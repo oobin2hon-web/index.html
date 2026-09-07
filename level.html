@@ -1,0 +1,1122 @@
+level.html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SOLDOUT2 レベルアップ予想</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    background: #f5f5f5;
+    color: #222;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Helvetica Neue",
+        "Hiragino Kaku Gothic ProN",
+        "Yu Gothic",
+        sans-serif;
+}
+
+.container {
+    max-width: 700px;
+    margin: auto;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+h2 {
+    font-size: 19px;
+    margin-top: 0;
+}
+
+.description {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.section-title {
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.input-group {
+    margin-bottom: 12px;
+}
+
+label {
+    display: block;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr auto;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.sales-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+button {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.add {
+    background: #e8f3ff;
+    color: #1769aa;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.delete {
+    background: #eee;
+    color: #555;
+}
+
+.calculate {
+    background: #1976d2;
+    color: white;
+    width: 100%;
+    font-size: 18px;
+    padding: 14px;
+    margin-top: 8px;
+}
+
+.clear {
+    background: #eee;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.pdf {
+    background: #555;
+    color: white;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.result {
+    font-size: 16px;
+    line-height: 1.9;
+}
+
+.result strong {
+    font-size: 22px;
+}
+
+.highlight {
+    padding: 14px;
+    background: #f0f7ff;
+    border-radius: 10px;
+    margin-top: 12px;
+}
+
+.green {
+    background: #f0fff4;
+}
+
+.orange {
+    background: #fff8ed;
+}
+
+.red {
+    background: #fff1f1;
+}
+
+.result-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    border-bottom: 1px solid #eee;
+    padding: 5px 0;
+}
+
+.small {
+    font-size: 13px;
+    color: #777;
+}
+
+@media (max-width: 550px) {
+
+    body {
+        padding: 12px;
+    }
+
+    .row,
+    .sales-row {
+        grid-template-columns: 1fr 1fr 1fr auto;
+    }
+
+    input {
+        padding: 10px 7px;
+        font-size: 14px;
+    }
+
+    .delete {
+        padding: 8px;
+    }
+}
+
+@media print {
+
+    body {
+        background: white;
+        padding: 0;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+
+    .print-only {
+        display: block !important;
+    }
+}
+
+.print-only {
+    display: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>レベルアップ予想</h1>
+
+    <div class="description">
+        作業と売上回収で得られる経験値から、次のレベルまでの回数・時間を予想します。
+    </div>
+
+
+    <!-- 現在の経験値 -->
+
+    <div class="card no-print">
+
+        <div class="section-title">
+            現在の経験値
+        </div>
+
+        <div class="input-group">
+            <label>現在の経験値</label>
+            <input
+                type="number"
+                id="currentExp"
+                min="0"
+                step="any"
+                placeholder="例：98000"
+            >
+        </div>
+
+        <div class="input-group">
+            <label>次のレベルに必要な経験値</label>
+            <input
+                type="number"
+                id="nextExp"
+                min="1"
+                step="any"
+                placeholder="例：100000"
+            >
+        </div>
+
+    </div>
+
+
+    <!-- 作業経験値 -->
+
+    <div class="card no-print">
+
+        <h2>作業による経験値</h2>
+
+        <div class="small">
+            「○回作業して、経験値が○増えた」という実績を入力してください。
+        </div>
+
+        <br>
+
+        <div id="workRows">
+
+            <div class="row">
+
+                <input
+                    type="number"
+                    placeholder="作業回数"
+                    min="1"
+                    step="any"
+                >
+
+                <input
+                    type="number"
+                    placeholder="時間"
+                    min="0"
+                    step="any"
+                >
+
+                <input
+                    type="number"
+                    placeholder="増加経験値"
+                    min="0"
+                    step="any"
+                >
+
+                <button
+                    class="delete"
+                    onclick="deleteRow(this, 'workRows')"
+                >
+                    削除
+                </button>
+
+            </div>
+
+        </div>
+
+        <button
+            class="add"
+            onclick="addWorkRow()"
+        >
+            ＋ 作業実績を追加
+        </button>
+
+    </div>
+
+
+    <!-- 売上経験値 -->
+
+    <div class="card no-print">
+
+        <h2>売上回収による経験値</h2>
+
+        <div class="small">
+            商品単価・売上総数・実際に増えた経験値を入力してください。
+        </div>
+
+        <br>
+
+        <div id="salesRows">
+
+            <div class="sales-row">
+
+                <input
+                    type="number"
+                    placeholder="商品単価"
+                    min="0"
+                    step="any"
+                >
+
+                <input
+                    type="number"
+                    placeholder="売上総数"
+                    min="1"
+                    step="any"
+                >
+
+                <input
+                    type="number"
+                    placeholder="増加経験値"
+                    min="0"
+                    step="any"
+                >
+
+                <button
+                    class="delete"
+                    onclick="deleteRow(this, 'salesRows')"
+                >
+                    削除
+                </button>
+
+            </div>
+
+        </div>
+
+        <button
+            class="add"
+            onclick="addSalesRow()"
+        >
+            ＋ 売上実績を追加
+        </button>
+
+    </div>
+
+
+    <!-- 計算 -->
+
+    <div class="card no-print">
+
+        <button
+            class="calculate"
+            onclick="calculate()"
+        >
+            レベルアップを予想する
+        </button>
+
+        <button
+            class="clear"
+            onclick="clearAll()"
+        >
+            すべてクリア
+        </button>
+
+    </div>
+
+
+    <!-- 結果 -->
+
+    <div class="card">
+
+        <h2>予想結果</h2>
+
+        <div id="result" class="result">
+            数値を入力して「レベルアップを予想する」を押してください。
+        </div>
+
+        <button
+            class="pdf no-print"
+            onclick="savePDF()"
+        >
+            PDFとして保存
+        </button>
+
+    </div>
+
+
+    <div class="print-only">
+
+        <p>
+            SOLDOUT2 レベルアップ予想
+        </p>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+/* =========================
+   作業行追加
+========================= */
+
+function addWorkRow() {
+
+    const rows = document.getElementById("workRows");
+
+    const row = document.createElement("div");
+
+    row.className = "row";
+
+    row.innerHTML = `
+        <input
+            type="number"
+            placeholder="作業回数"
+            min="1"
+            step="any"
+        >
+
+        <input
+            type="number"
+            placeholder="時間"
+            min="0"
+            step="any"
+        >
+
+        <input
+            type="number"
+            placeholder="増加経験値"
+            min="0"
+            step="any"
+        >
+
+        <button
+            class="delete"
+            onclick="deleteRow(this, 'workRows')"
+        >
+            削除
+        </button>
+    `;
+
+    rows.appendChild(row);
+}
+
+
+/* =========================
+   売上行追加
+========================= */
+
+function addSalesRow() {
+
+    const rows = document.getElementById("salesRows");
+
+    const row = document.createElement("div");
+
+    row.className = "sales-row";
+
+    row.innerHTML = `
+        <input
+            type="number"
+            placeholder="商品単価"
+            min="0"
+            step="any"
+        >
+
+        <input
+            type="number"
+            placeholder="売上総数"
+            min="1"
+            step="any"
+        >
+
+        <input
+            type="number"
+            placeholder="増加経験値"
+            min="0"
+            step="any"
+        >
+
+        <button
+            class="delete"
+            onclick="deleteRow(this, 'salesRows')"
+        >
+            削除
+        </button>
+    `;
+
+    rows.appendChild(row);
+}
+
+
+/* =========================
+   行削除
+========================= */
+
+function deleteRow(button, containerId) {
+
+    const rows = document.getElementById(containerId);
+
+    if (rows.children.length > 1) {
+        button.parentElement.remove();
+    }
+
+}
+
+
+/* =========================
+   メイン計算
+========================= */
+
+function calculate() {
+
+    const currentExp =
+        Number(document.getElementById("currentExp").value);
+
+    const nextExp =
+        Number(document.getElementById("nextExp").value);
+
+
+    if (
+        !Number.isFinite(currentExp) ||
+        !Number.isFinite(nextExp) ||
+        nextExp <= 0 ||
+        currentExp < 0
+    ) {
+
+        document.getElementById("result").innerHTML =
+            "現在の経験値と次のレベルに必要な経験値を入力してください。";
+
+        return;
+
+    }
+
+
+    const remainingExp =
+        Math.max(nextExp - currentExp, 0);
+
+
+    /* =========================
+       作業データ
+    ========================= */
+
+    let workCount = 0;
+    let workTime = 0;
+    let workExp = 0;
+
+    const workRows =
+        document.querySelectorAll("#workRows .row");
+
+
+    workRows.forEach(row => {
+
+        const inputs =
+            row.querySelectorAll("input");
+
+        const count =
+            Number(inputs[0].value);
+
+        const time =
+            Number(inputs[1].value);
+
+        const exp =
+            Number(inputs[2].value);
+
+        if (
+            count > 0 &&
+            time >= 0 &&
+            exp >= 0
+        ) {
+
+            workCount += count;
+            workTime += time;
+            workExp += exp;
+
+        }
+
+    });
+
+
+    /* =========================
+       売上データ
+    ========================= */
+
+    let salesCount = 0;
+    let salesRevenue = 0;
+    let salesExp = 0;
+
+    const salesRows =
+        document.querySelectorAll("#salesRows .sales-row");
+
+
+    salesRows.forEach(row => {
+
+        const inputs =
+            row.querySelectorAll("input");
+
+        const price =
+            Number(inputs[0].value);
+
+        const count =
+            Number(inputs[1].value);
+
+        const exp =
+            Number(inputs[2].value);
+
+        if (
+            price >= 0 &&
+            count > 0 &&
+            exp >= 0
+        ) {
+
+            salesCount += count;
+
+            salesRevenue += price * count;
+
+            salesExp += exp;
+
+        }
+
+    });
+
+
+    /* =========================
+       作業の効率
+    ========================= */
+
+    let workExpPerCount = 0;
+    let workExpPerHour = 0;
+    let workMinutesPerCount = 0;
+
+    if (workCount > 0 && workExp > 0) {
+
+        workExpPerCount =
+            workExp / workCount;
+
+        workExpPerHour =
+            workTime > 0
+                ? workExp / workTime
+                : 0;
+
+        workMinutesPerCount =
+            workTime > 0
+                ? (workTime * 60) / workCount
+                : 0;
+
+    }
+
+
+    /* =========================
+       売上の効率
+    ========================= */
+
+    let salesExpPerItem = 0;
+    let salesExpPerGold = 0;
+
+    if (salesCount > 0 && salesExp > 0) {
+
+        salesExpPerItem =
+            salesExp / salesCount;
+
+        salesExpPerGold =
+            salesRevenue > 0
+                ? salesExp / salesRevenue
+                : 0;
+
+    }
+
+
+    /* =========================
+       作業だけの場合
+    ========================= */
+
+    let workRemainingCount = null;
+    let workRemainingHours = null;
+
+    if (workExpPerCount > 0) {
+
+        workRemainingCount =
+            remainingExp / workExpPerCount;
+
+        if (workMinutesPerCount > 0) {
+
+            workRemainingHours =
+                workRemainingCount *
+                workMinutesPerCount / 60;
+
+        }
+
+    }
+
+
+    /* =========================
+       売上だけの場合
+    ========================= */
+
+    let salesRemainingItems = null;
+    let salesRemainingRevenue = null;
+
+    if (salesExpPerItem > 0) {
+
+        salesRemainingItems =
+            remainingExp / salesExpPerItem;
+
+    }
+
+    if (salesExpPerGold > 0) {
+
+        salesRemainingRevenue =
+            remainingExp / salesExpPerGold;
+
+    }
+
+
+    /* =========================
+       表示
+    ========================= */
+
+    let html = "";
+
+
+    html += `
+        <div class="highlight">
+
+            <div class="result-line">
+                <span>現在の経験値</span>
+                <strong>${formatNumber(currentExp)}</strong>
+            </div>
+
+            <div class="result-line">
+                <span>次レベル必要経験値</span>
+                <strong>${formatNumber(nextExp)}</strong>
+            </div>
+
+            <div class="result-line">
+                <span>残り経験値</span>
+                <strong>${formatNumber(remainingExp)}</strong>
+            </div>
+
+        </div>
+    `;
+
+
+    if (remainingExp <= 0) {
+
+        html += `
+            <div class="highlight green">
+                <strong>レベルアップ条件達成！</strong>
+            </div>
+        `;
+
+    }
+
+
+    /* 作業 */
+
+    if (workExpPerCount > 0) {
+
+        html += `
+            <div class="highlight">
+
+                <h3>作業実績</h3>
+
+                <div>
+                    合計作業回数：
+                    <strong>${formatNumber(workCount)}</strong> 回
+                </div>
+
+                <div>
+                    合計時間：
+                    <strong>${formatNumber(workTime)}</strong> 時間
+                </div>
+
+                <div>
+                    合計経験値：
+                    <strong>${formatNumber(workExp)}</strong>
+                </div>
+
+                <hr>
+
+                <div>
+                    1回あたり経験値：
+                    <strong>${formatNumber(workExpPerCount)}</strong>
+                </div>
+
+                <div>
+                    1時間あたり経験値：
+                    <strong>${formatNumber(workExpPerHour)}</strong>
+                </div>
+
+            </div>
+        `;
+
+
+        if (remainingExp > 0) {
+
+            html += `
+                <div class="highlight green">
+
+                    <h3>作業だけでレベルアップする場合</h3>
+
+                    <div>
+                        あと
+                        <strong>
+                            ${formatNumber(workRemainingCount)}
+                        </strong>
+                        回
+                    </div>
+
+                    <div>
+                        あと約
+                        <strong>
+                            ${formatHours(workRemainingHours)}
+                        </strong>
+                    </div>
+
+                </div>
+            `;
+
+        }
+
+    }
+
+
+    /* 売上 */
+
+    if (salesExpPerItem > 0) {
+
+        html += `
+            <div class="highlight orange">
+
+                <h3>売上実績</h3>
+
+                <div>
+                    売上総数：
+                    <strong>${formatNumber(salesCount)}</strong> 個
+                </div>
+
+                <div>
+                    売上総額：
+                    <strong>${formatNumber(salesRevenue)}</strong> G
+                </div>
+
+                <div>
+                    増加経験値：
+                    <strong>${formatNumber(salesExp)}</strong>
+                </div>
+
+                <hr>
+
+                <div>
+                    1個あたり経験値：
+                    <strong>${formatNumber(salesExpPerItem)}</strong>
+                </div>
+
+                <div>
+                    1Gあたり経験値：
+                    <strong>${formatNumber(salesExpPerGold)}</strong>
+                </div>
+
+            </div>
+        `;
+
+
+        if (remainingExp > 0) {
+
+            html += `
+                <div class="highlight orange">
+
+                    <h3>売上だけでレベルアップする場合</h3>
+
+                    <div>
+                        あと約
+                        <strong>
+                            ${formatNumber(salesRemainingItems)}
+                        </strong>
+                        個
+                    </div>
+
+                    <div>
+                        必要売上額：約
+                        <strong>
+                            ${formatNumber(salesRemainingRevenue)}
+                        </strong>
+                        G
+                    </div>
+
+                </div>
+            `;
+
+        }
+
+    }
+
+
+    if (
+        workExpPerCount <= 0 &&
+        salesExpPerItem <= 0
+    ) {
+
+        html += `
+            <div class="highlight red">
+                作業または売上の実績を入力してください。
+            </div>
+        `;
+
+    }
+
+
+    document.getElementById("result").innerHTML = html;
+
+}
+
+
+/* =========================
+   数字表示
+========================= */
+
+function formatNumber(number) {
+
+    if (!Number.isFinite(number)) {
+        return "－";
+    }
+
+    if (Number.isInteger(number)) {
+
+        return number.toLocaleString("ja-JP");
+
+    }
+
+    return number.toLocaleString("ja-JP", {
+        maximumFractionDigits: 4
+    });
+
+}
+
+
+/* =========================
+   時間表示
+========================= */
+
+function formatHours(hours) {
+
+    if (!Number.isFinite(hours)) {
+        return "－";
+    }
+
+    const totalMinutes =
+        Math.round(hours * 60);
+
+    const days =
+        Math.floor(totalMinutes / 1440);
+
+    const remainingMinutes =
+        totalMinutes % 1440;
+
+    const h =
+        Math.floor(remainingMinutes / 60);
+
+    const m =
+        remainingMinutes % 60;
+
+
+    let text = "";
+
+    if (days > 0) {
+        text += days + "日 ";
+    }
+
+    if (h > 0) {
+        text += h + "時間 ";
+    }
+
+    if (m > 0 || text === "") {
+        text += m + "分";
+    }
+
+    return text.trim();
+
+}
+
+
+/* =========================
+   クリア
+========================= */
+
+function clearAll() {
+
+    document.getElementById("currentExp").value = "";
+    document.getElementById("nextExp").value = "";
+
+
+    document.getElementById("workRows").innerHTML = `
+        <div class="row">
+
+            <input
+                type="number"
+                placeholder="作業回数"
+                min="1"
+                step="any"
+            >
+
+            <input
+                type="number"
+                placeholder="時間"
+                min="0"
+                step="any"
+            >
+
+            <input
+                type="number"
+                placeholder="増加経験値"
+                min="0"
+                step="any"
+            >
+
+            <button
+                class="delete"
+                onclick="deleteRow(this, 'workRows')"
+            >
+                削除
+            </button>
+
+        </div>
+    `;
+
+
+    document.getElementById("salesRows").innerHTML = `
+        <div class="sales-row">
+
+            <input
+                type="number"
+                placeholder="商品単価"
+                min="0"
+                step="any"
+            >
+
+            <input
+                type="number"
+                placeholder="売上総数"
+                min="1"
+                step="any"
+            >
+
+            <input
+                type="number"
+                placeholder="増加経験値"
+                min="0"
+                step="any"
+            >
+
+            <button
+                class="delete"
+                onclick="deleteRow(this, 'salesRows')"
+            >
+                削除
+            </button>
+
+        </div>
+    `;
+
+
+    document.getElementById("result").innerHTML =
+        "数値を入力して「レベルアップを予想する」を押してください。";
+
+}
+
+
+/* =========================
+   PDF
+========================= */
+
+function savePDF() {
+
+    window.print();
+
+}
+
+</script>
+
+</body>
+</html>
