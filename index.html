@@ -1,0 +1,325 @@
+index.html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOLDOUT2 平均・50回期待値計算</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    background: #f5f5f5;
+    color: #222;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+                 "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+}
+
+.container {
+    max-width: 700px;
+    margin: auto;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.description {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr auto;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+button {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.add {
+    background: #e8f3ff;
+    color: #1769aa;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.delete {
+    background: #eee;
+    color: #555;
+}
+
+.calculate {
+    background: #1976d2;
+    color: white;
+    width: 100%;
+    font-size: 18px;
+    padding: 14px;
+    margin-top: 8px;
+}
+
+.clear {
+    background: #eee;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.result {
+    font-size: 17px;
+    line-height: 1.9;
+}
+
+.result strong {
+    font-size: 24px;
+}
+
+.highlight {
+    padding: 12px;
+    background: #f0f7ff;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+@media (max-width: 550px) {
+    .row {
+        grid-template-columns: 1fr 1fr 1fr auto;
+    }
+
+    input {
+        padding: 10px 6px;
+        font-size: 14px;
+    }
+
+    .delete {
+        padding: 8px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>平均・50回期待値計算</h1>
+
+    <div class="description">
+        SOLDOUT2などの作業結果を入力して、1回あたりの平均と50回期待値を計算します。
+    </div>
+
+    <div class="card">
+
+        <div id="rows">
+
+            <div class="row">
+                <input type="text" placeholder="アイテム名">
+                <input type="number" placeholder="数量" min="0">
+                <input type="number" placeholder="作業回数" min="1">
+                <button class="delete" onclick="deleteRow(this)">削除</button>
+            </div>
+
+        </div>
+
+        <button class="add" onclick="addRow()">＋ 行を追加</button>
+
+        <button class="calculate" onclick="calculate()">
+            計算する
+        </button>
+
+        <button class="clear" onclick="clearAll()">
+            すべてクリア
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <h2>計算結果</h2>
+
+        <div id="result" class="result">
+            数値を入力して「計算する」を押してください。
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+function addRow() {
+
+    const rows = document.getElementById("rows");
+
+    const row = document.createElement("div");
+
+    row.className = "row";
+
+    row.innerHTML = `
+        <input type="text" placeholder="アイテム名">
+        <input type="number" placeholder="数量" min="0">
+        <input type="number" placeholder="作業回数" min="1">
+        <button class="delete" onclick="deleteRow(this)">削除</button>
+    `;
+
+    rows.appendChild(row);
+}
+
+
+function deleteRow(button) {
+
+    const rows = document.getElementById("rows");
+
+    if (rows.children.length > 1) {
+        button.parentElement.remove();
+    }
+
+}
+
+
+function calculate() {
+
+    const rows = document.querySelectorAll(".row");
+
+    let totalQuantity = 0;
+    let totalWork = 0;
+
+    let itemName = "";
+
+    rows.forEach(row => {
+
+        const inputs = row.querySelectorAll("input");
+
+        const name = inputs[0].value.trim();
+
+        const quantity = Number(inputs[1].value);
+
+        const work = Number(inputs[2].value);
+
+        if (name && !itemName) {
+            itemName = name;
+        }
+
+        if (quantity > 0 && work > 0) {
+
+            totalQuantity += quantity;
+
+            totalWork += work;
+
+        }
+
+    });
+
+
+    if (totalWork === 0) {
+
+        document.getElementById("result").innerHTML =
+            "数量と作業回数を入力してください。";
+
+        return;
+
+    }
+
+
+    const average = totalQuantity / totalWork;
+
+    const expected50 = average * 50;
+
+
+    document.getElementById("result").innerHTML = `
+
+        <div>
+            アイテム：
+            <strong>${itemName || "－"}</strong>
+        </div>
+
+        <div>
+            合計数量：
+            <strong>${formatNumber(totalQuantity)}</strong>
+        </div>
+
+        <div>
+            合計作業回数：
+            <strong>${formatNumber(totalWork)}</strong> 回
+        </div>
+
+        <div class="highlight">
+            1回あたりのアベレージ<br>
+            <strong>${formatNumber(average)}</strong>
+        </div>
+
+        <div class="highlight">
+            50回期待値<br>
+            <strong>${formatNumber(expected50)}</strong>
+        </div>
+
+    `;
+
+}
+
+
+function formatNumber(number) {
+
+    if (Number.isInteger(number)) {
+        return number.toLocaleString("ja-JP");
+    }
+
+    return number.toLocaleString("ja-JP", {
+        maximumFractionDigits: 4
+    });
+
+}
+
+
+function clearAll() {
+
+    const rows = document.getElementById("rows");
+
+    rows.innerHTML = `
+
+        <div class="row">
+            <input type="text" placeholder="アイテム名">
+            <input type="number" placeholder="数量" min="0">
+            <input type="number" placeholder="作業回数" min="1">
+            <button class="delete" onclick="deleteRow(this)">削除</button>
+        </div>
+
+    `;
+
+    document.getElementById("result").innerHTML =
+        "数値を入力して「計算する」を押してください。";
+
+}
+
+</script>
+
+</body>
+</html>
