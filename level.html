@@ -80,7 +80,7 @@ input {
 
 .row {
     display: grid;
-    grid-template-columns: 1.2fr 1fr 1fr auto;
+    grid-template-columns: 1fr 1fr 1fr auto;
     gap: 8px;
     margin-bottom: 10px;
 }
@@ -230,7 +230,7 @@ button {
     <h1>レベルアップ予想</h1>
 
     <div class="description">
-        作業と売上回収で得られる経験値から、次のレベルまでの回数・時間を予想します。
+        作業と売上回収で得られる経験値から、次のレベルまでを予想します。
     </div>
 
 
@@ -239,29 +239,22 @@ button {
     <div class="card no-print">
 
         <div class="section-title">
-            現在の経験値
+            現在のレベル進捗
         </div>
 
         <div class="input-group">
-            <label>現在の経験値</label>
+
+            <label>現在の経験値（％）</label>
+
             <input
                 type="number"
-                id="currentExp"
+                id="currentPercent"
                 min="0"
+                max="100"
                 step="any"
-                placeholder="例：98000"
+                placeholder="例：98"
             >
-        </div>
 
-        <div class="input-group">
-            <label>次のレベルに必要な経験値</label>
-            <input
-                type="number"
-                id="nextExp"
-                min="1"
-                step="any"
-                placeholder="例：100000"
-            >
         </div>
 
     </div>
@@ -274,7 +267,7 @@ button {
         <h2>作業による経験値</h2>
 
         <div class="small">
-            「○回作業して、経験値が○増えた」という実績を入力してください。
+            例：30回作業して25時間かかり、経験値が2％増えた場合
         </div>
 
         <br>
@@ -299,7 +292,7 @@ button {
 
                 <input
                     type="number"
-                    placeholder="増加経験値"
+                    placeholder="増加％"
                     min="0"
                     step="any"
                 >
@@ -332,7 +325,7 @@ button {
         <h2>売上回収による経験値</h2>
 
         <div class="small">
-            商品単価・売上総数・実際に増えた経験値を入力してください。
+            商品単価・売上総数・その売上で増えた経験値（％）を入力してください。
         </div>
 
         <br>
@@ -357,7 +350,7 @@ button {
 
                 <input
                     type="number"
-                    placeholder="増加経験値"
+                    placeholder="増加％"
                     min="0"
                     step="any"
                 >
@@ -423,20 +416,10 @@ button {
 
     </div>
 
-
-    <div class="print-only">
-
-        <p>
-            SOLDOUT2 レベルアップ予想
-        </p>
-
-    </div>
-
 </div>
 
 
 <script>
-
 
 /* =========================
    作業行追加
@@ -467,7 +450,7 @@ function addWorkRow() {
 
         <input
             type="number"
-            placeholder="増加経験値"
+            placeholder="増加％"
             min="0"
             step="any"
         >
@@ -513,7 +496,7 @@ function addSalesRow() {
 
         <input
             type="number"
-            placeholder="増加経験値"
+            placeholder="増加％"
             min="0"
             step="any"
         >
@@ -551,30 +534,26 @@ function deleteRow(button, containerId) {
 
 function calculate() {
 
-    const currentExp =
-        Number(document.getElementById("currentExp").value);
-
-    const nextExp =
-        Number(document.getElementById("nextExp").value);
+    const currentPercent =
+        Number(document.getElementById("currentPercent").value);
 
 
     if (
-        !Number.isFinite(currentExp) ||
-        !Number.isFinite(nextExp) ||
-        nextExp <= 0 ||
-        currentExp < 0
+        !Number.isFinite(currentPercent) ||
+        currentPercent < 0 ||
+        currentPercent > 100
     ) {
 
         document.getElementById("result").innerHTML =
-            "現在の経験値と次のレベルに必要な経験値を入力してください。";
+            "現在の経験値（％）を0～100の範囲で入力してください。";
 
         return;
 
     }
 
 
-    const remainingExp =
-        Math.max(nextExp - currentExp, 0);
+    const remainingPercent =
+        Math.max(100 - currentPercent, 0);
 
 
     /* =========================
@@ -583,7 +562,7 @@ function calculate() {
 
     let workCount = 0;
     let workTime = 0;
-    let workExp = 0;
+    let workPercent = 0;
 
     const workRows =
         document.querySelectorAll("#workRows .row");
@@ -600,18 +579,18 @@ function calculate() {
         const time =
             Number(inputs[1].value);
 
-        const exp =
+        const percent =
             Number(inputs[2].value);
 
         if (
             count > 0 &&
             time >= 0 &&
-            exp >= 0
+            percent >= 0
         ) {
 
             workCount += count;
             workTime += time;
-            workExp += exp;
+            workPercent += percent;
 
         }
 
@@ -624,7 +603,7 @@ function calculate() {
 
     let salesCount = 0;
     let salesRevenue = 0;
-    let salesExp = 0;
+    let salesPercent = 0;
 
     const salesRows =
         document.querySelectorAll("#salesRows .sales-row");
@@ -641,20 +620,21 @@ function calculate() {
         const count =
             Number(inputs[1].value);
 
-        const exp =
+        const percent =
             Number(inputs[2].value);
 
         if (
             price >= 0 &&
             count > 0 &&
-            exp >= 0
+            percent >= 0
         ) {
 
             salesCount += count;
 
-            salesRevenue += price * count;
+            salesRevenue +=
+                price * count;
 
-            salesExp += exp;
+            salesPercent += percent;
 
         }
 
@@ -662,47 +642,55 @@ function calculate() {
 
 
     /* =========================
-       作業の効率
+       作業効率
     ========================= */
 
-    let workExpPerCount = 0;
-    let workExpPerHour = 0;
+    let workPercentPerCount = 0;
+    let workPercentPerHour = 0;
     let workMinutesPerCount = 0;
 
-    if (workCount > 0 && workExp > 0) {
+    if (
+        workCount > 0 &&
+        workPercent > 0
+    ) {
 
-        workExpPerCount =
-            workExp / workCount;
+        workPercentPerCount =
+            workPercent / workCount;
 
-        workExpPerHour =
-            workTime > 0
-                ? workExp / workTime
-                : 0;
+        if (workTime > 0) {
 
-        workMinutesPerCount =
-            workTime > 0
-                ? (workTime * 60) / workCount
-                : 0;
+            workPercentPerHour =
+                workPercent / workTime;
+
+            workMinutesPerCount =
+                (workTime * 60) / workCount;
+
+        }
 
     }
 
 
     /* =========================
-       売上の効率
+       売上効率
     ========================= */
 
-    let salesExpPerItem = 0;
-    let salesExpPerGold = 0;
+    let salesPercentPerItem = 0;
+    let salesPercentPerGold = 0;
 
-    if (salesCount > 0 && salesExp > 0) {
+    if (
+        salesCount > 0 &&
+        salesPercent > 0
+    ) {
 
-        salesExpPerItem =
-            salesExp / salesCount;
+        salesPercentPerItem =
+            salesPercent / salesCount;
 
-        salesExpPerGold =
-            salesRevenue > 0
-                ? salesExp / salesRevenue
-                : 0;
+        if (salesRevenue > 0) {
+
+            salesPercentPerGold =
+                salesPercent / salesRevenue;
+
+        }
 
     }
 
@@ -711,13 +699,14 @@ function calculate() {
        作業だけの場合
     ========================= */
 
-    let workRemainingCount = null;
-    let workRemainingHours = null;
+    let workRemainingCount = 0;
+    let workRemainingHours = 0;
 
-    if (workExpPerCount > 0) {
+    if (workPercentPerCount > 0) {
 
         workRemainingCount =
-            remainingExp / workExpPerCount;
+            remainingPercent /
+            workPercentPerCount;
 
         if (workMinutesPerCount > 0) {
 
@@ -734,26 +723,28 @@ function calculate() {
        売上だけの場合
     ========================= */
 
-    let salesRemainingItems = null;
-    let salesRemainingRevenue = null;
+    let salesRemainingItems = 0;
+    let salesRemainingRevenue = 0;
 
-    if (salesExpPerItem > 0) {
+    if (salesPercentPerItem > 0) {
 
         salesRemainingItems =
-            remainingExp / salesExpPerItem;
+            remainingPercent /
+            salesPercentPerItem;
 
     }
 
-    if (salesExpPerGold > 0) {
+    if (salesPercentPerGold > 0) {
 
         salesRemainingRevenue =
-            remainingExp / salesExpPerGold;
+            remainingPercent /
+            salesPercentPerGold;
 
     }
 
 
     /* =========================
-       表示
+       結果表示
     ========================= */
 
     let html = "";
@@ -763,38 +754,39 @@ function calculate() {
         <div class="highlight">
 
             <div class="result-line">
-                <span>現在の経験値</span>
-                <strong>${formatNumber(currentExp)}</strong>
+                <span>現在の進捗</span>
+                <strong>
+                    ${formatNumber(currentPercent)}％
+                </strong>
             </div>
 
             <div class="result-line">
-                <span>次レベル必要経験値</span>
-                <strong>${formatNumber(nextExp)}</strong>
-            </div>
-
-            <div class="result-line">
-                <span>残り経験値</span>
-                <strong>${formatNumber(remainingExp)}</strong>
+                <span>レベルアップまで</span>
+                <strong>
+                    ${formatNumber(remainingPercent)}％
+                </strong>
             </div>
 
         </div>
     `;
 
 
-    if (remainingExp <= 0) {
+    if (remainingPercent <= 0) {
 
         html += `
             <div class="highlight green">
-                <strong>レベルアップ条件達成！</strong>
+                <strong>レベルアップ達成！</strong>
             </div>
         `;
 
     }
 
 
-    /* 作業 */
+    /* =========================
+       作業結果
+    ========================= */
 
-    if (workExpPerCount > 0) {
+    if (workPercentPerCount > 0) {
 
         html += `
             <div class="highlight">
@@ -803,44 +795,56 @@ function calculate() {
 
                 <div>
                     合計作業回数：
-                    <strong>${formatNumber(workCount)}</strong> 回
+                    <strong>
+                        ${formatNumber(workCount)}
+                    </strong> 回
                 </div>
 
                 <div>
                     合計時間：
-                    <strong>${formatNumber(workTime)}</strong> 時間
+                    <strong>
+                        ${formatNumber(workTime)}
+                    </strong> 時間
                 </div>
 
                 <div>
-                    合計経験値：
-                    <strong>${formatNumber(workExp)}</strong>
+                    増加経験値：
+                    <strong>
+                        ${formatNumber(workPercent)}
+                    </strong>％
                 </div>
 
                 <hr>
 
                 <div>
-                    1回あたり経験値：
-                    <strong>${formatNumber(workExpPerCount)}</strong>
+                    1回あたり：
+                    <strong>
+                        ${formatNumber(workPercentPerCount)}
+                    </strong>％
                 </div>
 
                 <div>
-                    1時間あたり経験値：
-                    <strong>${formatNumber(workExpPerHour)}</strong>
+                    1時間あたり：
+                    <strong>
+                        ${formatNumber(workPercentPerHour)}
+                    </strong>％
                 </div>
 
             </div>
         `;
 
 
-        if (remainingExp > 0) {
+        if (remainingPercent > 0) {
 
             html += `
                 <div class="highlight green">
 
-                    <h3>作業だけでレベルアップする場合</h3>
+                    <h3>
+                        作業だけの場合
+                    </h3>
 
                     <div>
-                        あと
+                        あと約
                         <strong>
                             ${formatNumber(workRemainingCount)}
                         </strong>
@@ -862,52 +866,66 @@ function calculate() {
     }
 
 
-    /* 売上 */
+    /* =========================
+       売上結果
+    ========================= */
 
-    if (salesExpPerItem > 0) {
+    if (salesPercentPerItem > 0) {
 
         html += `
             <div class="highlight orange">
 
-                <h3>売上実績</h3>
+                <h3>売上回収実績</h3>
 
                 <div>
                     売上総数：
-                    <strong>${formatNumber(salesCount)}</strong> 個
+                    <strong>
+                        ${formatNumber(salesCount)}
+                    </strong> 個
                 </div>
 
                 <div>
                     売上総額：
-                    <strong>${formatNumber(salesRevenue)}</strong> G
+                    <strong>
+                        ${formatNumber(salesRevenue)}
+                    </strong> G
                 </div>
 
                 <div>
                     増加経験値：
-                    <strong>${formatNumber(salesExp)}</strong>
+                    <strong>
+                        ${formatNumber(salesPercent)}
+                    </strong>％
                 </div>
 
                 <hr>
 
                 <div>
-                    1個あたり経験値：
-                    <strong>${formatNumber(salesExpPerItem)}</strong>
+                    1個あたり：
+                    <strong>
+                        ${formatNumber(salesPercentPerItem)}
+                    </strong>％
                 </div>
 
                 <div>
-                    1Gあたり経験値：
-                    <strong>${formatNumber(salesExpPerGold)}</strong>
+                    1Gあたり：
+                    <strong>
+                        ${formatNumber(salesPercentPerGold)}
+                    </strong>％
                 </div>
 
             </div>
         `;
 
 
-        if (remainingExp > 0) {
+        if (remainingPercent > 0) {
 
             html += `
                 <div class="highlight orange">
 
-                    <h3>売上だけでレベルアップする場合</h3>
+                    <h3>
+                        売上だけの場合
+                    </h3>
 
                     <div>
                         あと約
@@ -934,20 +952,21 @@ function calculate() {
 
 
     if (
-        workExpPerCount <= 0 &&
-        salesExpPerItem <= 0
+        workPercentPerCount <= 0 &&
+        salesPercentPerItem <= 0
     ) {
 
         html += `
             <div class="highlight red">
-                作業または売上の実績を入力してください。
+                作業実績または売上実績を入力してください。
             </div>
         `;
 
     }
 
 
-    document.getElementById("result").innerHTML = html;
+    document.getElementById("result").innerHTML =
+        html;
 
 }
 
@@ -981,7 +1000,10 @@ function formatNumber(number) {
 
 function formatHours(hours) {
 
-    if (!Number.isFinite(hours)) {
+    if (
+        !Number.isFinite(hours) ||
+        hours < 0
+    ) {
         return "－";
     }
 
@@ -1026,8 +1048,7 @@ function formatHours(hours) {
 
 function clearAll() {
 
-    document.getElementById("currentExp").value = "";
-    document.getElementById("nextExp").value = "";
+    document.getElementById("currentPercent").value = "";
 
 
     document.getElementById("workRows").innerHTML = `
@@ -1049,7 +1070,7 @@ function clearAll() {
 
             <input
                 type="number"
-                placeholder="増加経験値"
+                placeholder="増加％"
                 min="0"
                 step="any"
             >
@@ -1084,7 +1105,7 @@ function clearAll() {
 
             <input
                 type="number"
-                placeholder="増加経験値"
+                placeholder="増加％"
                 min="0"
                 step="any"
             >
