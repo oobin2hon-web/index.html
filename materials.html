@@ -1,0 +1,705 @@
+    materials.html 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SOLDOUT2 必要材料計算</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    background: #f5f5f5;
+    color: #222;
+
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Helvetica Neue",
+        "Hiragino Kaku Gothic ProN",
+        "Yu Gothic",
+        sans-serif;
+}
+
+.container {
+    max-width: 700px;
+    margin: auto;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.description {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 16px;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+input {
+    width: 100%;
+
+    padding: 12px;
+
+    border: 1px solid #ccc;
+    border-radius: 8px;
+
+    font-size: 16px;
+}
+
+.product-box {
+    display: grid;
+
+    grid-template-columns:
+        1.5fr
+        1fr
+        1fr;
+
+    gap: 8px;
+
+    margin-bottom: 15px;
+}
+
+.material-row {
+    display: grid;
+
+    grid-template-columns:
+        1.5fr
+        1fr
+        auto;
+
+    gap: 8px;
+
+    margin-bottom: 10px;
+}
+
+button {
+    border: none;
+
+    border-radius: 8px;
+
+    padding: 10px 14px;
+
+    font-size: 15px;
+
+    cursor: pointer;
+}
+
+.add {
+    background: #e8f3ff;
+
+    color: #1769aa;
+
+    width: 100%;
+
+    margin-top: 5px;
+}
+
+.delete {
+    background: #eee;
+
+    color: #555;
+}
+
+.calculate {
+    background: #388e3c;
+
+    color: white;
+
+    width: 100%;
+
+    font-size: 18px;
+
+    padding: 14px;
+
+    margin-top: 8px;
+}
+
+.clear {
+    background: #eee;
+
+    width: 100%;
+
+    margin-top: 8px;
+}
+
+.result {
+    font-size: 17px;
+
+    line-height: 1.9;
+}
+
+.result strong {
+    font-size: 24px;
+}
+
+.highlight {
+    padding: 12px;
+
+    background: #f0f7ff;
+
+    border-radius: 10px;
+
+    margin-top: 10px;
+}
+
+.material-result {
+    padding: 12px;
+
+    background: #f7f7f7;
+
+    border-radius: 10px;
+
+    margin-top: 10px;
+}
+
+.material-result strong {
+    font-size: 22px;
+}
+
+.note {
+    font-size: 14px;
+
+    color: #777;
+
+    margin-top: 8px;
+}
+
+@media (max-width: 550px) {
+
+    .product-box {
+        grid-template-columns: 1fr;
+    }
+
+    .material-row {
+        grid-template-columns:
+            1.5fr
+            1fr
+            auto;
+    }
+
+    input {
+        padding: 10px 8px;
+
+        font-size: 14px;
+    }
+
+    .delete {
+        padding: 8px;
+    }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<h1>必要材料計算</h1>
+
+
+<div class="description">
+
+SOLDOUT2などの生産に必要な材料数を計算します。
+
+</div>
+
+
+<!-- 完成品設定 -->
+
+<div class="card">
+
+<h2>完成品</h2>
+
+
+<div class="product-box">
+
+<input
+    type="text"
+    id="productName"
+    placeholder="完成品名"
+>
+
+
+<input
+    type="number"
+    id="targetCount"
+    placeholder="作りたい数"
+    min="1"
+>
+
+
+<input
+    type="number"
+    id="outputPerWork"
+    placeholder="1回でできる数"
+    min="1"
+>
+
+</div>
+
+
+<div class="note">
+
+例：ハイポーションを100個作りたい。
+1回の作業で8個できる場合は「100」「8」と入力。
+
+</div>
+
+</div>
+
+
+<!-- 材料 -->
+
+<div class="card">
+
+<h2>必要材料</h2>
+
+
+<div id="materialRows">
+
+
+<div class="material-row">
+
+<input
+    type="text"
+    placeholder="材料名"
+>
+
+
+<input
+    type="number"
+    placeholder="1回に必要な数"
+    min="0"
+>
+
+
+<button
+    class="delete"
+    onclick="deleteMaterialRow(this)"
+>
+削除
+</button>
+
+</div>
+
+
+</div>
+
+
+<button
+    class="add"
+    onclick="addMaterialRow()"
+>
+＋ 材料を追加
+</button>
+
+
+<button
+    class="calculate"
+    onclick="calculateMaterials()"
+>
+必要材料を計算
+</button>
+
+
+<button
+    class="clear"
+    onclick="clearAll()"
+>
+すべてクリア
+</button>
+
+
+</div>
+
+
+<!-- 結果 -->
+
+<div class="card">
+
+<h2>計算結果</h2>
+
+
+<div
+    id="result"
+    class="result"
+>
+
+作りたい数と材料を入力して
+「必要材料を計算」を押してください。
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+<script>
+
+
+/* =========================
+   材料行追加
+========================= */
+
+function addMaterialRow() {
+
+    const rows =
+        document.getElementById("materialRows");
+
+
+    const row =
+        document.createElement("div");
+
+
+    row.className =
+        "material-row";
+
+
+    row.innerHTML = `
+
+        <input
+            type="text"
+            placeholder="材料名"
+        >
+
+        <input
+            type="number"
+            placeholder="1回に必要な数"
+            min="0"
+        >
+
+        <button
+            class="delete"
+            onclick="deleteMaterialRow(this)"
+        >
+            削除
+        </button>
+
+    `;
+
+
+    rows.appendChild(row);
+
+}
+
+
+/* =========================
+   材料行削除
+========================= */
+
+function deleteMaterialRow(button) {
+
+    const rows =
+        document.getElementById("materialRows");
+
+
+    if (rows.children.length > 1) {
+
+        button.parentElement.remove();
+
+    }
+
+}
+
+
+/* =========================
+   材料計算
+========================= */
+
+function calculateMaterials() {
+
+
+    const productName =
+        document.getElementById("productName")
+        .value
+        .trim();
+
+
+    const targetCount =
+        Number(
+            document.getElementById("targetCount").value
+        );
+
+
+    const outputPerWork =
+        Number(
+            document.getElementById("outputPerWork").value
+        );
+
+
+    /* 入力チェック */
+
+    if (
+        targetCount <= 0 ||
+        outputPerWork <= 0
+    ) {
+
+        document.getElementById("result").innerHTML =
+            "「作りたい数」と「1回でできる数」を入力してください。";
+
+        return;
+
+    }
+
+
+    /* 必要作業回数 */
+
+    const workCount =
+        Math.ceil(
+            targetCount / outputPerWork
+        );
+
+
+    /* 実際にできる完成品数 */
+
+    const actualOutput =
+        workCount * outputPerWork;
+
+
+    const rows =
+        document.querySelectorAll(".material-row");
+
+
+    let resultHTML = "";
+
+    let hasMaterial = false;
+
+
+    rows.forEach(row => {
+
+
+        const inputs =
+            row.querySelectorAll("input");
+
+
+        const name =
+            inputs[0].value.trim();
+
+
+        const quantity =
+            Number(inputs[1].value);
+
+
+        if (
+            name &&
+            quantity > 0
+        ) {
+
+
+            hasMaterial = true;
+
+
+            const total =
+                workCount * quantity;
+
+
+            resultHTML += `
+
+                <div class="material-result">
+
+                    <strong>
+                        ${escapeHTML(name)}
+                    </strong>
+
+                    <br>
+
+                    1回あたり：
+                    ${formatNumber(quantity)} 個
+
+                    <br>
+
+                    必要数：
+                    <strong>
+                        ${formatNumber(total)} 個
+                    </strong>
+
+                </div>
+
+            `;
+
+        }
+
+    });
+
+
+    if (!hasMaterial) {
+
+        document.getElementById("result").innerHTML =
+            "材料名と「1回に必要な数」を入力してください。";
+
+        return;
+
+    }
+
+
+    /* 結果表示 */
+
+    document.getElementById("result").innerHTML = `
+
+        <div class="highlight">
+
+            完成品：
+            <strong>
+                ${escapeHTML(productName || "－")}
+            </strong>
+
+            <br>
+
+            作りたい数：
+            <strong>
+                ${formatNumber(targetCount)}
+            </strong>
+            個
+
+        </div>
+
+
+        <div class="highlight">
+
+            必要作業回数：
+            <strong>
+                ${formatNumber(workCount)}
+            </strong>
+            回
+
+            <br>
+
+            実際にできる数：
+            <strong>
+                ${formatNumber(actualOutput)}
+            </strong>
+            個
+
+        </div>
+
+
+        <h3>
+            必要材料
+        </h3>
+
+
+        ${resultHTML}
+
+    `;
+
+}
+
+
+/* =========================
+   数字表示
+========================= */
+
+function formatNumber(number) {
+
+    if (Number.isInteger(number)) {
+
+        return number.toLocaleString("ja-JP");
+
+    }
+
+
+    return number.toLocaleString(
+        "ja-JP",
+        {
+            maximumFractionDigits: 4
+        }
+    );
+
+}
+
+
+/* =========================
+   HTML安全処理
+========================= */
+
+function escapeHTML(text) {
+
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/* =========================
+   クリア
+========================= */
+
+function clearAll() {
+
+
+    document.getElementById("productName").value = "";
+
+
+    document.getElementById("targetCount").value = "";
+
+
+    document.getElementById("outputPerWork").value = "";
+
+
+    document.getElementById("materialRows").innerHTML = `
+
+        <div class="material-row">
+
+            <input
+                type="text"
+                placeholder="材料名"
+            >
+
+            <input
+                type="number"
+                placeholder="1回に必要な数"
+                min="0"
+            >
+
+            <button
+                class="delete"
+                onclick="deleteMaterialRow(this)"
+            >
+                削除
+            </button>
+
+        </div>
+
+    `;
+
+
+    document.getElementById("result").innerHTML =
+        "作りたい数と材料を入力して「必要材料を計算」を押してください。";
+
+}
+
+</script>
+
+
+</body>
+
+</html>
