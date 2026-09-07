@@ -1,0 +1,614 @@
+trade.html 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SOLDOUT2 取引・募集文メーカー</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    background: #f5f5f5;
+    color: #222;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Helvetica Neue",
+        "Hiragino Kaku Gothic ProN",
+        "Yu Gothic",
+        sans-serif;
+}
+
+.container {
+    max-width: 700px;
+    margin: auto;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.description {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+h2 {
+    font-size: 19px;
+    margin-top: 0;
+}
+
+h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+label {
+    display: block;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.input-group {
+    margin-bottom: 14px;
+}
+
+input,
+textarea,
+select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: inherit;
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+button {
+    border: none;
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.add {
+    background: #e8f3ff;
+    color: #1769aa;
+    width: 100%;
+}
+
+.delete {
+    background: #eee;
+    color: #555;
+}
+
+.generate {
+    background: #1976d2;
+    color: white;
+    width: 100%;
+    font-size: 18px;
+    padding: 14px;
+}
+
+.copy {
+    background: #43a047;
+    color: white;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.clear {
+    background: #eee;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.format {
+    background: #7b61a8;
+    color: white;
+    width: 100%;
+    font-size: 17px;
+    padding: 13px;
+}
+
+.result {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 14px;
+    white-space: pre-wrap;
+    line-height: 1.8;
+    font-size: 15px;
+}
+
+.small {
+    color: #777;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+@media (max-width: 550px) {
+
+    body {
+        padding: 12px;
+    }
+
+    .row {
+        grid-template-columns: 1fr 1fr auto;
+    }
+
+    input,
+    textarea,
+    select {
+        font-size: 14px;
+        padding: 10px 8px;
+    }
+
+    button {
+        font-size: 14px;
+    }
+}
+
+@media print {
+
+    body {
+        background: white;
+        padding: 0;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .card {
+        box-shadow: none;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>取引・募集文メーカー</h1>
+
+    <div class="description">
+        SOLDOUT2の取引・募集文を作成します。
+    </div>
+
+
+    <!-- 募集文作成 -->
+
+    <div class="card no-print">
+
+        <h2>募集文を作る</h2>
+
+
+        <div class="input-group">
+
+            <label>求）欲しいもの</label>
+
+            <textarea
+                id="want"
+                placeholder="例：鉄鉱石 100個&#10;革 50枚"
+            ></textarea>
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>出）出せるもの</label>
+
+            <textarea
+                id="give"
+                placeholder="例：木材 100個&#10;石材 100個"
+            ></textarea>
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>募集口数</label>
+
+            <input
+                type="number"
+                id="lots"
+                min="1"
+                placeholder="例：5"
+            >
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>まとめて交換した場合</label>
+
+            <input
+                type="text"
+                id="bonus"
+                placeholder="例：5口まとめての場合6本差し上げます。"
+            >
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>一言コメント</label>
+
+            <textarea
+                id="comment"
+                placeholder="例：一口無言可です。よろしくお願いします。"
+            ></textarea>
+
+        </div>
+
+
+        <button
+            class="generate"
+            onclick="generateText()"
+        >
+            募集文を作成
+        </button>
+
+    </div>
+
+
+    <!-- 作成結果 -->
+
+    <div class="card">
+
+        <h2>作成結果</h2>
+
+        <div
+            id="result"
+            class="result"
+        >ここに募集文が表示されます。</div>
+
+        <button
+            class="copy no-print"
+            onclick="copyResult()"
+        >
+            コピー
+        </button>
+
+    </div>
+
+
+    <!-- 既存文章の整形 -->
+
+    <div class="card no-print">
+
+        <h2>既存の募集文を整える</h2>
+
+        <div class="small">
+            チャットログなどを貼り付けてください。<br>
+            不要な時刻・日数・余計な行を整理して、募集文として使いやすい形にします。
+        </div>
+
+        <br>
+
+        <textarea
+            id="rawText"
+            placeholder="例：
+
+求) ○○
+出) ○○
+一口無言可です。よろしくお願いします。
+
+347日
+[名門道具屋で孤高の鋳物師]
+06:15"
+        ></textarea>
+
+        <br><br>
+
+        <button
+            class="format"
+            onclick="formatText()"
+        >
+            募集文を整える
+        </button>
+
+    </div>
+
+
+    <div class="card no-print">
+
+        <button
+            class="clear"
+            onclick="clearAll()"
+        >
+            すべてクリア
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   募集文作成
+========================= */
+
+function generateText() {
+
+    const want =
+        document.getElementById("want").value.trim();
+
+    const give =
+        document.getElementById("give").value.trim();
+
+    const lots =
+        document.getElementById("lots").value.trim();
+
+    const bonus =
+        document.getElementById("bonus").value.trim();
+
+    const comment =
+        document.getElementById("comment").value.trim();
+
+
+    let text = "";
+
+
+    if (want) {
+
+        text += "求）" + want + "\n";
+
+    } else {
+
+        text += "求）\n";
+
+    }
+
+
+    if (give) {
+
+        text += "出）" + give + "\n";
+
+    } else {
+
+        text += "出）\n";
+
+    }
+
+
+    if (comment) {
+
+        text += comment + "\n";
+
+    }
+
+
+    if (lots) {
+
+        text += lots + "口募集。\n";
+
+    }
+
+
+    if (bonus) {
+
+        text += bonus + "\n";
+
+    }
+
+
+    text = text.trim();
+
+
+    document.getElementById("result").textContent =
+        text || "内容を入力してください。";
+
+}
+
+
+/* =========================
+   コピー
+========================= */
+
+async function copyResult() {
+
+    const text =
+        document.getElementById("result").textContent;
+
+    if (
+        !text ||
+        text === "ここに募集文が表示されます。"
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        await navigator.clipboard.writeText(text);
+
+        alert("コピーしました。");
+
+    } catch (error) {
+
+        alert("コピーできませんでした。文章を長押ししてコピーしてください。");
+
+    }
+
+}
+
+
+/* =========================
+   既存文章を整える
+========================= */
+
+function formatText() {
+
+    const raw =
+        document.getElementById("rawText").value.trim();
+
+
+    if (!raw) {
+
+        document.getElementById("result").textContent =
+            "文章を貼り付けてください。";
+
+        return;
+
+    }
+
+
+    const lines =
+        raw.split(/\r?\n/);
+
+
+    const useful = [];
+
+
+    lines.forEach(line => {
+
+        const text = line.trim();
+
+
+        if (!text) {
+            return;
+        }
+
+
+        /*
+         * 日数だけの行
+         * 例：347日
+         */
+
+        if (/^\d+日$/.test(text)) {
+            return;
+        }
+
+
+        /*
+         * 時刻だけの行
+         * 例：06:15
+         */
+
+        if (/^\d{1,2}:\d{2}$/.test(text)) {
+            return;
+        }
+
+
+        /*
+         * SOLDOUT2の店名・称号など
+         * [○○]
+         */
+
+        if (
+            text.startsWith("[") &&
+            text.endsWith("]")
+        ) {
+
+            return;
+
+        }
+
+
+        useful.push(text);
+
+    });
+
+
+    let formatted =
+        useful.join("\n");
+
+
+    /*
+     * 求）と出）の間に改行
+     */
+
+    formatted =
+        formatted.replace(
+            /求）/g,
+            "\n求）"
+        );
+
+
+    formatted =
+        formatted.replace(
+            /出）/g,
+            "\n出）"
+        );
+
+
+    formatted =
+        formatted
+        .replace(/\n+/g, "\n")
+        .trim();
+
+
+    document.getElementById("result").textContent =
+        formatted || "整形できる文章がありません。";
+
+}
+
+
+/* =========================
+   クリア
+========================= */
+
+function clearAll() {
+
+    document.getElementById("want").value = "";
+
+    document.getElementById("give").value = "";
+
+    document.getElementById("lots").value = "";
+
+    document.getElementById("bonus").value = "";
+
+    document.getElementById("comment").value = "";
+
+    document.getElementById("rawText").value = "";
+
+    document.getElementById("result").textContent =
+        "ここに募集文が表示されます。";
+
+}
+
+</script>
+
+</body>
+</html>
