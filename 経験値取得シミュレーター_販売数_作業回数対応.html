@@ -67,10 +67,10 @@ function calc(kind){
  '<div><b>現在Lv：</b>'+p.lv+'</div>'+
  '<div><b>現在経験値：</b>'+fmt(p.cur)+'%</div>'+
  '<div><b>LVアップまで：</b>'+fmt(remain)+'%</div><hr>'+
- '<div><b>基準：</b>'+p.count.toLocaleString()+'回'+p.unit+' → +'+fmt(p.gain)+'%</div>'+
- '<div><b>1回あたり：</b>+'+fmt(per)+'%</div><hr>'+
- '<div><b>必要な基準回数：</b>'+Math.ceil(batches).toLocaleString()+'回分</div>'+
- '<div class="big">あと '+required.toLocaleString()+p.unit+'でLVアップ</div>';
+ '<div><b>基準：</b>'+p.count.toLocaleString()+(p.unit==='販売'?'個販売':'回作業')+' → +'+fmt(p.gain)+'%</div>'+
+ '<div><b>1'+(p.unit==='販売'?'個販売':'回の作業')+'あたり：</b>+'+fmt(per)+'%</div><hr>'+
+ '<div><b>必要な基準数：</b>'+Math.ceil(batches).toLocaleString()+(p.unit==='販売'?'セット':'回')+'</div>'+
+ '<div class="big">あと '+required.toLocaleString()+(p.unit==='販売'?'個販売':'回の作業')+'でLVアップ</div>';
 }
 function calcSale(){calc('sale')} function calcWork(){calc('work')}
 calcSale();calcWork();
