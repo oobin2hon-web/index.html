@@ -5,17 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>経験値取得シミュレーター_販売数_作業回数対応</title>
 <style>
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:#f5f5f5;color:#222}
-.container{max-width:720px;margin:auto;padding:16px}
-h1{font-size:22px;margin:8px 0 18px}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f5f5;margin:0;padding:16px;color:#222}
+.container{max-width:700px;margin:auto}
 .card{background:#fff;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 1px 5px #ddd}
-h2{font-size:17px;margin:0 0 12px}
-label{display:block;margin:10px 0 5px;font-weight:bold}
-input{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:8px;font-size:16px}
-button{width:100%;padding:12px;border:0;border-radius:8px;background:#333;color:white;font-size:16px;margin-top:14px}
-.result{font-size:18px;line-height:1.8}
-.note{font-size:13px;color:#666;line-height:1.5}
-.sep{border-top:1px solid #ddd;margin:14px 0}
+h1{font-size:21px} h2{font-size:17px;margin-top:0}
+label{display:block;font-weight:bold;margin:10px 0 5px}
+input{width:100%;box-sizing:border-box;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:16px}
+button{width:100%;padding:12px;border:0;border-radius:8px;background:#333;color:white;font-size:16px;margin-top:12px}
+.result{line-height:1.8;font-size:17px}
+.small{font-size:13px;color:#666}
+hr{border:0;border-top:1px solid #ddd;margin:14px 0}
 </style>
 </head>
 <body>
@@ -23,85 +22,58 @@ button{width:100%;padding:12px;border:0;border-radius:8px;background:#333;color:
 <h1>経験値取得シミュレーター</h1>
 
 <div class="card">
-<h2>① 現在の経験値</h2>
-<label>現在Lv</label>
-<input id="lv" type="number" value="8" min="1">
+<h2>作業の経験値</h2>
+<p class="small">販売とは完全に独立して計算します。</p>
 
-<label>現在の経験値（%）</label>
-<input id="xp" type="number" value="99.92" min="0" max="100" step="0.01">
-
-<p class="note">Lvアップに必要な経験値量は、ゲーム内で表示される「次のLvまで」の値などに合わせて入力してください。</p>
-</div>
-
-<div class="card">
-<h2>② 作業による経験値</h2>
 <label>作業回数</label>
-<input id="workCount" type="number" value="0" min="0">
+<input id="workCount" type="number" min="0" value="0">
 
-<label>1作業あたりの経験値（%）</label>
-<input id="workXp" type="number" value="0" min="0" step="0.0001">
+<label>1作業で得られる経験値（%）</label>
+<input id="workXp" type="number" min="0" step="0.0001" value="0">
 
-<p class="note">ここは「作業」だけを計算します。販売数とは連動させません。</p>
+<button onclick="calcWork()">作業だけ計算</button>
+<div id="workResult" class="result"></div>
 </div>
 
 <div class="card">
-<h2>③ 販売による経験値</h2>
+<h2>販売の経験値</h2>
+<p class="small">作業とは完全に独立して計算します。作業回数から販売数を算出しません。</p>
+
 <label>販売数</label>
-<input id="saleCount" type="number" value="19" min="0">
+<input id="saleCount" type="number" min="0" value="0">
 
-<label>1販売あたりの経験値（%）</label>
-<input id="saleXp" type="number" value="0.0005263158" min="0" step="0.0000001">
+<label>1販売で得られる経験値（%）</label>
+<input id="saleXp" type="number" min="0" step="0.0001" value="0">
 
-<p class="note">ここは「販売」だけを計算します。作業回数とは連動させません。</p>
+<button onclick="calcSale()">販売だけ計算</button>
+<div id="saleResult" class="result"></div>
 </div>
 
 <div class="card">
-<h2>④ Lvアップ設定</h2>
-<label>1Lv分の経験値（%）</label>
-<input id="lvXp" type="number" value="100" min="0.0001" step="0.01">
-</div>
-
-<div class="card">
-<button onclick="calc()">計算する</button>
-<div id="result" class="result"></div>
+<h2>完全分離の確認</h2>
+<p class="small">
+作業の計算では販売数を一切使用しません。<br>
+販売の計算では作業回数を一切使用しません。<br>
+両者を合算する機能も入れていません。
+</p>
 </div>
 </div>
 
 <script>
-function n(id){return Number(document.getElementById(id).value)||0}
-function fmt(x,d=4){return x.toLocaleString('ja-JP',{maximumFractionDigits:d})}
+function val(id){return Number(document.getElementById(id).value)||0}
+function fmt(x){return x.toLocaleString('ja-JP',{maximumFractionDigits:6})}
 
-function calc(){
-  const lv=n('lv');
-  const current=n('xp');
-  const workCount=n('workCount');
-  const workXp=n('workXp');
-  const saleCount=n('saleCount');
-  const saleXp=n('saleXp');
-  const lvXp=n('lvXp');
-
-  const workTotal=workCount*workXp;
-  const saleTotal=saleCount*saleXp;
-  const total=workTotal+saleTotal;
-
-  let xp=current+total;
-  let up=0;
-  if(lvXp>0){
-    up=Math.floor(xp/lvXp);
-    xp=xp%lvXp;
-  }
-
-  const finalLv=lv+up;
-
-  document.getElementById('result').innerHTML=
-    '<div><b>作業による経験値：</b>'+fmt(workTotal)+'%</div>'+
-    '<div><b>販売による経験値：</b>'+fmt(saleTotal)+'%</div>'+
-    '<div class="sep"></div>'+
-    '<div><b>合計獲得経験値：</b>'+fmt(total)+'%</div>'+
-    '<div><b>最終Lv：</b>'+finalLv+'</div>'+
-    '<div><b>最終経験値：</b>'+fmt(xp)+'%</div>';
+function calcWork(){
+ const count=val('workCount'), xp=val('workXp');
+ document.getElementById('workResult').innerHTML=
+   '<hr><b>作業で得られる経験値：</b>'+fmt(count*xp)+'%';
 }
-calc();
+
+function calcSale(){
+ const count=val('saleCount'), xp=val('saleXp');
+ document.getElementById('saleResult').innerHTML=
+   '<hr><b>販売で得られる経験値：</b>'+fmt(count*xp)+'%';
+}
 </script>
 </body>
 </html>
