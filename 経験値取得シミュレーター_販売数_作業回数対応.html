@@ -2,100 +2,106 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>経験値取得シミュレーター</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>経験値取得シミュレーター_販売数_作業回数対応</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f4f4f7;color:#222;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif}
-.wrap{max-width:620px;margin:auto;padding:16px}.card{background:#fff;border-radius:16px;padding:18px;margin:12px 0;box-shadow:0 2px 10px #0001}
-h1{font-size:23px;text-align:center;margin:8px 0 18px}h2{font-size:18px;margin:0 0 12px}
-label{display:block;font-weight:700;margin:11px 0 5px}input{width:100%;padding:11px;border:1px solid #ccc;border-radius:9px;font-size:16px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{width:100%;border:0;border-radius:10px;padding:13px;margin-top:15px;font-size:16px;font-weight:700}
-.big{text-align:center;font-size:27px;font-weight:800;margin:8px 0 14px}.result{line-height:1.85}.muted{font-size:13px;color:#666}
-hr{border:0;border-top:1px solid #eee;margin:14px 0}.ok{font-weight:700}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:#f5f5f5;color:#222}
+.container{max-width:720px;margin:auto;padding:16px}
+h1{font-size:22px;margin:8px 0 18px}
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 1px 5px #ddd}
+h2{font-size:17px;margin:0 0 12px}
+label{display:block;margin:10px 0 5px;font-weight:bold}
+input{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:8px;font-size:16px}
+button{width:100%;padding:12px;border:0;border-radius:8px;background:#333;color:white;font-size:16px;margin-top:14px}
+.result{font-size:18px;line-height:1.8}
+.note{font-size:13px;color:#666;line-height:1.5}
+.sep{border-top:1px solid #ddd;margin:14px 0}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="container">
 <h1>経験値取得シミュレーター</h1>
 
 <div class="card">
-<h2>① 実績データ</h2>
-<div class="muted">「販売19体で＋0.01%」のような実績を入力します。<br>※経験値は販売数から算出し、作業回数は販売数を生み出す回数として扱います。</div>
-
-<label>実績の販売数</label>
-<input id="rSales" type="number" value="19" min="0">
-
-<label>実績の作業回数</label>
-<input id="rWork" type="number" value="1" min="0">
-
-<label>その実績で増えた経験値（%）</label>
-<input id="rExp" type="number" value="0.01" min="0" step="0.001">
-
-<button onclick="calcRate()">実績から計算</button>
-<div id="rate" class="result"></div>
-</div>
-
-<div class="card">
-<h2>② シミュレーション</h2>
-<label>現在レベル</label>
+<h2>① 現在の経験値</h2>
+<label>現在Lv</label>
 <input id="lv" type="number" value="8" min="1">
 
 <label>現在の経験値（%）</label>
-<input id="cur" type="number" value="99.92" min="0" max="100" step="0.01">
+<input id="xp" type="number" value="99.92" min="0" max="100" step="0.01">
 
-<div class="grid">
-<div><label>追加販売数</label><input id="addSales" type="number" value="0" min="0"></div>
-<div><label>追加作業回数</label><input id="addWork" type="number" value="100" min="0"></div>
-</div>
-<button onclick="simulate()">シミュレーション</button>
+<p class="note">Lvアップに必要な経験値量は、ゲーム内で表示される「次のLvまで」の値などに合わせて入力してください。</p>
 </div>
 
-<div class="card result">
-<div class="big" id="final">---</div>
-<div id="detail"></div>
+<div class="card">
+<h2>② 作業による経験値</h2>
+<label>作業回数</label>
+<input id="workCount" type="number" value="0" min="0">
+
+<label>1作業あたりの経験値（%）</label>
+<input id="workXp" type="number" value="0" min="0" step="0.0001">
+
+<p class="note">ここは「作業」だけを計算します。販売数とは連動させません。</p>
+</div>
+
+<div class="card">
+<h2>③ 販売による経験値</h2>
+<label>販売数</label>
+<input id="saleCount" type="number" value="19" min="0">
+
+<label>1販売あたりの経験値（%）</label>
+<input id="saleXp" type="number" value="0.0005263158" min="0" step="0.0000001">
+
+<p class="note">ここは「販売」だけを計算します。作業回数とは連動させません。</p>
+</div>
+
+<div class="card">
+<h2>④ Lvアップ設定</h2>
+<label>1Lv分の経験値（%）</label>
+<input id="lvXp" type="number" value="100" min="0.0001" step="0.01">
+</div>
+
+<div class="card">
+<button onclick="calc()">計算する</button>
+<div id="result" class="result"></div>
 </div>
 </div>
 
 <script>
-let ratePerSale=0, salesPerWork=0;
-function N(id){return Number(document.getElementById(id).value)||0}
+function n(id){return Number(document.getElementById(id).value)||0}
+function fmt(x,d=4){return x.toLocaleString('ja-JP',{maximumFractionDigits:d})}
 
-function calcRate(){
- const s=N('rSales'), w=N('rWork'), e=N('rExp');
- ratePerSale=s>0?e/s:0;
- salesPerWork=w>0?s/w:0;
- document.getElementById('rate').innerHTML=
-  `経験値：<b>${ratePerSale.toFixed(8)}%</b> / 販売1個<br>`+
-  `販売効率：<b>${salesPerWork.toFixed(4)}個</b> / 作業1回`;
- simulate();
+function calc(){
+  const lv=n('lv');
+  const current=n('xp');
+  const workCount=n('workCount');
+  const workXp=n('workXp');
+  const saleCount=n('saleCount');
+  const saleXp=n('saleXp');
+  const lvXp=n('lvXp');
+
+  const workTotal=workCount*workXp;
+  const saleTotal=saleCount*saleXp;
+  const total=workTotal+saleTotal;
+
+  let xp=current+total;
+  let up=0;
+  if(lvXp>0){
+    up=Math.floor(xp/lvXp);
+    xp=xp%lvXp;
+  }
+
+  const finalLv=lv+up;
+
+  document.getElementById('result').innerHTML=
+    '<div><b>作業による経験値：</b>'+fmt(workTotal)+'%</div>'+
+    '<div><b>販売による経験値：</b>'+fmt(saleTotal)+'%</div>'+
+    '<div class="sep"></div>'+
+    '<div><b>合計獲得経験値：</b>'+fmt(total)+'%</div>'+
+    '<div><b>最終Lv：</b>'+finalLv+'</div>'+
+    '<div><b>最終経験値：</b>'+fmt(xp)+'%</div>';
 }
-
-function simulate(){
- if(ratePerSale===0) calcRate();
- const lv=N('lv'), cur=N('cur'), direct=N('addSales'), work=N('addWork');
- const fromWork=work*salesPerWork;
- const totalSales=direct+fromWork;
- const gained=totalSales*ratePerSale;
- const total=cur+gained;
- const ups=Math.floor(total/100);
- const remain=total-ups*100;
- const finalLv=lv+ups;
- const remainNeed=Math.max(0,100-remain);
- const salesNeed=ratePerSale>0?Math.ceil(remainNeed/ratePerSale):0;
- const workNeed=salesPerWork>0?Math.ceil(salesNeed/salesPerWork):0;
-
- document.getElementById('final').textContent=`LV${finalLv}　${remain.toFixed(3)}%`;
- document.getElementById('detail').innerHTML=
- `追加販売数（直接）：<b>${direct}</b>個<br>`+
- `追加作業回数：<b>${work}</b>回<br>`+
- `作業から発生する販売数：<b>${fromWork.toFixed(3)}</b>個<br>`+
- `合計販売数：<b>${totalSales.toFixed(3)}</b>個<br>`+
- `取得経験値：<b>+${gained.toFixed(6)}%</b><hr>`+
- `レベルアップ：<b>${ups}回</b><br>`+
- `次のLVまで：<b>${remainNeed.toFixed(3)}%</b><br>`+
- `目安：販売 <b>${salesNeed}</b>個 / 作業 <b>${workNeed}</b>回`;
-}
-calcRate();
+calc();
 </script>
 </body>
 </html>
