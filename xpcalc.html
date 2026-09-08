@@ -77,6 +77,8 @@ th,td{border-bottom:1px solid #ddd;padding:7px 5px;text-align:left}
 <h2>成果量の記録</h2>
 <label>職種・職業</label><input id="ojob" placeholder="例：木こり">
 <label>成果物</label><input id="oitem" placeholder="例：木の枝">
+<label>街名</label><input id="ocity" placeholder="例：王都">
+<div class="grid2"><div><label>座標X</label><input id="ox" type="number" step="any" placeholder="例：123"></div><div><label>座標Y</label><input id="oy" type="number" step="any" placeholder="例：456"></div></div>
 <label>成果量</label><input id="oqty" type="number" min="0" step="0.0001" placeholder="例：561">
 <label>作業回数</label><input id="ocount" type="number" min="1" value="50">
 <label>単位</label><input id="ounit" placeholder="例：個、kg、本">
@@ -148,7 +150,7 @@ function calcOut(){
 function addOut(){
  const q=n('oqty'),c=n('ocount');
  if(!q||!c){alert('成果量と作業回数を入力してください。');return}
- records.push({type:'o',date:new Date().toLocaleString('ja-JP'),job:document.getElementById('ojob').value.trim(),name:document.getElementById('oitem').value.trim(),qty:q,count:c,unit:document.getElementById('ounit').value||'個'});
+ records.push({type:'o',date:new Date().toLocaleString('ja-JP'),job:document.getElementById('ojob').value.trim(),name:document.getElementById('oitem').value.trim(),city:document.getElementById('ocity').value.trim(),x:n('ox'),y:n('oy'),qty:q,count:c,unit:document.getElementById('ounit').value||'個'});
  save();show('log');
 }
 function table(arr,type){
@@ -168,8 +170,8 @@ function table(arr,type){
 }
 function outTable(arr){
  if(!arr.length)return '<p class="note">まだ記録がありません。</p>';
- return '<div class="tablewrap"><table><tr><th>日時</th><th>職種・職業</th><th>成果物</th><th>成果量</th><th>作業回数</th><th>1回平均</th><th>50回期待値</th><th></th></tr>'+
- arr.map(x=>{const i=records.indexOf(x),a=x.qty/x.count;return '<tr><td>'+x.date+'</td><td>'+esc(x.job)+'</td><td>'+esc(x.name)+'</td><td>'+f(x.qty)+x.unit+'</td><td>'+x.count+'回</td><td>'+f(a)+x.unit+'</td><td>'+f(a*50)+x.unit+'</td><td><button class="del" onclick="del('+i+')">削除</button></td></tr>'}).join('')+'</table></div>';
+ return '<div class="tablewrap"><table><tr><th>日時</th><th>職種・職業</th><th>成果物</th><th>街名</th><th>座標</th><th>成果量</th><th>作業回数</th><th>1回平均</th><th>50回期待値</th><th></th></tr>'+
+ arr.map(x=>{const i=records.indexOf(x),a=x.qty/x.count;return '<tr><td>'+x.date+'</td><td>'+esc(x.job)+'</td><td>'+esc(x.name)+'</td><td>'+esc(x.city||'')+'</td><td>'+((x.x!==undefined&&x.y!==undefined)?x.x+', '+x.y:'')+'</td><td>'+f(x.qty)+x.unit+'</td><td>'+x.count+'回</td><td>'+f(a)+x.unit+'</td><td>'+f(a*50)+x.unit+'</td><td><button class="del" onclick="del('+i+')">削除</button></td></tr>'}).join('')+'</table></div>';
 }
 function summaryXP(arr,unit){
  if(!arr.length)return '<span class="note">記録なし</span>';
