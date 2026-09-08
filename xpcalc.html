@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>経験値取得シミュレーター_販売数_作業回数対応</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f5f5;margin:0;padding:16px;color:#222}
+.container{max-width:700px;margin:auto}.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 1px 5px #ddd}
+h1{font-size:21px;margin:6px 0 18px}h2{font-size:17px;margin:0 0 12px}
+label{display:block;font-weight:bold;margin:10px 0 5px}
+input{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:8px;font-size:16px}
+button{width:100%;padding:12px;border:0;border-radius:8px;background:#333;color:#fff;font-size:16px;margin-top:14px}
+.result{margin-top:16px;line-height:1.9;font-size:17px}.big{font-size:22px;font-weight:bold}
+.note{font-size:13px;color:#666;line-height:1.5}hr{border:0;border-top:1px solid #ddd;margin:14px 0}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>経験値取得シミュレーター</h1>
+
+<div class="card">
+<h2>販売によるLVアップ計算</h2>
+<label>現在Lv</label><input id="saleLv" type="number" min="1" value="8">
+<label>現在の経験値（%）</label><input id="saleCurrent" type="number" min="0" max="99.999999" step="0.01" value="99.92">
+<label>基準となる販売数</label><input id="saleCount" type="number" min="1" value="19">
+<label>その販売数で増えた経験値（%）</label><input id="saleGain" type="number" min="0.000001" step="0.000001" value="0.01">
+<button onclick="calcSale()">販売を計算</button>
+<div id="saleResult" class="result"></div>
+</div>
+
+<div class="card">
+<h2>作業によるLVアップ計算</h2>
+<label>現在Lv</label><input id="workLv" type="number" min="1" value="8">
+<label>現在の経験値（%）</label><input id="workCurrent" type="number" min="0" max="99.999999" step="0.01" value="99.92">
+<label>基準となる作業回数</label><input id="workCount" type="number" min="1" value="1">
+<label>その作業回数で増えた経験値（%）</label><input id="workGain" type="number" min="0.000001" step="0.000001" value="0.01">
+<button onclick="calcWork()">作業を計算</button>
+<div id="workResult" class="result"></div>
+</div>
+
+<div class="card">
+<p class="note">
+販売と作業は完全に独立しています。<br>
+販売の計算に作業回数は使いません。<br>
+作業の計算に販売数は使いません。
+</p>
+</div>
+</div>
+
+<script>
+function num(id){return Number(document.getElementById(id).value)||0}
+function fmt(x){return x.toLocaleString('ja-JP',{maximumFractionDigits:8})}
+
+function calc(kind){
+ const p=kind==='sale'
+ ? {lv:num('saleLv'),cur:num('saleCurrent'),count:num('saleCount'),gain:num('saleGain'),r:'saleResult',unit:'販売'}
+ : {lv:num('workLv'),cur:num('workCurrent'),count:num('workCount'),gain:num('workGain'),r:'workResult',unit:'作業'};
+
+ if(p.count<=0||p.gain<=0){document.getElementById(p.r).innerHTML='基準回数と獲得経験値を入力してください。';return}
+ const remain=Math.max(0,100-p.cur);
+ const batches=remain/p.gain;
+ const required=Math.ceil(batches)*p.count;
+ const per=p.gain/p.count;
+
+ document.getElementById(p.r).innerHTML=
+ '<div><b>現在Lv：</b>'+p.lv+'</div>'+
+ '<div><b>現在経験値：</b>'+fmt(p.cur)+'%</div>'+
+ '<div><b>LVアップまで：</b>'+fmt(remain)+'%</div><hr>'+
+ '<div><b>基準：</b>'+p.count.toLocaleString()+(p.unit==='販売'?'個販売':'回作業')+' → +'+fmt(p.gain)+'%</div>'+
+ '<div><b>1'+(p.unit==='販売'?'個販売':'回の作業')+'あたり：</b>+'+fmt(per)+'%</div><hr>'+
+ '<div><b>必要な基準数：</b>'+Math.ceil(batches).toLocaleString()+(p.unit==='販売'?'セット':'回')+'</div>'+
+ '<div class="big">あと '+required.toLocaleString()+(p.unit==='販売'?'個販売':'回の作業')+'でLVアップ</div>';
+}
+function calcSale(){calc('sale')} function calcWork(){calc('work')}
+calcSale();calcWork();
+</script>
+</body>
+</html>
