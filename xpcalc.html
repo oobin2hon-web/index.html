@@ -35,15 +35,20 @@ th,td{border-bottom:1px solid #ddd;padding:7px 5px;text-align:left}
 <h2>販売によるLVアップ計算</h2>
 <label>職種・職業</label><input id="sjob" placeholder="例：肉屋">
 <label>販売物</label><input id="sitem" placeholder="例：食用獣">
+
 <div class="grid">
 <div><label>現在Lv</label><input id="slv" type="number" value="8"></div>
 <div><label>現在経験値（%）</label><input id="sxp" type="number" value="99.92" step="0.01"></div>
 </div>
+
+<label>販売価格（1個）</label><input id="sprice" type="number" min="0" step="0.000001" value="1">
 <label>基準となる販売数（個）</label><input id="scount" type="number" min="1" value="19">
-<label>その販売数で増えた経験値（%）</label><input id="sgain" type="number" min="0" step="0.000001" value="0.01">
+<label>その販売で増えた経験値（%）</label><input id="sgain" type="number" min="0" step="0.000001" value="0.01">
+
 <button onclick="calcXP('s')">販売を計算</button>
 <div id="sr" class="result"></div>
 <button onclick="addXP('s')">販売記録を保存</button>
+<p class="note">販売価格と販売数から売上額を計算し、実績経験値から「1Gあたりの経験値」を求めます。予測時は販売価格が変わると経験値も変わる前提で計算します。</p>
 </div>
 
 <div class="card">
@@ -78,27 +83,23 @@ th,td{border-bottom:1px solid #ddd;padding:7px 5px;text-align:left}
 </div>
 
 <div id="log" class="section">
-<div class="card">
-<h2>販売記録</h2><div id="salesLog"></div><h3>販売集計</h3><div id="salesAvg"></div>
-</div>
-<div class="card">
-<h2>作業記録</h2><div id="workLog"></div><h3>作業集計</h3><div id="workAvg"></div>
-</div>
-<div class="card">
-<h2>成果量記録</h2><div id="outLog"></div><h3>成果量集計</h3><div id="outAvg"></div>
-</div>
-<div class="card"><button class="del" onclick="clearAll()">全記録を削除</button>
-<p class="note">記録はこのブラウザに保存されます。</p></div>
+<div class="card"><h2>販売記録</h2><div id="salesLog"></div><h3>販売集計</h3><div id="salesAvg"></div></div>
+<div class="card"><h2>作業記録</h2><div id="workLog"></div><h3>作業集計</h3><div id="workAvg"></div></div>
+<div class="card"><h2>成果量記録</h2><div id="outLog"></div><h3>成果量集計</h3><div id="outAvg"></div></div>
+<div class="card"><button class="del" onclick="clearAll()">全記録を削除</button><p class="note">記録はこのブラウザに保存されます。以前のxpcalcの記録も自動で引き継ぎます。</p></div>
 </div>
 </div>
 
 <script>
-const KEY='xpcalc_all_v3';
+const KEY='xpcalc_all_v4';
 let records=JSON.parse(localStorage.getItem(KEY)||'[]');
+if(!records.length){
+  const old=JSON.parse(localStorage.getItem('xpcalc_all_v3')||'[]');
+  if(old.length) records=old;
+}
 function n(id){return Number(document.getElementById(id).value)||0}
 function f(x){return x.toLocaleString('ja-JP',{maximumFractionDigits:8})}
 function save(){localStorage.setItem(KEY,JSON.stringify(records));render()}
-
 function show(id){
  document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
  document.getElementById(id).classList.add('active');
@@ -107,20 +108,35 @@ function show(id){
 }
 function calcXP(t){
  const cur=n(t==='s'?'sxp':'wxp'), count=n(t==='s'?'scount':'wcount'), gain=n(t==='s'?'sgain':'wgain');
- const out=document.getElementById(t==='s'?'sr':'wr'), unit=t==='s'?'個':'回';
+ const out=document.getElementById(t==='s'?'sr':'wr');
  if(!count||!gain){out.innerHTML='入力してください。';return}
  const remain=Math.max(0,100-cur), sets=Math.ceil(remain/gain), required=sets*count;
- out.innerHTML='<div>1'+unit+'あたり：<b>+'+f(gain/count)+'%</b></div><div>LVアップまで：<b>'+f(remain)+'%</b></div><div class="big">あと '+required.toLocaleString()+unit+'でLVアップ</div>';
+ if(t==='s'){
+   const price=n('sprice');
+   if(price<=0){out.innerHTML='販売価格を入力してください。';return}
+   const revenue=price*count, xpPerG=gain/revenue;
+   const oneSale=xpPerG*price;
+   const requiredRevenue=required*price;
+   out.innerHTML=
+    '実績売上額：<b>'+f(revenue)+'</b> G<br>'+
+    '経験値：<b>+'+f(gain/count)+'%</b> / 1個<br>'+
+    '経験値：<b>+'+f(xpPerG)+'%</b> / 1G<br>'+
+    'この価格での1個あたり経験値：<b>+'+f(oneSale)+'%</b><hr>'+
+    'LVアップまで：<b>'+f(remain)+'%</b><br>'+
+    '<div class="big">あと '+required.toLocaleString()+'個（売上 '+f(requiredRevenue)+' G）でLVアップ</div>';
+ }else{
+   out.innerHTML='<div>1回あたり：<b>+'+f(gain/count)+'%</b></div><div>LVアップまで：<b>'+f(remain)+'%</b></div><div class="big">あと '+required.toLocaleString()+'回でLVアップ</div>';
+ }
 }
 function addXP(t){
  const p=t==='s'
- ?{job:document.getElementById('sjob').value.trim(),name:document.getElementById('sitem').value.trim(),lv:n('slv'),xp:n('sxp'),count:n('scount'),gain:n('sgain')}
+ ?{job:document.getElementById('sjob').value.trim(),name:document.getElementById('sitem').value.trim(),lv:n('slv'),xp:n('sxp'),price:n('sprice'),count:n('scount'),gain:n('sgain')}
  :{job:document.getElementById('wjob').value.trim(),name:document.getElementById('wname').value.trim(),lv:n('wlv'),xp:n('wxp'),count:n('wcount'),gain:n('wgain')};
- if(!p.count||!p.gain){alert('数量と増加経験値を入力してください。');return}
- records.push({type:t, date:new Date().toLocaleString('ja-JP'),...p});save();show('log');
+ if(!p.count||!p.gain||(t==='s'&&!p.price)){alert(t==='s'?'販売価格・販売数・増加経験値を入力してください。':'作業回数・増加経験値を入力してください。');return}
+ records.push({type:t,date:new Date().toLocaleString('ja-JP'),...p});save();show('log');
 }
 function calcOut(){
- const q=n('oqty'), c=n('ocount'), u=document.getElementById('ounit').value||'個';
+ const q=n('oqty'),c=n('ocount'),u=document.getElementById('ounit').value||'個';
  if(!q||!c){document.getElementById('or').innerHTML='成果量と作業回数を入力してください。';return}
  document.getElementById('or').innerHTML='<div>1回あたり：<b>'+f(q/c)+u+'</b></div><div class="big">50回期待値：'+f(q/c*50)+u+'</div>';
 }
@@ -132,19 +148,33 @@ function addOut(){
 }
 function table(arr,type){
  if(!arr.length)return '<p class="note">まだ記録がありません。</p>';
- return '<div class="tablewrap"><table><tr><th>日時</th><th>職種・職業</th><th>名称</th><th>Lv</th><th>数量</th><th>増加XP</th><th>1単位</th><th></th></tr>'+
- arr.map(x=>{const i=records.indexOf(x),per=x.gain/x.count;
- return '<tr><td>'+x.date+'</td><td>'+esc(x.job)+'</td><td>'+esc(x.name)+'</td><td>'+x.lv+'</td><td>'+x.count.toLocaleString()+(type==='s'?'個':'回')+'</td><td>+'+f(x.gain)+'%</td><td>+'+f(per)+'%</td><td><button class="del" onclick="del('+i+')">削除</button></td></tr>'}).join('')+'</table></div>';
+ let head=type==='s'
+ ?'<tr><th>日時</th><th>職種・職業</th><th>販売物</th><th>Lv</th><th>価格</th><th>販売数</th><th>売上</th><th>増加XP</th><th>1GあたりXP</th><th></th></tr>'
+ :'<tr><th>日時</th><th>職種・職業</th><th>作業名</th><th>Lv</th><th>回数</th><th>増加XP</th><th>1回あたりXP</th><th></th></tr>';
+ return '<div class="tablewrap"><table>'+head+
+ arr.map(x=>{
+  const i=records.indexOf(x),per=x.gain/x.count;
+  if(type==='s'){
+   const revenue=(x.price||0)*x.count,perG=revenue?x.gain/revenue:0;
+   return '<tr><td>'+x.date+'</td><td>'+esc(x.job)+'</td><td>'+esc(x.name)+'</td><td>'+x.lv+'</td><td>'+f(x.price||0)+' G</td><td>'+x.count.toLocaleString()+'個</td><td>'+f(revenue)+' G</td><td>+'+f(x.gain)+'%</td><td>+'+f(perG)+'%</td><td><button class="del" onclick="del('+i+')">削除</button></td></tr>';
+  }
+  return '<tr><td>'+x.date+'</td><td>'+esc(x.job)+'</td><td>'+esc(x.name)+'</td><td>'+x.lv+'</td><td>'+x.count.toLocaleString()+'回</td><td>+'+f(x.gain)+'%</td><td>+'+f(per)+'%</td><td><button class="del" onclick="del('+i+')">削除</button></td></tr>';
+ }).join('')+'</table></div>';
 }
 function outTable(arr){
  if(!arr.length)return '<p class="note">まだ記録がありません。</p>';
  return '<div class="tablewrap"><table><tr><th>日時</th><th>職種・職業</th><th>成果物</th><th>成果量</th><th>作業回数</th><th>1回平均</th><th>50回期待値</th><th></th></tr>'+
- arr.map(x=>{const i=records.indexOf(x),a=x.qty/x.count;
- return '<tr><td>'+x.date+'</td><td>'+esc(x.job)+'</td><td>'+esc(x.name)+'</td><td>'+f(x.qty)+x.unit+'</td><td>'+x.count+'回</td><td>'+f(a)+x.unit+'</td><td>'+f(a*50)+x.unit+'</td><td><button class="del" onclick="del('+i+')">削除</button></td></tr>'}).join('')+'</table></div>';
+ arr.map(x=>{const i=records.indexOf(x),a=x.qty/x.count;return '<tr><td>'+x.date+'</td><td>'+esc(x.job)+'</td><td>'+esc(x.name)+'</td><td>'+f(x.qty)+x.unit+'</td><td>'+x.count+'回</td><td>'+f(a)+x.unit+'</td><td>'+f(a*50)+x.unit+'</td><td><button class="del" onclick="del('+i+')">削除</button></td></tr>'}).join('')+'</table></div>';
 }
 function summaryXP(arr,unit){
  if(!arr.length)return '<span class="note">記録なし</span>';
  const c=arr.reduce((a,x)=>a+x.count,0),g=arr.reduce((a,x)=>a+x.gain,0);
+ if(unit==='個'){
+  const rev=arr.reduce((a,x)=>a+(x.price||0)*x.count,0);
+  const perG=rev?g/rev:0;
+  return '合計：<b>'+c.toLocaleString()+'個</b> ／ 売上：<b>'+f(rev)+' G</b> ／ 経験値：<b>+'+f(g)+'%</b><br>'+
+   '販売平均：<b>+'+f(g/c)+'%</b> / 1個 ／ 売上平均：<b>+'+f(perG)+'%</b> / 1G';
+ }
  return '合計：<b>'+c.toLocaleString()+unit+'</b> ／ 経験値：<b>+'+f(g)+'%</b><br>合計からの平均：<b>+'+f(g/c)+'%</b> / 1'+unit;
 }
 function summaryOut(arr){
@@ -158,8 +188,12 @@ function del(i){records.splice(i,1);save()}
 function clearAll(){if(confirm('すべての記録を削除しますか？')){records=[];save()}}
 function render(){
  const s=records.filter(x=>x.type==='s'),w=records.filter(x=>x.type==='w'),o=records.filter(x=>x.type==='o');
- document.getElementById('salesLog').innerHTML=table(s,'s');document.getElementById('workLog').innerHTML=table(w,'w');document.getElementById('outLog').innerHTML=outTable(o);
- document.getElementById('salesAvg').innerHTML=summaryXP(s,'個');document.getElementById('workAvg').innerHTML=summaryXP(w,'回');document.getElementById('outAvg').innerHTML=summaryOut(o);
+ document.getElementById('salesLog').innerHTML=table(s,'s');
+ document.getElementById('workLog').innerHTML=table(w,'w');
+ document.getElementById('outLog').innerHTML=outTable(o);
+ document.getElementById('salesAvg').innerHTML=summaryXP(s,'個');
+ document.getElementById('workAvg').innerHTML=summaryXP(w,'回');
+ document.getElementById('outAvg').innerHTML=summaryOut(o);
 }
 render();
 </script>
