@@ -3,72 +3,82 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>XP Calc</title>
+<title>xpcalc</title>
 <style>
-body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;margin:0;padding:14px;color:#222}
-.wrap{max-width:900px;margin:auto}.card{background:#fff;border-radius:12px;padding:15px;margin-bottom:14px;box-shadow:0 1px 5px #ddd}
-h1{font-size:22px}h2{font-size:18px;margin-top:0}h3{font-size:16px}
-label{display:block;font-weight:bold;margin:9px 0 4px}
-input,select{width:100%;box-sizing:border-box;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:16px}
-button{padding:10px 14px;border:0;border-radius:8px;background:#333;color:#fff;font-size:15px;margin-top:10px}
-.del{background:#aaa}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.result{margin-top:12px;line-height:1.8}.big{font-size:20px;font-weight:bold}
-.note{font-size:13px;color:#666;line-height:1.5}hr{border:0;border-top:1px solid #ddd;margin:14px 0}
-.tablewrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
-th,td{border-bottom:1px solid #ddd;padding:7px 5px;text-align:left}
-.tabs{display:flex;gap:6px;margin-bottom:14px}.tabs button{flex:1;margin:0;background:#888}.tabs button.active{background:#333}
+*{box-sizing:border-box}
+body{margin:0;background:#f4f4f7;color:#222;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif}
+.wrap{max-width:760px;margin:auto;padding:12px}
+h1{text-align:center;font-size:22px;margin:8px 0 12px}
+.card{background:#fff;border-radius:16px;padding:16px;margin:10px 0;box-shadow:0 2px 10px #0001}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;position:sticky;top:0;background:#f4f4f7;padding:4px 0;z-index:5}
+.tabs button{margin:0;padding:10px 4px;background:#ddd;color:#222}
+.tabs button.active{background:#333;color:#fff}
 .section{display:none}.section.active{display:block}
+label{display:block;font-weight:700;margin:10px 0 5px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #ccc;border-radius:9px;font-size:16px;background:#fff}
+textarea{min-height:150px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{width:100%;border:0;border-radius:10px;padding:12px;margin-top:12px;font-size:16px;font-weight:700;background:#333;color:#fff}
+button.sub{background:#eee;color:#222}
+button.del{background:#b3261e;color:#fff;padding:7px;margin:0;font-size:13px}
+button.edit{background:#eee;color:#222;padding:7px;margin:0;font-size:13px}
+.result{line-height:1.8;margin-top:12px}.big{text-align:center;font-size:25px;font-weight:800;margin:8px 0 14px}
+.note{font-size:13px;color:#666;line-height:1.5}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:680px}
+th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:top}
+.memo{border:1px solid #ddd;border-radius:12px;padding:12px;margin:10px 0;background:#fafafa}
+.memo.expired{opacity:.6}
+.memohead{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.memoTitle{font-weight:800;font-size:17px}
+.badge{display:inline-block;padding:3px 8px;border-radius:999px;background:#e8e8e8;font-size:12px;margin:3px 3px 3px 0}
+.badge.want{background:#fff0f0}.badge.offer{background:#f0f7ff}.badge.deadline{background:#fff8df}
+.memoText{white-space:pre-wrap;line-height:1.6;margin:10px 0}
+.actions{display:flex;gap:6px}.actions button{width:auto}
+.search{margin-bottom:8px}
+.smallgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+@media(max-width:520px){.tabs{grid-template-columns:repeat(2,1fr)}.smallgrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
-<h1>経験値・成果量 記録＆計算</h1>
+<h1>経験値・成果量・備忘録</h1>
 
 <div class="tabs">
 <button id="tabxp" class="active" onclick="show('xp')">経験値</button>
 <button id="tabout" onclick="show('out')">成果量</button>
 <button id="tablog" onclick="show('log')">記録</button>
+<button id="tabmemo" onclick="show('memo')">備忘録</button>
 </div>
 
 <div id="xp" class="section active">
 <div class="card">
-<h2>販売によるLVアップ計算</h2>
-<label>職種・職業</label><input id="sjob" placeholder="例：肉屋">
-<label>販売物</label><input id="sitem" placeholder="例：食用獣">
-
-<div class="grid">
-<div><label>現在Lv</label><input id="slv" type="number" value="8"></div>
-<div><label>現在経験値（%）</label><input id="sxp" type="number" value="99.92" step="0.01"></div>
+<h2>経験値計算</h2>
+<div class="note">販売・作業それぞれの実測値から、1回あたりの経験値と必要回数を計算します。</div>
+<label>現在Lv</label><input id="level" type="number" min="1" value="8">
+<label>現在の経験値（%）</label><input id="current" type="number" min="0" max="99.999999" step="0.001" value="99.92">
+<label>1回で増える経験値（%）</label><input id="gain" type="number" min="0" step="0.000001" value="0.01">
+<label>取得回数</label><input id="count" type="number" min="0" value="100">
+<button onclick="calcXP()">計算する</button>
+<div id="xpResult" class="result"></div>
 </div>
-
-<label>販売価格（1個）</label><input id="sprice" type="number" min="0" step="0.000001" value="1">
-<label>基準となる販売数（個）</label><input id="scount" type="number" min="1" value="19">
-<label>その販売で増えた経験値（%）</label><input id="sgain" type="number" min="0" step="0.000001" value="0.01">
-
-<button onclick="calcXP('s')">販売を計算</button>
-<div id="sr" class="result"></div>
-<button onclick="addXP('s')">販売記録を保存</button>
-<p class="note">販売価格と販売数から売上額を計算し、実績経験値から「1Gあたりの経験値」を求めます。予測時は販売価格が変わると経験値も変わる前提で計算します。</p>
-</div>
-
 <div class="card">
-<h2>作業によるLVアップ計算</h2>
-<label>職種・職業</label><input id="wjob" placeholder="例：調理師">
-<label>作業名</label><input id="wname" placeholder="例：調理">
-<label>街名</label><input id="wcity" placeholder="例：王都">
-<div class="grid">
-<div><label>座標X</label><input id="wx" type="number" step="1" placeholder="例：123"></div>
-<div><label>座標Y</label><input id="wy" type="number" step="1" placeholder="例：456"></div>
+<h2>販売記録を保存</h2>
+<label>職種・職業</label><input id="sjob" placeholder="例：道具屋">
+<label>販売物</label><input id="sitem" placeholder="例：ポーション">
+<div class="grid2"><div><label>街名</label><input id="scity" placeholder="例：王都"></div><div><label>Lv</label><input id="slv" type="number" min="1"></div></div>
+<div class="grid2"><div><label>販売価格（G/個）</label><input id="sprice" type="number" min="0" step="any"></div><div><label>販売数</label><input id="scount" type="number" min="1" step="any"></div></div>
+<label>増加経験値（%）</label><input id="sgain" type="number" min="0" step="0.000001">
+<button onclick="addSale()">販売記録を保存</button>
 </div>
-<div class="grid">
-<div><label>現在Lv</label><input id="wlv" type="number" value="8"></div>
-<div><label>現在経験値（%）</label><input id="wxp" type="number" value="99.92" step="0.01"></div>
-</div>
-<label>基準となる作業回数（回）</label><input id="wcount" type="number" min="1" value="1">
-<label>その作業回数で増えた経験値（%）</label><input id="wgain" type="number" min="0" step="0.000001" value="0.01">
-<button onclick="calcXP('w')">作業を計算</button>
-<div id="wr" class="result"></div>
-<button onclick="addXP('w')">作業記録を保存</button>
+<div class="card">
+<h2>作業記録を保存</h2>
+<label>職種・職業</label><input id="wjob" placeholder="例：木こり">
+<label>作業名</label><input id="wname" placeholder="例：林道を探索">
+<div class="grid2"><div><label>街名</label><input id="wcity" placeholder="例：王都"></div><div><label>Lv</label><input id="wlv" type="number" min="1"></div></div>
+<div class="grid2"><div><label>座標X</label><input id="wx" type="number" step="any"></div><div><label>座標Y</label><input id="wy" type="number" step="any"></div></div>
+<div class="grid2"><div><label>作業回数</label><input id="wcount" type="number" min="1"></div><div><label>増加経験値（%）</label><input id="wgain" type="number" min="0" step="0.000001"></div></div>
+<button onclick="addWork()">作業記録を保存</button>
 </div>
 </div>
 
@@ -78,130 +88,159 @@ th,td{border-bottom:1px solid #ddd;padding:7px 5px;text-align:left}
 <label>職種・職業</label><input id="ojob" placeholder="例：木こり">
 <label>成果物</label><input id="oitem" placeholder="例：木の枝">
 <label>街名</label><input id="ocity" placeholder="例：王都">
-<div class="grid2"><div><label>座標X</label><input id="ox" type="number" step="any" placeholder="例：123"></div><div><label>座標Y</label><input id="oy" type="number" step="any" placeholder="例：456"></div></div>
+<div class="grid2"><div><label>座標X</label><input id="ox" type="number" step="any"></div><div><label>座標Y</label><input id="oy" type="number" step="any"></div></div>
 <label>成果量</label><input id="oqty" type="number" min="0" step="0.0001" placeholder="例：561">
 <label>作業回数</label><input id="ocount" type="number" min="1" value="50">
 <label>単位</label><input id="ounit" placeholder="例：個、kg、本">
 <button onclick="calcOut()">成果量を計算</button>
 <div id="or" class="result"></div>
 <button onclick="addOut()">成果量を保存</button>
-<p class="note">複数の記録を保存すると、合計・アベレージ・50回期待値を自動集計します。</p>
 </div>
 </div>
 
 <div id="log" class="section">
-<div class="card"><h2>販売記録</h2><div id="salesLog"></div><h3>販売集計</h3><div id="salesAvg"></div></div>
-<div class="card"><h2>作業記録</h2><div id="workLog"></div><h3>作業集計</h3><div id="workAvg"></div></div>
-<div class="card"><h2>成果量記録</h2><div id="outLog"></div><h3>成果量集計</h3><div id="outAvg"></div></div>
-<div class="card"><button class="del" onclick="clearAll()">全記録を削除</button><p class="note">記録はこのブラウザに保存されます。以前のxpcalcの記録も自動で引き継ぎます。</p></div>
+<div class="card"><h2>保存した記録</h2><div id="salesLog"></div><hr><div id="workLog"></div><hr><div id="outLog"></div></div>
+<div class="card"><button class="del" onclick="clearRecords()">記録だけ全削除</button><p class="note">以前のxpcalcの記録キー（xpcalc_all_v4）も自動で読み込みます。</p></div>
+</div>
+
+<div id="memo" class="section">
+<div class="card">
+<h2>📝 備忘録</h2>
+<div class="note">ゲーム内の掲示板・取引メモ・攻略メモなどを、そのまま貼り付けて保存できます。</div>
+<label>タイトル</label><input id="mtitle" placeholder="例：ポーション交換募集">
+<div class="smallgrid">
+<div><label>カテゴリ</label><select id="mcat"><option>取引</option><option>募集</option><option>攻略</option><option>ゲーム</option><option>その他</option></select></div>
+<div><label>街名</label><input id="mcity" placeholder="任意"></div>
+<div><label>タグ</label><input id="mtags" placeholder="例：ポーション,募集"></div>
+</div>
+<label>求（欲しいもの）</label><input id="mwant" placeholder="例：獣の肉100">
+<label>出（出せるもの）</label><input id="moffer" placeholder="例：G 10000">
+<label>募集期限</label><input id="mdeadline" type="date">
+<label>内容</label><textarea id="mtext" placeholder="ここに掲示板の文章などをそのまま貼り付け"></textarea>
+<button onclick="addMemo()">備忘録を保存</button>
+</div>
+<div class="card">
+<h2>保存済み備忘録</h2>
+<input class="search" id="msearch" placeholder="タイトル・内容・求・出・タグ・街名を検索" oninput="renderMemos()">
+<div class="smallgrid">
+<select id="mfilter" onchange="renderMemos()"><option value="">すべてのカテゴリ</option><option>取引</option><option>募集</option><option>攻略</option><option>ゲーム</option><option>その他</option></select>
+<select id="mstatus" onchange="renderMemos()"><option value="">期限すべて</option><option value="active">期限内・期限なし</option><option value="expired">期限切れ</option></select>
+<select id="msort" onchange="renderMemos()"><option value="new">新しい順</option><option value="old">古い順</option><option value="deadline">期限順</option></select>
+</div>
+<div id="memoList"></div>
+</div>
+<div class="card"><button class="del" onclick="clearMemos()">備忘録だけ全削除</button></div>
 </div>
 </div>
 
 <script>
 const KEY='xpcalc_all_v4';
 let records=JSON.parse(localStorage.getItem(KEY)||'[]');
-if(!records.length){
-  const old=JSON.parse(localStorage.getItem('xpcalc_all_v3')||'[]');
-  if(old.length) records=old;
-}
-function n(id){return Number(document.getElementById(id).value)||0}
-function f(x){return x.toLocaleString('ja-JP',{maximumFractionDigits:8})}
-function save(){localStorage.setItem(KEY,JSON.stringify(records));render()}
+if(!records.length){const old=JSON.parse(localStorage.getItem('xpcalc_all_v3')||'[]');if(old.length)records=old}
+const MEMOKEY='xpcalc_memos_v1';
+let memos=JSON.parse(localStorage.getItem(MEMOKEY)||'[]');
+
+function val(id){return document.getElementById(id).value}
+function num(id){return Number(val(id))||0}
+function f(x){return Number(x).toLocaleString('ja-JP',{maximumFractionDigits:8})}
+function esc(x){return String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function show(id){
  document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
  document.getElementById(id).classList.add('active');
  document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
- document.getElementById(id==='xp'?'tabxp':id==='out'?'tabout':'tablog').classList.add('active');
+ document.getElementById('tab'+id).classList.add('active');
+ if(id==='log')render();
+ if(id==='memo')renderMemos();
 }
-function calcXP(t){
- const cur=n(t==='s'?'sxp':'wxp'), count=n(t==='s'?'scount':'wcount'), gain=n(t==='s'?'sgain':'wgain');
- const out=document.getElementById(t==='s'?'sr':'wr');
- if(!count||!gain){out.innerHTML='入力してください。';return}
- const remain=Math.max(0,100-cur), sets=Math.ceil(remain/gain), required=sets*count;
- if(t==='s'){
-   const price=n('sprice');
-   if(price<=0){out.innerHTML='販売価格を入力してください。';return}
-   const revenue=price*count, xpPerG=gain/revenue;
-   const oneSale=xpPerG*price;
-   const requiredRevenue=required*price;
-   out.innerHTML=
-    '実績売上額：<b>'+f(revenue)+'</b> G<br>'+
-    '経験値：<b>+'+f(gain/count)+'%</b> / 1個<br>'+
-    '経験値：<b>+'+f(xpPerG)+'%</b> / 1G<br>'+
-    'この価格での1個あたり経験値：<b>+'+f(oneSale)+'%</b><hr>'+
-    'LVアップまで：<b>'+f(remain)+'%</b><br>'+
-    '<div class="big">あと '+required.toLocaleString()+'個（売上 '+f(requiredRevenue)+' G）でLVアップ</div>';
- }else{
-   out.innerHTML='<div>1回あたり：<b>+'+f(gain/count)+'%</b></div><div>LVアップまで：<b>'+f(remain)+'%</b></div><div class="big">あと '+required.toLocaleString()+'回でLVアップ</div>';
- }
+function calcXP(){
+ const lv=num('level'),cur=num('current'),gain=num('gain'),count=num('count');
+ if(gain<=0){document.getElementById('xpResult').innerHTML='増加経験値を入力してください。';return}
+ const total=cur+gain*count,up=Math.floor(total/100),remain=total%100,need=Math.max(0,Math.ceil((100-cur)/gain-1e-12));
+ document.getElementById('xpResult').innerHTML='<div class="big">Lv '+(lv+up)+' / 経験値 '+f(remain)+'%</div><div>'+count+'回で <b>+'+f(gain*count)+'%</b><br>次のLVまで <b>'+need+'回</b></div>';
 }
-function addXP(t){
- const p=t==='s'
- ?{job:document.getElementById('sjob').value.trim(),name:document.getElementById('sitem').value.trim(),lv:n('slv'),xp:n('sxp'),price:n('sprice'),count:n('scount'),gain:n('sgain')}
- :{job:document.getElementById('wjob').value.trim(),name:document.getElementById('wname').value.trim(),city:document.getElementById('wcity').value.trim(),x:n('wx'),y:n('wy'),lv:n('wlv'),xp:n('wxp'),count:n('wcount'),gain:n('wgain')};
- if(!p.count||!p.gain||(t==='s'&&!p.price)){alert(t==='s'?'販売価格・販売数・増加経験値を入力してください。':'作業回数・増加経験値を入力してください。');return}
- records.push({type:t,date:new Date().toLocaleString('ja-JP'),...p});save();show('log');
+function addSale(){
+ const count=num('scount'),gain=num('sgain');
+ if(!count||gain<=0){alert('販売数と増加経験値を入力してください。');return}
+ records.push({type:'s',date:new Date().toLocaleString('ja-JP'),job:val('sjob').trim(),name:val('sitem').trim(),city:val('scity').trim(),lv:num('slv'),price:num('sprice'),count,gain});
+ saveRecords();show('log');
+}
+function addWork(){
+ const count=num('wcount'),gain=num('wgain');
+ if(!count||gain<=0){alert('作業回数と増加経験値を入力してください。');return}
+ records.push({type:'w',date:new Date().toLocaleString('ja-JP'),job:val('wjob').trim(),name:val('wname').trim(),city:val('wcity').trim(),x:val('wx'),y:val('wy'),lv:num('wlv'),count,gain});
+ saveRecords();show('log');
 }
 function calcOut(){
- const q=n('oqty'),c=n('ocount'),u=document.getElementById('ounit').value||'個';
+ const q=num('oqty'),c=num('ocount'),u=val('ounit')||'個';
  if(!q||!c){document.getElementById('or').innerHTML='成果量と作業回数を入力してください。';return}
  document.getElementById('or').innerHTML='<div>1回あたり：<b>'+f(q/c)+u+'</b></div><div class="big">50回期待値：'+f(q/c*50)+u+'</div>';
 }
 function addOut(){
- const q=n('oqty'),c=n('ocount');
+ const q=num('oqty'),c=num('ocount');
  if(!q||!c){alert('成果量と作業回数を入力してください。');return}
- records.push({type:'o',date:new Date().toLocaleString('ja-JP'),job:document.getElementById('ojob').value.trim(),name:document.getElementById('oitem').value.trim(),city:document.getElementById('ocity').value.trim(),x:n('ox'),y:n('oy'),qty:q,count:c,unit:document.getElementById('ounit').value||'個'});
- save();show('log');
+ records.push({type:'o',date:new Date().toLocaleString('ja-JP'),job:val('ojob').trim(),name:val('oitem').trim(),city:val('ocity').trim(),x:val('ox'),y:val('oy'),qty:q,count:c,unit:val('ounit')||'個'});
+ saveRecords();show('log');
 }
-function table(arr,type){
- if(!arr.length)return '<p class="note">まだ記録がありません。</p>';
- let head=type==='s'
- ?'<tr><th>日時</th><th>職種・職業</th><th>販売物</th><th>Lv</th><th>価格</th><th>販売数</th><th>売上</th><th>増加XP</th><th>1GあたりXP</th><th></th></tr>'
- :'<tr><th>日時</th><th>職種・職業</th><th>作業名</th><th>街名</th><th>座標</th><th>Lv</th><th>回数</th><th>増加XP</th><th>1回あたりXP</th><th></th></tr>';
- return '<div class="tablewrap"><table>'+head+
- arr.map(x=>{
-  const i=records.indexOf(x),per=x.gain/x.count;
-  if(type==='s'){
-   const revenue=(x.price||0)*x.count,perG=revenue?x.gain/revenue:0;
-   return '<tr><td>'+x.date+'</td><td>'+esc(x.job)+'</td><td>'+esc(x.name)+'</td><td>'+x.lv+'</td><td>'+f(x.price||0)+' G</td><td>'+x.count.toLocaleString()+'個</td><td>'+f(revenue)+' G</td><td>+'+f(x.gain)+'%</td><td>+'+f(perG)+'%</td><td><button class="del" onclick="del('+i+')">削除</button></td></tr>';
-  }
-  return '<tr><td>'+x.date+'</td><td>'+esc(x.job)+'</td><td>'+esc(x.name)+'</td><td>'+esc(x.city||'')+'</td><td>'+((x.x!==undefined&&x.y!==undefined)?x.x+', '+x.y:'')+'</td><td>'+x.lv+'</td><td>'+x.count.toLocaleString()+'回</td><td>+'+f(x.gain)+'%</td><td>+'+f(per)+'%</td><td><button class="del" onclick="del('+i+')">削除</button></td></tr>';
- }).join('')+'</table></div>';
-}
-function outTable(arr){
- if(!arr.length)return '<p class="note">まだ記録がありません。</p>';
- return '<div class="tablewrap"><table><tr><th>日時</th><th>職種・職業</th><th>成果物</th><th>街名</th><th>座標</th><th>成果量</th><th>作業回数</th><th>1回平均</th><th>50回期待値</th><th></th></tr>'+
- arr.map(x=>{const i=records.indexOf(x),a=x.qty/x.count;return '<tr><td>'+x.date+'</td><td>'+esc(x.job)+'</td><td>'+esc(x.name)+'</td><td>'+esc(x.city||'')+'</td><td>'+((x.x!==undefined&&x.y!==undefined)?x.x+', '+x.y:'')+'</td><td>'+f(x.qty)+x.unit+'</td><td>'+x.count+'回</td><td>'+f(a)+x.unit+'</td><td>'+f(a*50)+x.unit+'</td><td><button class="del" onclick="del('+i+')">削除</button></td></tr>'}).join('')+'</table></div>';
-}
-function summaryXP(arr,unit){
- if(!arr.length)return '<span class="note">記録なし</span>';
- const c=arr.reduce((a,x)=>a+x.count,0),g=arr.reduce((a,x)=>a+x.gain,0);
- if(unit==='個'){
-  const rev=arr.reduce((a,x)=>a+(x.price||0)*x.count,0);
-  const perG=rev?g/rev:0;
-  return '合計：<b>'+c.toLocaleString()+'個</b> ／ 売上：<b>'+f(rev)+' G</b> ／ 経験値：<b>+'+f(g)+'%</b><br>'+
-   '販売平均：<b>+'+f(g/c)+'%</b> / 1個 ／ 売上平均：<b>+'+f(perG)+'%</b> / 1G';
- }
- return '合計：<b>'+c.toLocaleString()+unit+'</b> ／ 経験値：<b>+'+f(g)+'%</b><br>合計からの平均：<b>+'+f(g/c)+'%</b> / 1'+unit;
-}
-function summaryOut(arr){
- if(!arr.length)return '<span class="note">記録なし</span>';
- const groups={};
- arr.forEach(x=>{const k=(x.job||'職種未入力')+'｜'+(x.name||'成果物未入力');if(!groups[k])groups[k]={job:x.job||'職種未入力',name:x.name||'成果物未入力',qty:0,count:0,unit:x.unit};groups[k].qty+=x.qty;groups[k].count+=x.count});
- return Object.values(groups).map(x=>x.job+' / '+x.name+'：合計 '+f(x.qty)+x.unit+' ／ 合計 '+x.count+'回 ／ 平均 <b>'+f(x.qty/x.count)+x.unit+'/回</b> ／ 50回期待値 <b>'+f(x.qty/x.count*50)+x.unit+'</b>').join('<br>');
-}
-function esc(x){return String(x||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function del(i){records.splice(i,1);save()}
-function clearAll(){if(confirm('すべての記録を削除しますか？')){records=[];save()}}
+function saveRecords(){localStorage.setItem(KEY,JSON.stringify(records));render()}
 function render(){
  const s=records.filter(x=>x.type==='s'),w=records.filter(x=>x.type==='w'),o=records.filter(x=>x.type==='o');
  document.getElementById('salesLog').innerHTML=table(s,'s');
  document.getElementById('workLog').innerHTML=table(w,'w');
  document.getElementById('outLog').innerHTML=outTable(o);
- document.getElementById('salesAvg').innerHTML=summaryXP(s,'個');
- document.getElementById('workAvg').innerHTML=summaryXP(w,'回');
- document.getElementById('outAvg').innerHTML=summaryOut(o);
 }
+function table(arr,type){
+ if(!arr.length)return '<h3>'+ (type==='s'?'販売記録':'作業記録') +'</h3><p class="note">まだ記録がありません。</p>';
+ let h=type==='s'?'<tr><th>日時</th><th>職種</th><th>販売物</th><th>街</th><th>Lv</th><th>価格</th><th>販売数</th><th>売上</th><th>XP</th><th></th></tr>':'<tr><th>日時</th><th>職種</th><th>作業名</th><th>街</th><th>座標</th><th>Lv</th><th>回数</th><th>XP</th><th>1回XP</th><th></th></tr>';
+ return '<h3>'+ (type==='s'?'販売記録':'作業記録') +'</h3><div class="tablewrap"><table>'+h+arr.map(x=>{
+ const i=records.indexOf(x);
+ if(type==='s'){const rev=(x.price||0)*x.count;return '<tr><td>'+esc(x.date)+'</td><td>'+esc(x.job)+'</td><td>'+esc(x.name)+'</td><td>'+esc(x.city||'')+'</td><td>'+x.lv+'</td><td>'+f(x.price||0)+' G</td><td>'+f(x.count)+'</td><td>'+f(rev)+' G</td><td>+'+f(x.gain)+'%</td><td><button class="del" onclick="delRecord('+i+')">削除</button></td></tr>'}
+ return '<tr><td>'+esc(x.date)+'</td><td>'+esc(x.job)+'</td><td>'+esc(x.name)+'</td><td>'+esc(x.city||'')+'</td><td>'+esc((x.x??'')+(x.x!==undefined&&x.y!==undefined?', ':'')+(x.y??''))+'</td><td>'+x.lv+'</td><td>'+f(x.count)+'回</td><td>+'+f(x.gain)+'%</td><td>+'+f(x.gain/x.count)+'%</td><td><button class="del" onclick="delRecord('+i+')">削除</button></td></tr>'
+ }).join('')+'</table></div>';
+}
+function outTable(arr){
+ if(!arr.length)return '<h3>成果量記録</h3><p class="note">まだ記録がありません。</p>';
+ return '<h3>成果量記録</h3><div class="tablewrap"><table><tr><th>日時</th><th>職種</th><th>成果物</th><th>街</th><th>座標</th><th>成果量</th><th>回数</th><th>平均</th><th>50回期待値</th><th></th></tr>'+arr.map(x=>{const i=records.indexOf(x),a=x.qty/x.count;return '<tr><td>'+esc(x.date)+'</td><td>'+esc(x.job)+'</td><td>'+esc(x.name)+'</td><td>'+esc(x.city||'')+'</td><td>'+esc((x.x??'')+(x.x!==undefined&&x.y!==undefined?', ':'')+(x.y??''))+'</td><td>'+f(x.qty)+esc(x.unit)+'</td><td>'+f(x.count)+'回</td><td>'+f(a)+esc(x.unit)+'</td><td>'+f(a*50)+esc(x.unit)+'</td><td><button class="del" onclick="delRecord('+i+')">削除</button></td></tr>'}).join('')+'</table></div>';
+}
+function delRecord(i){records.splice(i,1);saveRecords()}
+function clearRecords(){if(confirm('経験値・販売・作業・成果量の記録をすべて削除しますか？')){records=[];saveRecords();}}
+
+function addMemo(){
+ const title=val('mtitle').trim(),text=val('mtext').trim();
+ if(!title&&!text){alert('タイトルか内容を入力してください。');return}
+ memos.push({id:Date.now(),date:new Date().toLocaleString('ja-JP'),title,cat:val('mcat'),city:val('mcity').trim(),tags:val('mtags').trim(),want:val('mwant').trim(),offer:val('moffer').trim(),deadline:val('mdeadline'),text});
+ localStorage.setItem(MEMOKEY,JSON.stringify(memos));
+ ['mtitle','mcity','mtags','mwant','moffer','mdeadline','mtext'].forEach(id=>document.getElementById(id).value='');
+ renderMemos();
+}
+function memoExpired(m){return m.deadline && m.deadline < new Date().toISOString().slice(0,10)}
+function renderMemos(){
+ const q=val('msearch').trim().toLowerCase(),cat=val('mfilter'),status=val('mstatus'),sort=val('msort');
+ let arr=memos.filter(m=>{
+  const hay=[m.title,m.text,m.want,m.offer,m.tags,m.city,m.cat].join(' ').toLowerCase();
+  if(q&&!hay.includes(q))return false;
+  if(cat&&m.cat!==cat)return false;
+  if(status==='active'&&memoExpired(m))return false;
+  if(status==='expired'&&!memoExpired(m))return false;
+  return true;
+ });
+ arr.sort((a,b)=>sort==='old'?a.id-b.id:sort==='deadline'?(a.deadline||'9999').localeCompare(b.deadline||'9999'):b.id-a.id);
+ document.getElementById('memoList').innerHTML=arr.length?arr.map(m=>{
+  const exp=memoExpired(m);
+  return '<div class="memo '+(exp?'expired':'')+'"><div class="memohead"><div><div class="memoTitle">'+esc(m.title||'無題')+'</div><span class="badge">'+esc(m.cat)+'</span>'+(m.city?'<span class="badge">'+esc(m.city)+'</span>':'')+(m.deadline?'<span class="badge deadline">'+(exp?'期限切れ：':'期限：')+esc(m.deadline)+'</span>':'')+'</div><div class="actions"><button class="edit" onclick="copyMemo('+m.id+')">コピー</button><button class="del" onclick="delMemo('+m.id+')">削除</button></div></div>'+
+  (m.want?'<div><span class="badge want">求</span>'+esc(m.want)+'</div>':'')+
+  (m.offer?'<div><span class="badge offer">出</span>'+esc(m.offer)+'</div>':'')+
+  '<div class="memoText">'+esc(m.text)+'</div>'+
+  (m.tags?'<div>'+m.tags.split(',').map(t=>'<span class="badge">#'+esc(t.trim())+'</span>').join('')+'</div>':'')+
+  '<div class="note">保存：'+esc(m.date)+'</div></div>'
+ }).join(''):'<p class="note">該当する備忘録はありません。</p>';
+}
+function delMemo(id){if(confirm('この備忘録を削除しますか？')){memos=memos.filter(m=>m.id!==id);localStorage.setItem(MEMOKEY,JSON.stringify(memos));renderMemos()}}
+function copyMemo(id){
+ const m=memos.find(x=>x.id===id);if(!m)return;
+ const text=(m.want?'求）'+m.want+'\n':'')+(m.offer?'出）'+m.offer+'\n':'')+(m.deadline?'期限）'+m.deadline+'\n':'')+m.text;
+ navigator.clipboard?.writeText(text).then(()=>alert('コピーしました。')).catch(()=>prompt('コピー用テキスト',text));
+}
+function clearMemos(){if(confirm('備忘録をすべて削除しますか？')){memos=[];localStorage.setItem(MEMOKEY,'[]');renderMemos()}}
 render();
 </script>
 </body>
