@@ -103,7 +103,7 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 <label>作業回数</label><input id="ocount" type="number" min="1" value="50">
 <label>単位</label><input id="ounit" placeholder="例：個、kg、本">
 <button onclick="calcOut()">成果量を計算</button>
-<div id="or" class="result"></div>
+<div id="or" class="result"></div><button class="sub" onclick="copyOutResult()">📋 この形式でコピー</button>
 <button onclick="addOut()">成果量を保存</button><button class="sub" onclick="pickRecord('o')">保存済みの成果量記録から入力</button>
 </div>
 </div>
@@ -212,10 +212,28 @@ function addWork(){
  records.push({type:'w',date:new Date().toLocaleString('ja-JP'),job:val('wjob').trim(),name:val('wname').trim(),city:val('wcity').trim(),x:val('wx'),y:val('wy'),lv:num('wlv'),count,gain});
  saveRecords();show('log');
 }
+let outCopyText='';
+
 function calcOut(){
  const q=num('oqty'),c=num('ocount'),u=val('ounit')||'個';
- if(!q||!c){document.getElementById('or').innerHTML='成果量と作業回数を入力してください。';return}
- document.getElementById('or').innerHTML='<div>1回あたり：<b>'+f(q/c)+u+'</b></div><div class="big">50回期待値：'+f(q/c*50)+u+'</div>';
+ if(!q||!c){
+  outCopyText='';
+  document.getElementById('or').innerHTML='成果量と作業回数を入力してください。';
+  return
+ }
+ const avg=f(q/c),expected=f(q/c*50);
+ outCopyText=(val('oitem').trim()?val('oitem').trim()+' ':'')+f(q)+' '+u+' ÷ '+f(c)+'回 = '+avg+u+'/回\n50回で'+expected+u;
+ document.getElementById('or').innerHTML='<div>1回あたり：<b>'+avg+u+'</b></div><div class="big">50回期待値：'+expected+u+'</div>';
+}
+
+function copyOutResult(){
+ if(!outCopyText){
+  calcOut();
+  if(!outCopyText)return;
+ }
+ navigator.clipboard?.writeText(outCopyText)
+  .then(()=>alert('コピーしました。'))
+  .catch(()=>prompt('コピー用テキスト',outCopyText));
 }
 function addOut(){
  const q=num('oqty'),c=num('ocount');
