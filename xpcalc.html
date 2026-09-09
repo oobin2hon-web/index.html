@@ -38,6 +38,8 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 .search{margin-bottom:8px}
 .smallgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 @media(max-width:520px){.tabs{grid-template-columns:repeat(2,1fr)}.smallgrid{grid-template-columns:1fr}}
+
+.book{border:1px solid #ddd;border-radius:14px;padding:14px;margin:10px 0;background:#fafafa}.bookTitle{font-size:18px;font-weight:800;margin-bottom:7px}.bookGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.bookImg{width:100%;max-height:240px;object-fit:contain;border-radius:10px;background:#eee;margin:8px 0}.bookRow{margin:5px 0;white-space:pre-wrap}.bookLabel{font-weight:700}.bookActions{display:flex;gap:6px;margin-top:10px}.bookActions button{flex:1}.badge.bookcat{background:#eee}
 </style>
 </head>
 <body>
@@ -49,6 +51,7 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 <button id="tabout" onclick="show('out')">成果量</button>
 <button id="tablog" onclick="show('log')">記録</button>
 <button id="tabmemo" onclick="show('memo')">備忘録</button>
+<button id="tabbook" onclick="show('book')">図鑑</button>
 </div>
 
 <div id="xp" class="section active">
@@ -270,7 +273,33 @@ function copyMemo(id){
  navigator.clipboard?.writeText(text).then(()=>alert('コピーしました。')).catch(()=>prompt('コピー用テキスト',text));
 }
 function clearMemos(){if(confirm('備忘録をすべて削除しますか？')){memos=[];localStorage.setItem(MEMOKEY,'[]');renderMemos()}}
+
+const BOOKKEY='xpcalc_book_v1';
+let books=JSON.parse(localStorage.getItem(BOOKKEY)||'[]');
+let bookImageData='';
+function previewBookImage(){
+ const file=document.getElementById('bimage').files[0]; if(!file)return;
+ const reader=new FileReader(); reader.onload=e=>{const img=new Image();img.onload=()=>{const max=900,scale=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));c.getContext('2d').drawImage(img,0,0,c.width,c.height);bookImageData=c.toDataURL('image/jpeg',0.72);document.getElementById('bpreview').innerHTML='<img class="bookImg" src="'+bookImageData+'">'};img.src=e.target.result};reader.readAsDataURL(file);
+}
+function addBook(){
+ const name=val('bname').trim(); if(!name){alert('名前・項目名を入力してください。');return}
+ books.push({id:Date.now(),date:new Date().toLocaleString('ja-JP'),name,cat:val('bcat'),job:val('bjob').trim(),lv:num('blv'),city:val('bcity').trim(),cond:val('bcond').trim(),mat:val('bmat').trim(),out:val('bout').trim(),x:val('bx'),y:val('by'),extra:val('bextra').trim(),image:bookImageData,note:val('bnote').trim()});
+ localStorage.setItem(BOOKKEY,JSON.stringify(books)); clearBookForm(); renderBooks();
+}
+function clearBookForm(){['bname','bjob','blv','bcity','bcond','bmat','bout','bx','by','bextra','bnote','bimage'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});bookImageData='';document.getElementById('bpreview').innerHTML=''}
+function renderBooks(){
+ const q=val('bsearch').trim().toLowerCase(),cat=val('bfilter');
+ let arr=books.filter(b=>{const hay=[b.name,b.cat,b.job,b.city,b.cond,b.mat,b.out,b.extra,b.note].join(' ').toLowerCase();return (!q||hay.includes(q))&&(!cat||b.cat===cat)}).sort((a,b)=>b.id-a.id);
+ document.getElementById('bookList').innerHTML=arr.length?arr.map(b=>{
+  const i=books.indexOf(b),coord=(b.x!==''||b.y!=='')?(b.x||'')+', '+(b.y||''):'';
+  return '<div class="book">'+(b.image?'<img class="bookImg" src="'+b.image+'">':'')+'<div class="bookTitle">'+esc(b.name)+'</div><span class="badge bookcat">'+esc(b.cat)+'</span>'+(b.job?'<span class="badge">'+esc(b.job)+'</span>':'')+(b.lv?'<span class="badge">Lv '+esc(b.lv)+'</span>':'')+(b.city?'<span class="badge">'+esc(b.city)+'</span>':'')+(coord?'<div class="bookRow"><span class="bookLabel">座標：</span>'+esc(coord)+'</div>':'')+(b.cond?'<div class="bookRow"><span class="bookLabel">条件・効果：</span>'+esc(b.cond)+'</div>':'')+(b.mat?'<div class="bookRow"><span class="bookLabel">必要素材・消費：</span>'+esc(b.mat)+'</div>':'')+(b.out?'<div class="bookRow"><span class="bookLabel">成果・入手：</span>'+esc(b.out)+'</div>':'')+(b.extra?'<div class="bookRow"><span class="bookLabel">その他：</span>'+esc(b.extra)+'</div>':'')+(b.note?'<div class="bookRow"><span class="bookLabel">メモ：</span>'+esc(b.note)+'</div>':'')+'<div class="note">登録：'+esc(b.date)+'</div><div class="bookActions"><button class="edit" onclick="copyBook('+i+')">コピーして新規登録</button><button class="del" onclick="delBook('+i+')">削除</button></div></div>';
+ }).join(''):'<p class="note">まだ図鑑登録がありません。</p>';
+}
+function copyBook(i){const b=books[i];if(!b)return;['bname','bjob','blv','bcity','bcond','bmat','bout','bx','by','bextra','bnote'].forEach(id=>setv(id,''));setv('bname',b.name);setv('bcat',b.cat);setv('bjob',b.job);setv('blv',b.lv);setv('bcity',b.city);setv('bcond',b.cond);setv('bmat',b.mat);setv('bout',b.out);setv('bx',b.x);setv('by',b.y);setv('bextra',b.extra);setv('bnote',b.note);bookImageData=b.image||'';document.getElementById('bpreview').innerHTML=bookImageData?'<img class="bookImg" src="'+bookImageData+'">':'';alert('図鑑登録フォームにコピーしました。必要なところだけ変更して登録できます。')}
+function delBook(i){if(confirm('この図鑑項目を削除しますか？')){books.splice(i,1);localStorage.setItem(BOOKKEY,JSON.stringify(books));renderBooks()}}
+function clearBooks(){if(confirm('図鑑をすべて削除しますか？')){books=[];localStorage.setItem(BOOKKEY,'[]');renderBooks()}}
 render();
+renderBooks();
 </script>
 </body>
 </html>
