@@ -143,6 +143,37 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 </div>
 </div>
 
+<div id="book" class="section">
+<div class="card">
+<h2>📖 図鑑登録</h2>
+<div class="note">ゲーム内の作業・アイテム・NPC・場所・イベントなどを登録して、あとから検索できます。</div>
+<label>名前・項目名</label><input id="bname" placeholder="例：スノーマンを呼び出す">
+<div class="smallgrid">
+<div><label>カテゴリ</label><select id="bcat"><option>作業</option><option>アイテム</option><option>NPC</option><option>場所</option><option>イベント</option><option>その他</option></select></div>
+<div><label>職種・職業</label><input id="bjob" placeholder="任意"></div>
+<div><label>必要Lv</label><input id="blv" type="number" min="0" step="1"></div>
+<div><label>街名</label><input id="bcity" placeholder="任意"></div>
+<div><label>座標X</label><input id="bx" placeholder="任意"></div>
+<div><label>座標Y</label><input id="by" placeholder="任意"></div>
+</div>
+<label>条件・効果</label><textarea id="bcond" placeholder="条件や効果"></textarea>
+<label>必要素材・消費アイテム</label><textarea id="bmat" placeholder="必要素材・消費するアイテム"></textarea>
+<label>成果・入手物</label><textarea id="bout" placeholder="成果物・入手できるもの"></textarea>
+<label>その他</label><textarea id="bextra" placeholder="時間・価格・回数など"></textarea>
+<label>画像</label><input id="bimage" type="file" accept="image/*" onchange="previewBookImage()">
+<div id="bpreview"></div>
+<label>メモ</label><textarea id="bnote" placeholder="自由メモ"></textarea>
+<button onclick="addBook()">図鑑に登録</button> <button class="sub" onclick="clearBookForm()">入力をクリア</button>
+</div>
+<div class="card">
+<h2>登録済み図鑑</h2>
+<input class="search" id="bsearch" placeholder="名前・条件・素材・成果物などを検索" oninput="renderBooks()">
+<select id="bfilter" onchange="renderBooks()"><option value="">すべてのカテゴリ</option><option>作業</option><option>アイテム</option><option>NPC</option><option>場所</option><option>イベント</option><option>その他</option></select>
+<div id="bookList"></div>
+</div>
+<div class="card"><button class="del" onclick="clearBooks()">図鑑だけ全削除</button></div>
+</div>
+
 <script>
 const KEY='xpcalc_all_v4';
 let records=JSON.parse(localStorage.getItem(KEY)||'[]');
@@ -161,6 +192,7 @@ function show(id){
  document.getElementById('tab'+id).classList.add('active');
  if(id==='log')render();
  if(id==='memo')renderMemos();
+ if(id==='book')renderBooks();
 }
 function calcXP(){
  const lv=num('level'),cur=num('current'),gain=num('gain'),count=num('count');
