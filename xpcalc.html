@@ -43,6 +43,224 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 
 .optional{font-size:.8em;opacity:.7;margin-left:6px;font-weight:normal}
 .warning{border-left:4px solid #d98c00;padding:8px 10px}
+
+/* ===== 機能の色分け・番号・連動表示 ===== */
+.feature-map{background:#fff;border-radius:16px;padding:14px;margin:10px 0;box-shadow:0 2px 10px #0001}
+.feature-map-title{font-size:16px;font-weight:800;margin-bottom:8px}
+.feature-legend{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.feature-chip{border-radius:10px;padding:8px 9px;font-size:12px;font-weight:700;border-left:5px solid #777;background:#f7f7f7}
+.feature-chip b{margin-right:4px}
+.feature-card{position:relative;border-top:4px solid #777}
+.feature-head{display:flex;align-items:center;gap:7px;margin:0 0 8px}
+.feature-num{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:9px;color:#fff;font-size:13px;font-weight:800}
+.feature-title{font-size:18px;font-weight:800}
+.feature-links{font-size:12px;line-height:1.45;margin:0 0 10px;padding:7px 9px;border-radius:9px;background:#f7f7f7;color:#555}
+.feature-links b{color:#222}
+.feature-xp{border-top-color:#4b6cb7}.feature-xp .feature-num{background:#4b6cb7}.feature-chip.xp{border-left-color:#4b6cb7}
+.feature-sale{border-top-color:#d47b00}.feature-sale .feature-num{background:#d47b00}.feature-chip.sale{border-left-color:#d47b00}
+.feature-import{border-top-color:#8e5ab7}.feature-import .feature-num{background:#8e5ab7}.feature-chip.import{border-left-color:#8e5ab7}
+.feature-work{border-top-color:#3d8b5b}.feature-work .feature-num{background:#3d8b5b}.feature-chip.work{border-left-color:#3d8b5b}
+.feature-output{border-top-color:#138a9e}.feature-output .feature-num{background:#138a9e}.feature-chip.output{border-left-color:#138a9e}
+.feature-record{border-top-color:#65707a}.feature-record .feature-num{background:#65707a}.feature-chip.record{border-left-color:#65707a}
+.feature-memo{border-top-color:#b04a79}.feature-memo .feature-num{background:#b04a79}.feature-chip.memo{border-left-color:#b04a79}
+.feature-book{border-top-color:#7560a8}.feature-book .feature-num{background:#7560a8}.feature-chip.book{border-left-color:#7560a8}
+.feature-profit{border-top-color:#b44b3c}.feature-profit .feature-num{background:#b44b3c}.feature-chip.profit{border-left-color:#b44b3c}
+.feature-recipe{border-top-color:#8a6b25}.feature-recipe .feature-num{background:#8a6b25}.feature-chip.recipe{border-left-color:#8a6b25}
+@media(max-width:520px){.feature-legend{grid-template-columns:1fr}.feature-head{align-items:flex-start}}
+
+/* ===== 機能ごとの視認性をさらに強化 ===== */
+.feature-card{border-top-width:5px;background:linear-gradient(180deg,rgba(0,0,0,.025),#fff 34px);overflow:hidden}
+.feature-card .feature-head{padding:2px 2px 0}
+.feature-card .feature-title{letter-spacing:.01em}
+.feature-card .feature-links{border-left:4px solid currentColor;background:rgba(0,0,0,.035)}
+.feature-card input,.feature-card select,.feature-card textarea{background:rgba(0,0,0,.018)}
+.feature-card button:not(.sub):not(.del):not(.edit){background:var(--feature-color,#333)}
+.feature-card button.sub{border:1px solid currentColor;background:rgba(0,0,0,.025)}
+.feature-xp{--feature-color:#4b6cb7;background:linear-gradient(180deg,#eef3ff 0,#fff 42px)}
+.feature-sale{--feature-color:#d47b00;background:linear-gradient(180deg,#fff5e6 0,#fff 42px)}
+.feature-import{--feature-color:#8e5ab7;background:linear-gradient(180deg,#f6effb 0,#fff 42px)}
+.feature-work{--feature-color:#3d8b5b;background:linear-gradient(180deg,#edf8f1 0,#fff 42px)}
+.feature-output{--feature-color:#138a9e;background:linear-gradient(180deg,#eaf8fa 0,#fff 42px)}
+.feature-record{--feature-color:#65707a;background:linear-gradient(180deg,#f0f2f3 0,#fff 42px)}
+.feature-memo{--feature-color:#b04a79;background:linear-gradient(180deg,#fbeef4 0,#fff 42px)}
+.feature-book{--feature-color:#7560a8;background:linear-gradient(180deg,#f2effa 0,#fff 42px)}
+.feature-profit{--feature-color:#b44b3c;background:linear-gradient(180deg,#fff0ed 0,#fff 42px)}
+.feature-recipe{--feature-color:#8a6b25;background:linear-gradient(180deg,#faf5e7 0,#fff 42px)}
+.feature-xp .feature-links{color:#38558f}.feature-sale .feature-links{color:#9a5b00}.feature-import .feature-links{color:#71458f}.feature-work .feature-links{color:#2e6c47}.feature-output .feature-links{color:#0b6878}.feature-record .feature-links{color:#4e5960}.feature-memo .feature-links{color:#8d3a60}.feature-book .feature-links{color:#5c4a87}.feature-profit .feature-links{color:#8d382d}.feature-recipe .feature-links{color:#6f571e}
+.feature-card .feature-num{box-shadow:0 1px 3px #0002}
+.feature-chip.xp{background:#eef3ff}.feature-chip.sale{background:#fff5e6}.feature-chip.import{background:#f6effb}.feature-chip.work{background:#edf8f1}.feature-chip.output{background:#eaf8fa}.feature-chip.record{background:#f0f2f3}.feature-chip.memo{background:#fbeef4}.feature-chip.book{background:#f2effa}.feature-chip.profit{background:#fff0ed}.feature-chip.recipe{background:#faf5e7}
+/* ===== 入力欄・小さい文字の視認性を強化 ===== */
+label{font-size:14px;margin:7px 0 4px}
+input,select,textarea{font-size:16px;padding:9px 10px;min-height:40px}
+textarea{min-height:115px}
+.note{font-size:13px;line-height:1.5}
+.feature-links{font-size:12px;line-height:1.4}
+.feature-chip{font-size:12px}
+table{font-size:14px}
+th,td{padding:7px}
+.badge{font-size:13px}
+.optional{font-size:.85em}
+.memoText{font-size:14px;line-height:1.55}
+.search{font-size:16px}
+.feature-card input,.feature-card select,.feature-card textarea{background:rgba(255,255,255,.72);border-width:1px}
+
+/* ===== コンパクト表示 ===== */
+body{font-size:14px}
+.wrap{max-width:720px;padding:7px}
+h1{font-size:19px;margin:4px 0 7px}
+.card{border-radius:11px;padding:10px;margin:6px 0;box-shadow:0 1px 6px #0001}
+.tabs{gap:4px;margin-bottom:6px;padding:3px 0}
+.tabs button{padding:7px 3px;font-size:13px}
+label{margin:6px 0 3px;font-size:13px}
+input,select,textarea{padding:8px;border-radius:7px;font-size:15px}
+textarea{min-height:100px}
+.grid2{gap:6px}
+button{border-radius:8px;padding:8px;margin-top:7px;font-size:14px}
+button.del,button.edit{padding:5px;font-size:12px}
+.result{line-height:1.55;margin-top:7px}.big{font-size:21px;margin:6px 0 9px}
+.note{font-size:12px;line-height:1.35}
+.feature-map{border-radius:11px;padding:9px;margin:6px 0;box-shadow:0 1px 6px #0001}
+.feature-map-title{font-size:14px;margin-bottom:5px}
+.feature-legend{gap:4px}
+.feature-chip{padding:5px 6px;font-size:11px;border-radius:7px}
+.feature-links{font-size:11px;line-height:1.3;margin:0 0 6px;padding:5px 7px;border-radius:7px}
+.feature-head{gap:5px;margin-bottom:5px}
+.feature-num{min-width:24px;height:24px;border-radius:7px;font-size:12px}
+.feature-title{font-size:16px}
+.smallgrid{gap:5px}
+.book{border-radius:10px;padding:9px;margin:6px 0}.bookTitle{font-size:16px}.bookGrid{gap:5px;margin:5px 0}.bookImg{max-height:180px;margin:5px 0}.bookRow{margin:3px 0}.bookActions{gap:4px;margin-top:6px}
+.memo{border-radius:9px;padding:8px;margin:6px 0}.memoTitle{font-size:15px}.memoText{line-height:1.4;margin:6px 0}
+.badge{padding:2px 6px;font-size:11px;margin:2px}
+table{font-size:12px}.tablewrap{margin:0 -2px}th,td{padding:5px}
+summary{font-size:13px}
+.optional{font-size:.75em}
+@media(max-width:520px){.wrap{padding:5px}.tabs button{font-size:12px;padding:6px 2px}.card{padding:8px}.feature-legend{grid-template-columns:1fr 1fr}.feature-chip{font-size:10px}.feature-links{font-size:10px}}
+@media(max-width:360px){.feature-legend{grid-template-columns:1fr}.grid2{grid-template-columns:1fr 1fr;gap:5px}}
+</style>
+
+<style id="compact-readable-v2">
+/* 入力欄は大きすぎない幅に、文字は少し大きめ */
+input, select { font-size: 15px !important; }
+textarea { font-size: 15px !important; }
+label { font-size: 14px !important; }
+input[type="text"], input[type="number"], input[type="url"], input[type="date"], select {
+  max-width: 220px;
+  width: min(100%, 220px);
+  box-sizing: border-box;
+}
+/* 職種・職業・業種など短い入力はさらにコンパクト */
+input[id*="job"], input[id*="Job"], input[id*="industry"], select[id*="job"], select[id*="Job"], select[id*="industry"] {
+  max-width: 150px;
+  width: min(100%, 150px);
+}
+/* 数値入力 */
+input[type="number"] { max-width: 150px; width: min(100%, 150px); }
+/* 機能ごとの色分けを入力欄にも反映 */
+.feature-xp input, .feature-xp select, .feature-xp textarea { border-color:#6aa9e8 !important; }
+.feature-sale input, .feature-sale select, .feature-sale textarea { border-color:#e7a44a !important; }
+.feature-import input, .feature-import select, .feature-import textarea { border-color:#a879d8 !important; }
+.feature-work input, .feature-work select, .feature-work textarea { border-color:#69b879 !important; }
+.feature-output input, .feature-output select, .feature-output textarea { border-color:#5ebdc7 !important; }
+.feature-record input, .feature-record select, .feature-record textarea { border-color:#9aa1a8 !important; }
+.feature-memo input, .feature-memo select, .feature-memo textarea { border-color:#df83a8 !important; }
+.feature-book input, .feature-book select, .feature-book textarea { border-color:#9b79cf !important; }
+.feature-profit input, .feature-profit select, .feature-profit textarea { border-color:#d97878 !important; }
+.feature-recipe input, .feature-recipe select, .feature-recipe textarea { border-color:#b88b61 !important; }
+/* 説明・結果など小さすぎる文字を底上げ */
+.note, .small, .result, .big, .feature-map, .relation-box, .chip { font-size: 13.5px !important; }
+button { font-size: 14px !important; }
+@media (max-width: 600px){
+  input[type="text"], input[type="number"], input[type="url"], input[type="date"], select { max-width: 200px; width: min(100%, 200px); }
+  input[id*="job"], input[id*="Job"], input[id*="industry"], select[id*="job"], select[id*="Job"], select[id*="industry"] { max-width: 135px; width: min(100%, 135px); }
+  input[type="number"] { max-width: 140px; width: min(100%, 140px); }
+}
+</style>
+
+<style id="compact-input-style">
+/* 入力画面：文字をワンランク大きく、項目を横並びでコンパクトに */
+.card label{font-size:14px!important;font-weight:600!important;}
+.card input,.card select,.card textarea{font-size:16px!important;line-height:1.35!important;min-height:38px!important;box-sizing:border-box;}
+.card textarea{min-height:72px!important;}
+.feature-xp input,.feature-xp select,.feature-xp textarea{background:#eef5ff!important;border-color:#9fc0ee!important;}
+.feature-sale input,.feature-sale select,.feature-sale textarea{background:#fff4e8!important;border-color:#e7b77b!important;}
+.feature-import input,.feature-import select,.feature-import textarea{background:#f5efff!important;border-color:#bda5e8!important;}
+.feature-work input,.feature-work select,.feature-work textarea{background:#edf9f0!important;border-color:#9bc9a5!important;}
+.feature-output input,.feature-output select,.feature-output textarea{background:#eafaff!important;border-color:#8fc8d8!important;}
+.feature-record input,.feature-record select,.feature-record textarea{background:#f3f4f6!important;border-color:#bfc3c9!important;}
+.feature-memo input,.feature-memo select,.feature-memo textarea{background:#fff0f5!important;border-color:#e2a8bb!important;}
+.feature-book input,.feature-book select,.feature-book textarea{background:#f5efff!important;border-color:#bda5e8!important;}
+.feature-profit input,.feature-profit select,.feature-profit textarea{background:#fff0ef!important;border-color:#dfa5a0!important;}
+.feature-recipe input,.feature-recipe select,.feature-recipe textarea{background:#f8f1e8!important;border-color:#d0b28b!important;}
+.compact-row{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:end;}
+.compact-row>.field{flex:1 1 120px;min-width:0;}
+.compact-row>.field.job-field{flex:0 1 105px;}
+.compact-row>.field.small-field{flex:0 1 90px;}
+.compact-row>.field.medium-field{flex:0 1 135px;}
+.compact-row>.field.wide-field{flex:2 1 180px;}
+@media(max-width:600px){
+ .compact-row{gap:5px 6px;}
+ .compact-row>.field{flex-basis:105px;}
+ .compact-row>.field.job-field{flex-basis:92px;}
+ .compact-row>.field.small-field{flex-basis:78px;}
+ .compact-row>.field.medium-field{flex-basis:115px;}
+ .compact-row>.field.wide-field{flex-basis:150px;}
+}
+</style>
+
+<style id="compact-form-layout">
+.card .row,.card .form-row,.card .fields{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:end;}
+.card .row>*,.card .form-row>*,.card .fields>*{min-width:0;}
+.card .row input,.card .row select,.card .form-row input,.card .form-row select,.card .fields input,.card .fields select{max-width:100%;}
+/* 職種・職業などの選択欄は短く */
+select[id*="job"],select[id*="Job"],input[id*="job"],input[id*="Job"],select[id*="industry"],input[id*="industry"]{width:110px!important;max-width:110px!important;}
+/* 数値欄は横長にしすぎない */
+input[type="number"]{width:115px!important;max-width:115px!important;}
+input[type="text"]{max-width:220px;}
+@media(max-width:600px){
+ select[id*="job"],select[id*="Job"],input[id*="job"],input[id*="Job"],select[id*="industry"],input[id*="industry"]{width:100px!important;max-width:100px!important;}
+ input[type="number"]{width:105px!important;max-width:105px!important;}
+}
+</style>
+
+<style id="compact-3col-final">
+/* 入力欄：3項目程度を横並びにしてコンパクト化 */
+.form-grid, .input-grid, .fields, .row-fields {
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:6px !important;
+  align-items:end !important;
+}
+.form-grid > div, .input-grid > div, .fields > div, .row-fields > div { min-width:0 !important; }
+.form-grid input, .form-grid select, .input-grid input, .input-grid select, .fields input, .fields select, .row-fields input, .row-fields select {
+  width:100% !important; box-sizing:border-box !important;
+}
+@media(max-width:520px){
+  .form-grid, .input-grid, .fields, .row-fields {
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:5px !important;
+  }
+  .form-grid label, .input-grid label, .fields label, .row-fields label { font-size:14px !important; }
+  .form-grid input, .form-grid select, .input-grid input, .input-grid select, .fields input, .fields select, .row-fields input, .row-fields select {
+    font-size:15px !important; min-height:38px !important; padding:6px !important;
+  }
+}
+</style>
+
+<style id="three-input-layout-final">
+/* 3項目を横並び：職種・項目名・街名などをコンパクトに */
+.three-inputs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;align-items:end;}
+.three-inputs>div{min-width:0;}
+.three-inputs input,.three-inputs select{width:100%!important;max-width:none!important;min-width:0!important;}
+/* 既存の2項目グリッドも、入力用のものは3列化 */
+.card .grid2:has(>div){grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+.smallgrid{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
+@media(max-width:520px){
+  .three-inputs{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;}
+  .card .grid2:has(>div){grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;}
+  .smallgrid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px;}
+  .three-inputs label,.card .grid2 label,.smallgrid label{font-size:14px!important;}
+  .three-inputs input,.three-inputs select,.card .grid2 input,.card .grid2 select,.smallgrid input,.smallgrid select{font-size:16px!important;padding:7px 6px!important;min-height:38px!important;}
+}
 </style>
 </head>
 <body><button id="tabprofit" style="margin:6px" onclick="showTab('profit')">収支</button>
@@ -55,6 +273,22 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 <button id="tablog" onclick="show('log')">記録</button>
 <button id="tabmemo" onclick="show('memo')">備忘録</button>
 <button id="tabbook" onclick="show('book')">図鑑</button><button id="tabrecipe" onclick="showTab('recipe')" data-tab="recipe">レシピ取込</button>
+</div>
+<div class="feature-map">
+<div class="feature-map-title">🧭 機能マップ（番号・色で区別）</div>
+<div class="feature-legend">
+<div class="feature-chip xp"><b>①</b> 経験値計算 → 作業XP・販売XPの基礎</div>
+<div class="feature-chip sale"><b>②</b> 販売・減衰 → 販売XPだけに影響</div>
+<div class="feature-chip import"><b>③</b> 販売結果取込 → ②への入力補助のみ</div>
+<div class="feature-chip work"><b>④</b> 作業記録 → 作業データを保存</div>
+<div class="feature-chip output"><b>⑤</b> 成果量 → 平均・50回期待値</div>
+<div class="feature-chip record"><b>⑥</b> 記録 → ①〜⑤などの保存データを確認</div>
+<div class="feature-chip memo"><b>⑦</b> 備忘録 → 独立</div>
+<div class="feature-chip book"><b>⑧</b> 図鑑 → 独立</div>
+<div class="feature-chip profit"><b>⑨</b> 収支 → 原価・利益・時給</div>
+<div class="feature-chip recipe"><b>⑩</b> レシピ取込 → 図鑑への入力補助</div>
+</div>
+<p class="note" style="margin:8px 0 0">🔗 <b>連動</b>＝データを渡す機能　／　🧩 <b>入力補助</b>＝元の機能を勝手に変更しない　／　🔒 <b>独立</b>＝他機能の計算に影響しない</p>
 </div>
 
 <div id="xp" class="section active">
@@ -75,9 +309,8 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 
 <div class="card">
 <h2>販売記録を保存</h2>
-<label>職種・職業</label><input id="sjob" placeholder="例：道具屋">
-<label>販売物</label><input id="sitem" placeholder="例：ポーション">
-<div class="grid2"><div><label>街名</label><input id="scity" placeholder="例：王都"></div><div><label>Lv</label><input id="slv" type="number" min="1"></div></div>
+<div class="three-inputs"><div><label>職種・職業</label><input id="sjob" placeholder="例：道具屋"></div><div><label>販売物</label><input id="sitem" placeholder="例：ポーション"></div><div><label>街名</label><input id="scity" placeholder="例：王都"></div></div>
+<div class="three-inputs"><div><label>Lv</label><input id="slv" type="number" min="1"></div></div>
 <div class="grid2"><div><label>販売価格（G/個）</label><input id="sprice" type="number" min="0" step="any"></div><div><label>販売数</label><input id="scount" type="number" min="1" step="any"></div></div>
 <label>増加経験値（%）</label><input id="sgain" type="number" min="0" step="0.000001">
 <button onclick="addSale()">販売記録を保存</button><button class="sub" onclick="pickRecord('s')">保存済みの販売記録から入力</button>
@@ -89,6 +322,24 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 <button onclick="calcSaleDecay()">減衰を反映して計算</button>
 <div id="decayResult" class="result"></div>
 </div>
+<div class="card" id="saleImportCard">
+<h2>販売結果取り込み（入力補助）</h2>
+<div class="note">販売結果の画面をコピーして貼り付けるか、保存したWebアーカイブ（.webarchive）/HTML/TXTを選択してください。ここは<strong>入力補助専用</strong>で、販売記録などを勝手に変更しません。</div>
+<textarea id="saleImportText" rows="6" placeholder="例：
+商店
+LV 13
+(+0.17%)
+37.25%
+資金の増減 +140,000G -14,000G
+差し引き 126,000G
+販売棚
+水 1000杯
+単価 @ 140G
+総額 140,000G"></textarea>
+<div class="grid2"><button class="sub" onclick="saleImportFile.click()">Webアーカイブ等を読み込む</button><input id="saleImportFile" type="file" accept=".webarchive,.html,.htm,.txt,text/html,text/plain,application/x-webarchive" style="display:none" onchange="importSaleFile(this.files[0])"></div>
+<button onclick="parseSaleImport()">内容を取り込む</button>
+<div id="saleImportResult" class="result"></div>
+</div>
 <div class="card">
 <h2>販売ペース・完売予測</h2>
 <div class="note">一定の販売ペースが続く場合の完売時間を計算します。</div>
@@ -98,9 +349,8 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 </div>
 <div class="card">
 <h2>作業記録を保存</h2>
-<label>職種・職業</label><input id="wjob" placeholder="例：木こり">
-<label>作業名</label><input id="wname" placeholder="例：林道を探索">
-<div class="grid2"><div><label>街名</label><input id="wcity" placeholder="例：王都"></div><div><label>Lv</label><input id="wlv" type="number" min="1"></div></div>
+<div class="three-inputs"><div><label>職種・職業</label><input id="wjob" placeholder="例：木こり"></div><div><label>作業名</label><input id="wname" placeholder="例：林道を探索"></div><div><label>街名</label><input id="wcity" placeholder="例：王都"></div></div>
+<div class="three-inputs"><div><label>Lv</label><input id="wlv" type="number" min="1"></div></div>
 <div class="grid2"><div><label>座標X</label><input id="wx" type="number" step="any"></div><div><label>座標Y</label><input id="wy" type="number" step="any"></div></div>
 <div class="grid2"><div><label>作業回数</label><input id="wcount" type="number" min="1"></div><div><label>増加経験値（%）</label><input id="wgain" type="number" min="0" step="0.000001"></div></div>
 <button onclick="addWork()">作業記録を保存</button><button class="sub" onclick="pickRecord('w')">保存済みの作業記録から入力</button>
@@ -110,9 +360,7 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 <div id="out" class="section">
 <div class="card">
 <h2>成果量の記録</h2>
-<label>職種・職業</label><input id="ojob" placeholder="例：木こり">
-<label>成果物</label><input id="oitem" placeholder="例：木の枝">
-<label>街名</label><input id="ocity" placeholder="例：王都">
+<div class="three-inputs"><div><label>職種・職業</label><input id="ojob" placeholder="例：木こり"></div><div><label>成果物</label><input id="oitem" placeholder="例：木の枝"></div><div><label>街名</label><input id="ocity" placeholder="例：王都"></div></div>
 <div class="grid2"><div><label>座標X</label><input id="ox" type="number" step="any"></div><div><label>座標Y</label><input id="oy" type="number" step="any"></div></div>
 <label>成果量</label><input id="oqty" type="number" min="0" step="0.0001" placeholder="例：561">
 <label>作業回数</label><input id="ocount" type="number" min="1" value="50">
@@ -732,6 +980,67 @@ function saleXPWithDecay(amount,before){
   const after=before+amount;
   return {amount,before,after,xp:Math.max(0,saleXPFromDayTotal(after)-saleXPFromDayTotal(before))};
 }
+function extractMoney_(text){
+  const m=text.match(/[+＋]?\s*([0-9][0-9,]*(?:\.\d+)?)\s*G/gi)||[];
+  return m.map(x=>Number(x.replace(/[^0-9.]/g,''))).filter(Number.isFinite);
+}
+function parseSaleImportText_(raw){
+  const text=String(raw||'').replace(/\u00a0/g,' ').replace(/\r/g,'\n');
+  const flat=text.replace(/<[^>]*>/g,' ').replace(/&nbsp;/gi,' ');
+  const clean=flat.replace(/\s+/g,' ').trim();
+  const level=(clean.match(/\bLV\s*(\d+)/i)||[])[1]||'';
+  const xp=(clean.match(/\(([+-]?[0-9]+(?:\.[0-9]+)?)%\)/)||[])[1]||'';
+  const current=(clean.match(/(?:^|\s)(\d+(?:\.\d+)?)%\s*資金|資金[\s\S]{0,80}?(\d+(?:\.\d+)?)%/i)||[]); 
+  const currentXp=current[1]||current[2]||'';
+  const qty=(clean.match(/(?:販売棚|販売)[\s\S]{0,100}?([0-9][0-9,]*)\s*(?:杯|個|本|枚|瓶|塊|kg|Ｇ|G)/i)||[])[1]||'';
+  const unit=(clean.match(/単価\s*@?\s*([0-9][0-9,]*(?:\.\d+)?)\s*G/i)||[])[1]||'';
+  const totalMatch=clean.match(/(?:総額|売上|販売額)\s*([0-9][0-9,]*(?:\.\d+)?)\s*G/i);
+  const total=totalMatch?Number(totalMatch[1].replace(/,/g,'')):0;
+  const diff=(clean.match(/資金の増減\s*[+＋]?\s*([0-9][0-9,]*(?:\.\d+)?)\s*G/i)||[])[1]||'';
+  const net=(clean.match(/差し引き\s*([0-9][0-9,]*(?:\.\d+)?)\s*G/i)||[])[1]||'';
+  const money=extractMoney_(clean);
+  const saleAmount=total || (diff?Number(diff.replace(/,/g,'')):0) || (money[0]||0);
+  return {level,currentXp,observedXp:xp,qty:qty?Number(qty.replace(/,/g,'')):0,unit:unit?Number(unit.replace(/,/g,'')):0,total:saleAmount,tax:diff&&net?Math.max(0,Number(diff.replace(/,/g,''))-Number(net.replace(/,/g,''))):0,net:net?Number(net.replace(/,/g,'')):0,raw:text};
+}
+function renderSaleImport_(d){
+  const rows=[];
+  if(d.level)rows.push('Lv：'+d.level);
+  if(d.currentXp)rows.push('現在経験値：'+d.currentXp+'%');
+  if(d.observedXp)rows.push('実測の増加経験値：+'+d.observedXp+'%');
+  if(d.qty)rows.push('販売数：'+f(d.qty));
+  if(d.unit)rows.push('単価：'+f(d.unit)+' G');
+  if(d.total)rows.push('売上（総額）：'+f(d.total)+' G');
+  if(d.tax)rows.push('税・差額：'+f(d.tax)+' G');
+  if(d.net)rows.push('差し引き：'+f(d.net)+' G');
+  return '<h3>取り込み結果</h3>'+(rows.length?rows.map(x=>'<div>'+x+'</div>').join(''):'<div class="note warning">⚠️ 販売結果を読み取れませんでした。</div>')+(d.total?'<button onclick="applySaleImport()">販売経験値へ反映</button>':'');
+}
+let lastSaleImport=null;
+function parseSaleImport(){
+  lastSaleImport=parseSaleImportText_(document.getElementById('saleImportText').value);
+  document.getElementById('saleImportResult').innerHTML=renderSaleImport_(lastSaleImport);
+}
+function applySaleImport(){
+  if(!lastSaleImport||!lastSaleImport.total){alert('売上総額を先に取り込んでください。');return;}
+  const el=document.getElementById('decaySale');
+  if(el)el.value=lastSaleImport.total;
+  const out=document.getElementById('saleImportResult');
+  out.innerHTML=renderSaleImport_(lastSaleImport)+'<div class="note">✅ 今回回収する売上に '+f(lastSaleImport.total)+' G を入力しました。ほかの販売記録・作業・成果量などは変更していません。</div>';
+}
+function importSaleFile(file){
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(){
+    let text='';
+    try{
+      if(typeof reader.result==='string') text=reader.result;
+      else text=new TextDecoder('utf-8').decode(reader.result);
+    }catch(e){text='';}
+    document.getElementById('saleImportText').value=text;
+    parseSaleImport();
+  };
+  reader.readAsArrayBuffer(file);
+}
+
 function calcSaleDecay(){
   const amount=Number(document.getElementById('decaySale')?.value);
   const beforeRaw=(document.getElementById('decayBefore')?.value||'').trim();
@@ -1187,6 +1496,51 @@ function importRecipeBook(){
   };
   input.click();
 }
+
+/* ===== 機能番号・色・連動関係の表示（計算ロジックとは独立） ===== */
+(function(){
+  const defs=[
+    ['経験値計算','①','xp','作業XP・販売XPの基礎。減衰はここ全体にはかけません。'],
+    ['販売記録を保存','②','sale','販売データを保存。販売XPの記録に使用します。'],
+    ['販売経験値・減衰計算','②','sale','販売XP専用。毎日5:00以降の回収売上だけを使い、他機能には影響しません。'],
+    ['販売結果取り込み（入力補助）','③','import','②へ入力するための補助。取り込むだけでは既存記録を変更しません。'],
+    ['販売ペース・完売予測','②','sale','販売ペースの予測。減衰計算とは別処理です。'],
+    ['作業記録を保存','④','work','作業データを保存。減衰対象外です。'],
+    ['成果量の記録','⑤','output','成果量の平均・50回期待値。減衰対象外です。'],
+    ['保存した記録','⑥','record','①〜⑤などで保存した記録を確認。'],
+    ['📝 備忘録','⑦','memo','独立機能。経験値・販売・減衰の計算には関与しません。'],
+    ['📖 図鑑登録','⑧','book','独立機能。レシピ取込から登録できます。'],
+    ['材料・成果物 収支計算','⑨','profit','原価・利益・時給の計算。販売XP減衰とは別処理です。'],
+    ['Wikiレシピ取込・トレース','⑩','recipe','図鑑への入力補助。既存の販売・XP計算には影響しません。']
+  ];
+  document.querySelectorAll('.card').forEach(card=>{
+    const h=card.querySelector(':scope > h2'); if(!h) return;
+    const text=h.textContent.trim();
+    const d=defs.find(x=>text===x[0]); if(!d) return;
+    card.classList.add('feature-card','feature-'+d[2]);
+    const old=h.innerHTML;
+    h.className='feature-head';
+    h.innerHTML='<span class="feature-num">'+d[1]+'</span><span class="feature-title">'+old+'</span>';
+    const p=document.createElement('div'); p.className='feature-links';
+    p.innerHTML='🔗 <b>関係：</b>'+d[3];
+    h.insertAdjacentElement('afterend',p);
+  });
+})();
 </script>
 </body>
 </html>
+<style>
+/* 機能ごとの入力エリアを色分け */
+.feature-xp .field, .feature-xp input, .feature-xp select, .feature-xp textarea { background:#eef5ff !important; border-color:#6ea8fe !important; }
+.feature-sale .field, .feature-sale input, .feature-sale select, .feature-sale textarea { background:#fff4e6 !important; border-color:#f0a24a !important; }
+.feature-import .field, .feature-import input, .feature-import select, .feature-import textarea { background:#f5efff !important; border-color:#9b73d8 !important; }
+.feature-work .field, .feature-work input, .feature-work select, .feature-work textarea { background:#edf9ef !important; border-color:#67b879 !important; }
+.feature-output .field, .feature-output input, .feature-output select, .feature-output textarea { background:#eafaff !important; border-color:#54b9d6 !important; }
+.feature-record .field, .feature-record input, .feature-record select, .feature-record textarea { background:#f2f4f6 !important; border-color:#9aa3ad !important; }
+.feature-memo .field, .feature-memo input, .feature-memo select, .feature-memo textarea { background:#fff0f5 !important; border-color:#df7fa0 !important; }
+.feature-book .field, .feature-book input, .feature-book select, .feature-book textarea { background:#f4efff !important; border-color:#9874c9 !important; }
+.feature-profit .field, .feature-profit input, .feature-profit select, .feature-profit textarea { background:#fff0ef !important; border-color:#df7770 !important; }
+.feature-recipe .field, .feature-recipe input, .feature-recipe select, .feature-recipe textarea { background:#fff6e8 !important; border-color:#c28a4a !important; }
+/* ラベルも機能色に寄せる */
+.feature-xp label{color:#245b9e}.feature-sale label{color:#a75d00}.feature-import label{color:#67409a}.feature-work label{color:#347b43}.feature-output label{color:#267b94}.feature-record label{color:#5d6670}.feature-memo label{color:#a34d70}.feature-book label{color:#664296}.feature-profit label{color:#a24c46}.feature-recipe label{color:#87591f}
+</style>
