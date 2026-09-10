@@ -83,6 +83,13 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 <button onclick="addSale()">販売記録を保存</button><button class="sub" onclick="pickRecord('s')">保存済みの販売記録から入力</button>
 </div>
 <div class="card">
+<h2>販売経験値・減衰計算</h2>
+<div class="note">毎日5:00の決算後からの「販売売上回収額」だけを使って計算します。減衰は販売経験値にのみ適用し、作業・成果量・原価・利益など他の計算には影響しません。</div>
+<div class="grid2"><div><label>今回回収する売上（G）</label><input id="decaySale" type="number" min="0" step="any" placeholder="例：1000000"></div><div><label>5:00以降の回収済み売上（G）</label><input id="decayBefore" type="number" min="0" step="any" value="0" placeholder="例：0"></div></div>
+<button onclick="calcSaleDecay()">減衰を反映して計算</button>
+<div id="decayResult" class="result"></div>
+</div>
+<div class="card">
 <h2>販売ペース・完売予測</h2>
 <div class="note">一定の販売ペースが続く場合の完売時間を計算します。</div>
 <div class="grid2"><div><label>現在の在庫数（個）</label><input id="stock" type="number" min="0" step="any"></div><div><label>売れた数（個）</label><input id="sold" type="number" min="0" step="any"></div></div>
@@ -320,7 +327,7 @@ function calcMixedXP(){
     const remain=Math.max(0,cumulativeXP(lv+1)-afterTotal);
     html+=(afterLv>lv?'<div class="big">Lv '+lv+' → Lv '+afterLv+'</div>':'<div>次のLvまで残り：約 <b>'+f(remain)+'pt</b></div>');
   }
-  html+='<p class="note">※販売経験値は次の売上額だけを基準にした目安計算です。現在の累計売上による減衰は考慮していません。</p>';
+  html+='<p class="note">※販売経験値の減衰は販売計算にのみ適用します。5:00以降の回収済み売上を基準にしてください。</p>';
   document.getElementById('mixResult').innerHTML=html;
 }
 const KEY='xpcalc_all_v4';
@@ -647,7 +654,7 @@ function addPfMaterial(name='',price='',qty=''){
 function escapeHtmlAttr(v){
   return String(v??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
-function num(v){
+function numValue(v){
   const n=Number(v);
   return Number.isFinite(n)?n:0;
 }
@@ -657,10 +664,10 @@ function fmtNum(n){
 }
 function calcProfit(){
   const name=document.getElementById('pfName')?.value.trim()||'成果物';
-  const price=num(document.getElementById('pfPrice')?.value);
-  const outQty=num(document.getElementById('pfQty')?.value)||1;
-  const hours=num(document.getElementById('pfHours')?.value);
-  const minutes=num(document.getElementById('pfMinutes')?.value);
+  const price=numValue(document.getElementById('pfPrice')?.value);
+  const outQty=numValue(document.getElementById('pfQty')?.value)||1;
+  const hours=numValue(document.getElementById('pfHours')?.value);
+  const minutes=numValue(document.getElementById('pfMinutes')?.value);
   const workMinutes=hours*60+minutes;
   let materialCost=0;
   const materials=[];
@@ -712,6 +719,34 @@ function clearProfit(){
 }
 const SALES_XP_POINTS=[[0,0],[100000,3600],[200000,5578],[300000,6497],[500000,7555],[800000,8474],[1000000,8900],[2000000,10194]];
 function salesXpEstimate(sales){sales=Math.max(0,Number(sales)||0);if(sales<=100000)return sales*3600/100000;for(let i=1;i<SALES_XP_POINTS.length;i++){const [x1,y1]=SALES_XP_POINTS[i-1],[x2,y2]=SALES_XP_POINTS[i];if(sales<=x2)return y1+(y2-y1)*(sales-x1)/(x2-x1);}const [x1,y1]=SALES_XP_POINTS[6],[x2,y2]=SALES_XP_POINTS[7];return y2+(sales-x2)*(y2-y1)/(x2-x1);}
+
+// 販売経験値の減衰専用計算。5:00以降の販売回収額だけを対象にし、他機能では使用しない。
+function saleXPFromDayTotal(total){
+  total=Math.max(0,Number(total)||0);
+  if(total<=100000) return total*0.036;
+  return 3600 + 1800*Math.log((total-50000)/50000);
+}
+function saleXPWithDecay(amount,before){
+  amount=Math.max(0,Number(amount)||0);
+  before=Math.max(0,Number(before)||0);
+  const after=before+amount;
+  return {amount,before,after,xp:Math.max(0,saleXPFromDayTotal(after)-saleXPFromDayTotal(before))};
+}
+function calcSaleDecay(){
+  const amount=Number(document.getElementById('decaySale')?.value);
+  const beforeRaw=(document.getElementById('decayBefore')?.value||'').trim();
+  const out=document.getElementById('decayResult');
+  if(!Number.isFinite(amount)||amount<0){out.innerHTML='<div class="note warning">⚠️ 今回回収する売上を入力してください。</div>';return;}
+  const before=beforeRaw===''?0:Number(beforeRaw);
+  if(!Number.isFinite(before)||before<0){out.innerHTML='<div class="note warning">⚠️ 5:00以降の回収済み売上は0以上で入力してください。</div>';return;}
+  const r=saleXPWithDecay(amount,before);
+  out.innerHTML='<h3>計算結果</h3>'+
+    '<div>5:00以降の回収済み売上：<b>'+f(r.before)+' G</b></div>'+
+    '<div>今回回収：<b>'+f(r.amount)+' G</b></div>'+
+    '<div>回収後の当日累計：<b>'+f(r.after)+' G</b></div>'+
+    '<div class="big">今回の販売経験値：<b>+'+f(r.xp)+' pt</b></div>'+
+    '<p class="note">※減衰は販売経験値だけに適用。毎日5:00で累計を0から数え直す想定です。</p>';
+}
 function showTab(name){
   const mainTabs=['xp','out','log','memo','book'];
   if(mainTabs.includes(name)){
@@ -810,10 +845,10 @@ function saveProfitRecords(a){
 }
 function getProfitCalculation(){
   const name=document.getElementById('pfName')?.value.trim()||'成果物';
-  const price=num(document.getElementById('pfPrice')?.value);
-  const outQty=num(document.getElementById('pfQty')?.value)||1;
-  const hours=num(document.getElementById('pfHours')?.value);
-  const minutes=num(document.getElementById('pfMinutes')?.value);
+  const price=numValue(document.getElementById('pfPrice')?.value);
+  const outQty=numValue(document.getElementById('pfQty')?.value)||1;
+  const hours=numValue(document.getElementById('pfHours')?.value);
+  const minutes=numValue(document.getElementById('pfMinutes')?.value);
   const workMinutes=hours*60+minutes;
   let materialCost=0;
   const materials=[];
