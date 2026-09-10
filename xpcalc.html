@@ -42,7 +42,7 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 .book{border:1px solid #ddd;border-radius:14px;padding:14px;margin:10px 0;background:#fafafa}.bookTitle{font-size:18px;font-weight:800;margin-bottom:7px}.bookGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.bookImg{width:100%;max-height:240px;object-fit:contain;border-radius:10px;background:#eee;margin:8px 0}.bookRow{margin:5px 0;white-space:pre-wrap}.bookLabel{font-weight:700}.bookActions{display:flex;gap:6px;margin-top:10px}.bookActions button{flex:1}.badge.bookcat{background:#eee}
 </style>
 </head>
-<body><button style="margin:6px" onclick="showTab('profit')">収支</button>
+<body><button id="tabprofit" style="margin:6px" onclick="showTab('profit')">収支</button>
 <div class="wrap">
 <h1>経験値・成果量・備忘録</h1>
 
@@ -51,7 +51,7 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 <button id="tabout" onclick="show('out')">成果量</button>
 <button id="tablog" onclick="show('log')">記録</button>
 <button id="tabmemo" onclick="show('memo')">備忘録</button>
-<button id="tabbook" onclick="show('book')">図鑑</button><button onclick="showTab('recipe')" data-tab="recipe">レシピ取込</button>
+<button id="tabbook" onclick="show('book')">図鑑</button><button id="tabrecipe" onclick="showTab('recipe')" data-tab="recipe">レシピ取込</button>
 </div>
 
 <div id="xp" class="section active">
@@ -317,7 +317,7 @@ function parseOutPaste(){
       countEl.value=count;
       unitEl.value=unit;
     }else{
-      const all=loadAll();
+      const all=records;
       all.push({
         type:'o',
         date:new Date().toISOString(),
@@ -593,19 +593,27 @@ function clearProfit(){
   const r=document.getElementById('pfResult'); if(r) r.innerHTML='';
   addPfMaterial();
 }
-</script>
-</body>
-</html>
-<script>
 function showTab(name){
+  const mainTabs=['xp','out','log','memo','book'];
+  if(mainTabs.includes(name)){
+    document.querySelectorAll('.tab').forEach(e=>e.style.display='none');
+    show(name);
+    document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
+    const b=document.getElementById('tab'+name); if(b)b.classList.add('active');
+    return;
+  }
+  document.querySelectorAll('.section').forEach(e=>e.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(e=>e.style.display='none');
   const target=document.getElementById(name+'Tab');
   if(target) target.style.display='block';
-  document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.getAttribute('data-tab')===name));
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
+  const b=document.getElementById('tab'+name); if(b)b.classList.add('active');
+  if(name==='recipe') renderRecipeBook();
+  if(name==='profit') renderProfitRecords();
 }
 
 function copyAllRecords(){
-  const all=loadAll();
+  const all=records;
   const recs=(Array.isArray(all)?all:[]).filter(r=>r && (r.type==='s'||r.type==='w'||r.type==='o'));
   if(!recs.length){
     alert('記録データがありません。');
@@ -623,7 +631,7 @@ function copyAllRecords(){
         (r.level!==undefined&&r.level!==''?'Lv：'+r.level+' ':'')+
         (r.price!==undefined&&r.price!==''?'価格：'+r.price+'G ':'')+
         (r.count!==undefined&&r.count!==''?'数量：'+r.count+'個 ':'')+
-        (r.xp!==undefined&&r.xp!==''?'経験値：'+r.xp+' ':'')+
+        (r.gain!==undefined&&r.gain!==''?'経験値：'+r.gain+'% ':'')+
         (date?'日時：'+date:'')
       );
     }else if(r.type==='w'){
@@ -635,7 +643,7 @@ function copyAllRecords(){
         ((r.x!==undefined&&r.x!=='')||(r.y!==undefined&&r.y!=='')?'座標：'+(r.x??'')+','+(r.y??'')+' ':'')+
         (r.level!==undefined&&r.level!==''?'Lv：'+r.level+' ':'')+
         (r.count!==undefined&&r.count!==''?'回数：'+r.count+'回 ':'')+
-        (r.xp!==undefined&&r.xp!==''?'経験値：'+r.xp+' ':'')+
+        (r.gain!==undefined&&r.gain!==''?'経験値：'+r.gain+'% ':'')+
         (date?'日時：'+date:'')
       );
     }else if(r.type==='o'){
@@ -1026,3 +1034,5 @@ function importRecipeBook(){
   input.click();
 }
 </script>
+</body>
+</html>
