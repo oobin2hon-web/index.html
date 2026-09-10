@@ -48,6 +48,7 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 
 <div class="tabs">
 <button id="tabxp" class="active" onclick="show('xp')">経験値</button>
+<button id="tabSalesDecay" onclick="show('salesDecay')">販売減衰</button>
 <button id="tabout" onclick="show('out')">成果量</button>
 <button id="tablog" onclick="show('log')">記録</button>
 <button id="tabmemo" onclick="show('memo')">備忘録</button>
@@ -242,6 +243,16 @@ id="log" class="section">
   </div>
   <div id="recipeBookList" class="card" style="margin-top:10px"></div>
 </div>
+<section id="salesDecay" class="section" style="display:none">
+<h2>販売経験値・減衰シミュレーター</h2>
+<div class="note">SOLDOUT2の販売経験値は10万Gを超える売上部分で減衰します。下の目安値を使って、受け取り済み売上＋次の売上から「今回増える経験値」を推定します。公式の厳密な計算式が公開されていないため、記事掲載値による近似計算です。</div>
+<label>今日すでに受け取った売上（G）</label><input id="sdReceived" type="number" min="0" step="1" value="0">
+<label>次に受け取る売上（G）</label><input id="sdNext" type="number" min="0" step="1" value="100000">
+<label>現在の経験値（ポイント）</label><input id="sdXp" type="number" min="0" step="1" value="0">
+<button onclick="calcSalesDecay()">減衰を計算</button>
+<div id="sdResult" class="result"></div>
+<div class="note" style="margin-top:10px">目安：10万G→3600pt、20万G→5578pt、30万G→6497pt、50万G→7555pt、80万G→8474pt、100万G→8900pt、200万G→10194pt。</div>
+</section>
 <script>
 const KEY='xpcalc_all_v4';
 let records=JSON.parse(localStorage.getItem(KEY)||'[]');
@@ -1034,5 +1045,41 @@ function importRecipeBook(){
   input.click();
 }
 </script>
+
+<script>
+(function(){
+const pts=[[0,0],[100000,3600],[200000,5578],[300000,6497],[500000,7555],[800000,8474],[1000000,8900],[2000000,10194]];
+window.salesDecayPoints=pts;
+window.salesDecayXP=function(sales){
+ sales=Math.max(0,Number(sales)||0);
+ if(sales<=0)return 0;
+ if(sales>=2000000){
+   // Article only gives a 2M benchmark; extend at the final observed slope as a cautious estimate.
+   return 10194+(sales-2000000)*(10194-8900)/1000000;
+ }
+ for(let i=1;i<pts.length;i++){
+   if(sales<=pts[i][0]){
+     const [x0,y0]=pts[i-1],[x1,y1]=pts[i];
+     return y0+(sales-x0)*(y1-y0)/(x1-x0);
+   }
+ }
+ return 0;
+};
+window.calcSalesDecay=function(){
+ const received=Math.max(0,Number(document.getElementById('sdReceived').value)||0);
+ const next=Math.max(0,Number(document.getElementById('sdNext').value)||0);
+ const before=window.salesDecayXP(received), after=window.salesDecayXP(received+next);
+ const add=Math.max(0,after-before);
+ const r=document.getElementById('sdResult');
+ r.innerHTML='<div class="big">累計売上：'+Math.round(received+next).toLocaleString()+'G</div>'+
+ '<div>受け取り済み分の目安：<b>'+before.toFixed(1)+'pt</b></div>'+
+ '<div>次の受け取り後の累計：<b>'+after.toFixed(1)+'pt</b></div>'+
+ '<div>今回増える経験値の目安：<b>+'+add.toFixed(1)+'pt</b></div>'+
+ '<div style="margin-top:8px">減衰前の売上 '+Math.max(0,100000-received).toLocaleString()+'G が残っています。</div>';
+};
+})();
+</script>
 </body>
 </html>
+
+
