@@ -262,6 +262,44 @@ input[type="text"]{max-width:220px;}
   .three-inputs input,.three-inputs select,.card .grid2 input,.card .grid2 select,.smallgrid input,.smallgrid select{font-size:16px!important;padding:7px 6px!important;min-height:38px!important;}
 }
 </style>
+
+<style id="feature-input-background-final">
+/* 機能ごとの入力欄：カード単位で確実に色分け */
+.card.feature-card.feature-xp input,.card.feature-card.feature-xp select,.card.feature-card.feature-xp textarea{background:#e6f0ff!important;border:1.5px solid #6ea8fe!important;}
+.card.feature-card.feature-sale input,.card.feature-card.feature-sale select,.card.feature-card.feature-sale textarea{background:#fff0dc!important;border:1.5px solid #f0a24a!important;}
+.card.feature-card.feature-import input,.card.feature-card.feature-import select,.card.feature-card.feature-import textarea{background:#f2e8ff!important;border:1.5px solid #9b73d8!important;}
+.card.feature-card.feature-work input,.card.feature-card.feature-work select,.card.feature-card.feature-work textarea{background:#e6f7ea!important;border:1.5px solid #67b879!important;}
+.card.feature-card.feature-output input,.card.feature-card.feature-output select,.card.feature-card.feature-output textarea{background:#e3f8fc!important;border:1.5px solid #54b9d6!important;}
+.card.feature-card.feature-record input,.card.feature-card.feature-record select,.card.feature-card.feature-record textarea{background:#eceff2!important;border:1.5px solid #9aa3ad!important;}
+.card.feature-card.feature-memo input,.card.feature-card.feature-memo select,.card.feature-card.feature-memo textarea{background:#ffebf2!important;border:1.5px solid #df7fa0!important;}
+.card.feature-card.feature-book input,.card.feature-card.feature-book select,.card.feature-card.feature-book textarea{background:#f0eaff!important;border:1.5px solid #9874c9!important;}
+.card.feature-card.feature-profit input,.card.feature-card.feature-profit select,.card.feature-card.feature-profit textarea{background:#ffebea!important;border:1.5px solid #df7770!important;}
+.card.feature-card.feature-recipe input,.card.feature-card.feature-recipe select,.card.feature-card.feature-recipe textarea{background:#fff2dc!important;border:1.5px solid #c28a4a!important;}
+/* class付与前でも色が分かるよう、主要入力IDからも着色 */
+.card:has(#level) input,.card:has(#level) select,.card:has(#level) textarea{background:#e6f0ff!important;}
+.card:has(#sjob) input,.card:has(#sjob) select,.card:has(#sjob) textarea{background:#fff0dc!important;}
+.card:has(#decaySale) input,.card:has(#decaySale) select,.card:has(#decaySale) textarea{background:#fff0dc!important;}
+.card:has(#saleImportText) input,.card:has(#saleImportText) select,.card:has(#saleImportText) textarea{background:#f2e8ff!important;}
+.card:has(#wjob) input,.card:has(#wjob) select,.card:has(#wjob) textarea{background:#e6f7ea!important;}
+.card:has(#ojob) input,.card:has(#ojob) select,.card:has(#ojob) textarea{background:#e3f8fc!important;}
+.card:has(#mTitle),.card:has(#mtitle) input,.card:has(#mtitle) select,.card:has(#mtitle) textarea{background:#ffebf2!important;}
+.card:has(#bname) input,.card:has(#bname) select,.card:has(#bname) textarea{background:#f0eaff!important;}
+.card:has(#pfName) input,.card:has(#pfName) select,.card:has(#pfName) textarea{background:#ffebea!important;}
+.card:has(#recipeUrl) input,.card:has(#recipeUrl) select,.card:has(#recipeUrl) textarea{background:#fff2dc!important;}
+</style>
+<style id="more-horizontal-layout">
+/* 横並びを増やして、スマホでも機能ごとの入力をコンパクトに表示 */
+.card .grid2{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:6px !important;}
+.card .grid2 > div{min-width:0 !important;}
+.card .grid2 input,.card .grid2 select,.card .grid2 textarea{width:100% !important;max-width:none !important;box-sizing:border-box !important;}
+/* 1項目だけの行はそのまま読みやすく */
+@media(max-width:520px){
+  .card .grid2{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:5px !important;}
+  .card .grid2 label{font-size:14px !important;line-height:1.2 !important;}
+  .card .grid2 input,.card .grid2 select{font-size:16px !important;padding:7px 5px !important;min-height:38px !important;}
+}
+</style>
+
 </head>
 <body><button id="tabprofit" style="margin:6px" onclick="showTab('profit')">収支</button>
 <div class="wrap">
@@ -296,7 +334,7 @@ input[type="text"]{max-width:220px;}
 <h2>経験値計算</h2>
 <div class="note">🔰 <b>分かるところだけ入力してください。</b> 必須項目はありません。<br>「1回の経験値」が分かるならそれだけでOK。分からない場合は「詳細」を開いて、基礎作業時間＋作業速度から自動計算できます。</div>
 <div class="grid2"><div><label>現在Lv<span class="optional">任意</span></label><input id="level" type="number" min="1" placeholder="例：8"></div><div><label>現在の経験値（%）<span class="optional">任意</span></label><input id="current" type="number" min="0" max="99.999999" step="0.001" placeholder="例：99.92"></div></div>
-<div class="grid2"><div><label>1回で増える経験値（pt）<span class="optional">任意</span></label><input id="gain" type="number" min="0" step="0.000001" placeholder="例：0.0147"></div><div><label>取得回数<span class="optional">任意</span></label><input id="count" type="number" min="1" value="1"></div></div>
+<div class="grid2"><div><label>1回で増える経験値（%）<span class="optional">任意</span></label><input id="gain" type="number" min="0" step="0.000001" placeholder="例：0.17"></div><div><label>取得回数<span class="optional">任意</span></label><input id="count" type="number" min="1" value="1"></div></div>
 <details style="margin-top:10px"><summary>⚙️ 基礎作業時間・作業速度から自動計算（任意）</summary>
 <div class="note">ここは分かる人だけ入力してください。2項目がそろった場合だけ自動計算します。</div>
 <div class="grid2"><div><label>基礎作業時間（分）</label><input id="baseWorkMin" type="number" min="0" step="0.000001" placeholder="例：60"></div><div><label>作業速度（%）</label><input id="workSpeed" type="number" min="0.01" step="0.01" placeholder="例：115"></div></div>
@@ -305,6 +343,22 @@ input[type="text"]{max-width:220px;}
 </details>
 <button onclick="calcXP()">計算する</button>
 <div id="xpResult" class="result"></div>
+</div>
+
+<div class="card feature-xp">
+<h2>次のLVアップまで</h2>
+<div class="note">現在のLVと経験値%、1回で増える経験値%を入力すると、<b>次のLVまであと何回か</b>を計算します。1回の作業時間を入れれば、必要時間も計算できます。</div>
+<div class="three-inputs">
+<div><label>現在Lv</label><input id="nextLv" type="number" min="1" step="1" placeholder="例：13"></div>
+<div><label>現在の経験値（%）</label><input id="nextCurrent" type="number" min="0" max="99.999999" step="0.001" placeholder="例：37.25"></div>
+<div><label>1回で増える経験値（%）</label><input id="nextGain" type="number" min="0" step="0.000001" placeholder="例：0.17"></div>
+</div>
+<div class="three-inputs">
+<div><label>1回の作業時間（分）<span class="optional">任意</span></label><input id="nextMinutes" type="number" min="0" step="0.001" placeholder="例：60"></div>
+<div><label>販売経験値（%）<span class="optional">任意</span></label><input id="nextSaleGain" type="number" min="0" step="0.000001" placeholder="例：0.17"></div>
+</div>
+<button onclick="calcNextLevel()">次のLVアップまで計算</button>
+<div id="nextLevelResult" class="result"></div>
 </div>
 
 <div class="card">
@@ -534,10 +588,49 @@ function calcWorkXP(){
     '<div>基礎作業時間：<b>'+fmt(base)+'分</b></div>'+
     '<div>作業速度：<b>'+fmt(speed)+'%</b></div>'+
     '<div>速度反映後の作業時間：<b>'+fmt(actualMin)+'分</b>（約'+fmt(actualSec)+'秒）</div>'+
-    '<hr><div>1回あたり作業経験値：<b>'+fmt(onePt)+'pt</b></div>'+
-    '<div>'+count+'回分：<b>'+fmt(perBatch)+'pt</b></div>'+
-    '<div>'+runs+'セット合計：<b>'+fmt(total)+'pt</b>（約 '+fmt(total/1440)+'D）</div>'+
+    '<hr><div>1回あたり作業経験値：<b>'+fmt(onePt)+'%</b></div>'+
+    '<div>'+count+'回分：<b>'+fmt(perBatch)+'%</b></div>'+
+    '<div>'+runs+'セット合計：<b>'+fmt(total)+'%</b>（約 '+fmt(total/1440)+'D）</div>'+
     '<p class="note">※内部計算では小数を保持し、秒や経験値を途中で切り上げません。表示時だけ丸めています。</p>';
+}
+function calcNextLevel(){
+  const lv=Number(document.getElementById('nextLv')?.value);
+  const cur=Number(document.getElementById('nextCurrent')?.value);
+  const gain=Number(document.getElementById('nextGain')?.value);
+  const minutesRaw=(document.getElementById('nextMinutes')?.value||'').trim();
+  const saleGainRaw=(document.getElementById('nextSaleGain')?.value||'').trim();
+  const out=document.getElementById('nextLevelResult');
+  if(!Number.isFinite(lv)||lv<1||!Number.isFinite(cur)||cur<0||cur>=100||!Number.isFinite(gain)||gain<=0){
+    out.innerHTML='<div class="note warning">⚠️ 現在Lv・現在の経験値（%）・1回で増える経験値（%）を正しく入力してください。</div>';
+    return;
+  }
+  const remain=Math.max(0,100-cur);
+  const runs=Math.ceil(remain/gain);
+  const after=Math.min(100,cur+runs*gain);
+  let html='<div class="big">Lv '+lv+' → Lv '+(lv+1)+'</div>'+
+    '<div>現在の経験値：<b>'+f(cur)+'%</b></div>'+
+    '<div>次のLVまで残り：<b>'+f(remain)+'%</b></div>'+
+    '<div>1回の増加：<b>'+f(gain)+'%</b></div>'+
+    '<div class="big">必要回数：<b>'+runs.toLocaleString('ja-JP')+'回</b></div>'+
+    '<div>その回数後の経験値：<b>'+f(after)+'%</b></div>';
+  if(minutesRaw!==''){
+    const min=Number(minutesRaw);
+    if(Number.isFinite(min)&&min>=0){
+      html+='<div>必要時間：約 <b>'+formatDuration(min*runs)+'</b></div>';
+    }
+  }
+  if(saleGainRaw!==''){
+    const sg=Number(saleGainRaw);
+    if(Number.isFinite(sg)&&sg>0) html+='<hr><div>販売だけで上げる場合：約 <b>'+Math.ceil(remain/sg).toLocaleString('ja-JP')+'回相当</b>（1回あたり '+f(sg)+'%）</div>';
+  }
+  out.innerHTML=html+'<p class="note">※ゲーム内で表示される経験値%を基準に計算しています。内部の非公開ポイントは画面に表示しません。</p>';
+}
+function formatDuration(min){
+  if(min<60) return f(min)+'分';
+  const h=Math.floor(min/60), m=min-h*60;
+  if(h<24) return h+'時間'+(m>=0.001?f(m)+'分':'');
+  const d=Math.floor(h/24), rh=h-d*24;
+  return d+'日'+(rh?rh+'時間':'')+(m>=0.001?f(m)+'分':'');
 }
 function calcMixedXP(){
   const getRaw=id=>(document.getElementById(id)?.value||'').trim();
@@ -551,8 +644,8 @@ function calcMixedXP(){
   const next=nextRaw?Math.max(0,Number(nextRaw)):0;
   const hasWork=workRaw!=='';
   const hasSale=nextRaw!=='';
-  if(workRaw==='' ) warnings.push('作業経験値は未入力のため、0ptとして計算しました。');
-  if(nextRaw==='' ) warnings.push('次の売上は未入力のため、販売経験値は0ptとして計算しました。');
+  if(workRaw==='' ) warnings.push('作業経験値は未入力のため、0%として計算しました。');
+  if(nextRaw==='' ) warnings.push('次の売上は未入力のため、販売経験値は0%として計算しました。');
   if(lv===null || curRaw==='') warnings.push('Lv・現在経験値が未入力のため、Lvアップ予測は表示しません。');
   let html='<h3>計算結果</h3>';
   if(warnings.length) html+='<div class="note warning">⚠️ '+warnings.join('<br>⚠️ ')+'</div>';
@@ -560,12 +653,12 @@ function calcMixedXP(){
   let saleAdd=0, saleDetail='';
   if(hasSale){
     saleAdd=salesXpEstimate(next);
-    saleDetail='<div>販売経験値：<b>+'+f(saleAdd)+'pt</b></div>';
+    saleDetail='<div>販売経験値：<b>+'+f(saleAdd)+'%</b></div>';
   }else{
-    saleDetail='<div>販売経験値：<b>+0pt</b></div>';
+    saleDetail='<div>販売経験値：<b>+0%</b></div>';
   }
   const totalAdd=workAdd+saleAdd;
-  html+='<div>作業経験値：<b>+'+f(workAdd)+'pt</b></div>'+saleDetail+'<div class="big">合計：+'+f(totalAdd)+'pt</div><div>合計：約 <b>'+f(totalAdd/1440)+'D</b></div>';
+  html+='<div>作業経験値：<b>+'+f(workAdd)+'%</b></div>'+saleDetail+'<div class="big">合計：+'+f(totalAdd)+'%</div><div>合計：約 <b>'+f(totalAdd/1440)+'D</b></div>';
   if(lv!==null && curRaw!==''){
     const levelBase=cumulativeXP(lv);
     const levelNext=cumulativeXP(lv+1);
@@ -573,7 +666,7 @@ function calcMixedXP(){
     const afterTotal=currentTotal+totalAdd;
     const afterLv=levelFromTotalXP(afterTotal);
     const remain=Math.max(0,cumulativeXP(lv+1)-afterTotal);
-    html+=(afterLv>lv?'<div class="big">Lv '+lv+' → Lv '+afterLv+'</div>':'<div>次のLvまで残り：約 <b>'+f(remain)+'pt</b></div>');
+    html+=(afterLv>lv?'<div class="big">Lv '+lv+' → Lv '+afterLv+'</div>':'<div>次のLvまで残り：約 <b>'+f(remain)+'%</b></div>');
   }
   html+='<p class="note">※販売経験値の減衰は販売計算にのみ適用します。5:00以降の回収済み売上を基準にしてください。</p>';
   document.getElementById('mixResult').innerHTML=html;
@@ -623,16 +716,15 @@ function calcXP(){
    document.getElementById('xpResult').innerHTML='<div class="note warning">⚠️ 経験値は0以上の数値で入力してください。</div>';return;
  }
  const totalGain=gain*count;
- let html='<div class="big">'+count+'回で <b>+'+f(totalGain)+'pt</b></div><div>1回あたり <b>'+f(gain)+'pt</b></div>';
+ let html='<div class="big">'+count+'回で <b>+'+f(totalGain)+'%</b></div><div>1回あたり <b>'+f(gain)+'%</b></div>';
  if(gainRaw==='') html+='<div class="note">基礎作業時間＋作業速度から自動計算しました。</div>';
  if(lvRaw!==''&&curRaw!==''){
    const lv=Number(lvRaw),cur=Number(curRaw);
    if(Number.isFinite(lv)&&lv>=1&&Number.isFinite(cur)&&cur>=0){
-     const total=cumulativeXP(lv)+cur+totalGain;
-     const newLv=levelFromTotalXP(total);
-     const remain=total-cumulativeXP(newLv);
-     const nextNeed=Math.max(0,cumulativeXP(newLv+1)-total);
-     html+='<hr><div>現在Lv '+lv+'・現在経験値 '+f(cur)+'%</div><div class="big">予測：Lv '+newLv+'</div><div>次Lvまで残り <b>'+f(nextNeed)+'pt</b></div>';
+     let projectedLv=lv, projectedPct=cur+totalGain;
+     while(projectedPct>=100 && projectedLv<100){projectedPct-=100;projectedLv++;}
+     const nextNeed=Math.max(0,100-projectedPct);
+     html+='<hr><div>現在Lv '+lv+'・現在経験値 '+f(cur)+'%</div><div class="big">予測：Lv '+projectedLv+'</div><div>次Lvまで残り <b>'+f(nextNeed)+'%</b></div>';
    }else warnings.push('Lvまたは現在経験値の値を確認してください。');
  }else warnings.push('Lv・現在経験値が未入力のため、Lvアップ予測は省略しました。');
  if(warnings.length) html+='<div class="note warning">⚠️ '+warnings.join('<br>⚠️ ')+'</div>';
@@ -1053,7 +1145,7 @@ function calcSaleDecay(){
     '<div>5:00以降の回収済み売上：<b>'+f(r.before)+' G</b></div>'+
     '<div>今回回収：<b>'+f(r.amount)+' G</b></div>'+
     '<div>回収後の当日累計：<b>'+f(r.after)+' G</b></div>'+
-    '<div class="big">今回の販売経験値：<b>+'+f(r.xp)+' pt</b></div>'+
+    '<div class="big">今回の販売経験値：<b>+'+f(r.xp)+'%</b></div>'+
     '<p class="note">※減衰は販売経験値だけに適用。毎日5:00で累計を0から数え直す想定です。</p>';
 }
 function showTab(name){
