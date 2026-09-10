@@ -48,11 +48,10 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 
 <div class="tabs">
 <button id="tabxp" class="active" onclick="show('xp')">経験値</button>
-<button id="tabSalesDecay" onclick="show('salesDecay')">販売減衰</button>
 <button id="tabout" onclick="show('out')">成果量</button>
 <button id="tablog" onclick="show('log')">記録</button>
 <button id="tabmemo" onclick="show('memo')">備忘録</button>
-<button id="tabbook" onclick="show('book')">図鑑</button><button id="tabrecipe" onclick="showTab('recipe')" data-tab="recipe">レシピ取込</button>
+<button id="tabbook" onclick="show('book')">図鑑</button><button id="tabsalesdecay" onclick="showTab('salesdecay')">販売減衰</button><button id="tabrecipe" onclick="showTab('recipe')" data-tab="recipe">レシピ取込</button>
 </div>
 
 <div id="xp" class="section active">
@@ -177,6 +176,11 @@ id="log" class="section">
 </div>
 
 
+<div id="salesdecayTab" class="tab" style="display:none">
+<div class="card"><h2>📉 販売経験値・減衰シミュレーター</h2><div class="note">その日の「すでに受け取った売上」と「次に受け取る売上」から、累計売上による販売経験値の減衰を考慮して今回増える経験値を計算します。記事掲載値を使った目安計算です。</div><label>現在Lv</label><input id="sdLevel" type="number" min="1" value="8"><label>現在の経験値（%）</label><input id="sdCurrent" type="number" min="0" max="99.999999" step="0.001" value="0"><label>今日すでに受け取った売上（G）</label><input id="sdReceived" type="number" min="0" step="1" value="0"><label>次に受け取る売上（G）</label><input id="sdNext" type="number" min="0" step="1" value="0"><button onclick="calcSalesDecay()">減衰を考慮して計算</button></div>
+<div id="sdResult" class="card result"></div>
+<div class="card"><h3>記事掲載の基準値</h3><div class="tablewrap"><table style="min-width:520px"><tr><th>累計売上</th><th>販売経験値</th><th>D</th></tr><tr><td>10万G</td><td>3,600pt</td><td>2.5D</td></tr><tr><td>20万G</td><td>5,578pt</td><td>3.9D</td></tr><tr><td>30万G</td><td>6,497pt</td><td>4.5D</td></tr><tr><td>50万G</td><td>7,555pt</td><td>5.3D</td></tr><tr><td>80万G</td><td>8,474pt</td><td>5.9D</td></tr><tr><td>100万G</td><td>8,900pt</td><td>6.2D</td></tr><tr><td>200万G</td><td>10,194pt</td><td>7.1D</td></tr></table></div><p class="note">10万G未満は比例、表の間は線形補間、200万G超は最後の傾きを延長した近似です。記事は厳密な販売経験値の式を公開していません。</p></div>
+</div>
 <div id="profitTab" class="tab" style="display:none">
   <h2>材料・成果物 収支計算</h2>
   <div class="card">
@@ -243,16 +247,6 @@ id="log" class="section">
   </div>
   <div id="recipeBookList" class="card" style="margin-top:10px"></div>
 </div>
-<section id="salesDecay" class="section" style="display:none">
-<h2>販売経験値・減衰シミュレーター</h2>
-<div class="note">SOLDOUT2の販売経験値は10万Gを超える売上部分で減衰します。下の目安値を使って、受け取り済み売上＋次の売上から「今回増える経験値」を推定します。公式の厳密な計算式が公開されていないため、記事掲載値による近似計算です。</div>
-<label>今日すでに受け取った売上（G）</label><input id="sdReceived" type="number" min="0" step="1" value="0">
-<label>次に受け取る売上（G）</label><input id="sdNext" type="number" min="0" step="1" value="100000">
-<label>現在の経験値（ポイント）</label><input id="sdXp" type="number" min="0" step="1" value="0">
-<button onclick="calcSalesDecay()">減衰を計算</button>
-<div id="sdResult" class="result"></div>
-<div class="note" style="margin-top:10px">目安：10万G→3600pt、20万G→5578pt、30万G→6497pt、50万G→7555pt、80万G→8474pt、100万G→8900pt、200万G→10194pt。</div>
-</section>
 <script>
 const KEY='xpcalc_all_v4';
 let records=JSON.parse(localStorage.getItem(KEY)||'[]');
@@ -604,6 +598,9 @@ function clearProfit(){
   const r=document.getElementById('pfResult'); if(r) r.innerHTML='';
   addPfMaterial();
 }
+const SALES_XP_POINTS=[[0,0],[100000,3600],[200000,5578],[300000,6497],[500000,7555],[800000,8474],[1000000,8900],[2000000,10194]];
+function salesXpEstimate(sales){sales=Math.max(0,Number(sales)||0);if(sales<=100000)return sales*3600/100000;for(let i=1;i<SALES_XP_POINTS.length;i++){const [x1,y1]=SALES_XP_POINTS[i-1],[x2,y2]=SALES_XP_POINTS[i];if(sales<=x2)return y1+(y2-y1)*(sales-x1)/(x2-x1);}const [x1,y1]=SALES_XP_POINTS[6],[x2,y2]=SALES_XP_POINTS[7];return y2+(sales-x2)*(y2-y1)/(x2-x1);}
+function calcSalesDecay(){const lv=Number(document.getElementById('sdLevel')?.value)||1,cur=Number(document.getElementById('sdCurrent')?.value)||0,received=Math.max(0,Number(document.getElementById('sdReceived')?.value)||0),next=Math.max(0,Number(document.getElementById('sdNext')?.value)||0),before=salesXpEstimate(received),after=salesXpEstimate(received+next),add=Math.max(0,after-before),d=x=>Number(x).toLocaleString('ja-JP',{maximumFractionDigits:2});document.getElementById('sdResult').innerHTML='<h3>計算結果</h3><div>現在Lv：<b>'+lv+'</b>　現在経験値：<b>'+d(cur)+'%</b></div><hr><div>受け取り済み売上：<b>'+d(received)+'G</b></div><div>受け取り済みまでの販売経験値目安：<b>'+d(before)+'pt</b></div><div>次の売上：<b>'+d(next)+'G</b></div><div>受け取り後の累計売上：<b>'+d(received+next)+'G</b></div><div>受け取り後の販売経験値目安：<b>'+d(after)+'pt</b></div><div class="big">今回増える経験値目安：+'+d(add)+'pt</div><div>今回分：約<b>'+d(add/1440)+'D</b></div><div>累計：約<b>'+d(after/1440)+'D</b></div><p class="note">※これは記事の実測目安を補間した値です。SOLDOUT2の厳密な内部式そのものではありません。</p>';}
 function showTab(name){
   const mainTabs=['xp','out','log','memo','book'];
   if(mainTabs.includes(name)){
@@ -1045,41 +1042,5 @@ function importRecipeBook(){
   input.click();
 }
 </script>
-
-<script>
-(function(){
-const pts=[[0,0],[100000,3600],[200000,5578],[300000,6497],[500000,7555],[800000,8474],[1000000,8900],[2000000,10194]];
-window.salesDecayPoints=pts;
-window.salesDecayXP=function(sales){
- sales=Math.max(0,Number(sales)||0);
- if(sales<=0)return 0;
- if(sales>=2000000){
-   // Article only gives a 2M benchmark; extend at the final observed slope as a cautious estimate.
-   return 10194+(sales-2000000)*(10194-8900)/1000000;
- }
- for(let i=1;i<pts.length;i++){
-   if(sales<=pts[i][0]){
-     const [x0,y0]=pts[i-1],[x1,y1]=pts[i];
-     return y0+(sales-x0)*(y1-y0)/(x1-x0);
-   }
- }
- return 0;
-};
-window.calcSalesDecay=function(){
- const received=Math.max(0,Number(document.getElementById('sdReceived').value)||0);
- const next=Math.max(0,Number(document.getElementById('sdNext').value)||0);
- const before=window.salesDecayXP(received), after=window.salesDecayXP(received+next);
- const add=Math.max(0,after-before);
- const r=document.getElementById('sdResult');
- r.innerHTML='<div class="big">累計売上：'+Math.round(received+next).toLocaleString()+'G</div>'+
- '<div>受け取り済み分の目安：<b>'+before.toFixed(1)+'pt</b></div>'+
- '<div>次の受け取り後の累計：<b>'+after.toFixed(1)+'pt</b></div>'+
- '<div>今回増える経験値の目安：<b>+'+add.toFixed(1)+'pt</b></div>'+
- '<div style="margin-top:8px">減衰前の売上 '+Math.max(0,100000-received).toLocaleString()+'G が残っています。</div>';
-};
-})();
-</script>
 </body>
 </html>
-
-
