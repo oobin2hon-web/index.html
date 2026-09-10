@@ -60,11 +60,11 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 <div id="xp" class="section active">
 <div class="card">
 <h2>経験値計算</h2>
-<div class="note">販売・作業それぞれの実測値から、1回あたりの経験値と必要回数を計算します。</div>
-<label>現在Lv</label><input id="level" type="number" min="1" value="8">
-<label>現在の経験値（%）</label><input id="current" type="number" min="0" max="99.999999" step="0.001" value="99.92">
-<label>1回で増える経験値（%）</label><input id="gain" type="number" min="0" step="0.000001" value="0.01">
-<label>取得回数</label><input id="count" type="number" min="0" value="100">
+<div class="note">分かる項目だけ入力してください。<b>「1回で増える経験値」は任意</b>です。未入力なら、下の「基礎作業時間＋作業速度」から自動計算します。</div>
+<label>現在Lv<span class="optional">任意</span></label><input id="level" type="number" min="1" placeholder="例：8">
+<label>現在の経験値（%）<span class="optional">任意</span></label><input id="current" type="number" min="0" max="99.999999" step="0.001" placeholder="例：99.92">
+<label>1回で増える経験値（%）<span class="optional">任意</span></label><input id="gain" type="number" min="0" step="0.000001" placeholder="例：0.0147">
+<label>取得回数<span class="optional">任意</span></label><input id="count" type="number" min="1" value="1">
 <button onclick="calcXP()">計算する</button>
 <div id="xpResult" class="result"></div>
 </div>
@@ -365,10 +365,47 @@ function show(id){
  if(id==='book')renderBooks();
 }
 function calcXP(){
- const lv=num('level'),cur=num('current'),gain=num('gain'),count=num('count');
- if(gain<=0){document.getElementById('xpResult').innerHTML='増加経験値を入力してください。';return}
- const total=cur+gain*count,up=Math.floor(total/100),remain=total%100,need=Math.max(0,Math.ceil((100-cur)/gain-1e-12));
- document.getElementById('xpResult').innerHTML='<div class="big">Lv '+(lv+up)+' / 経験値 '+f(remain)+'%</div><div>'+count+'回で <b>+'+f(gain*count)+'%</b><br>次のLVまで <b>'+need+'回</b></div>';
+ const lvRaw=val('level').trim(), curRaw=val('current').trim(), gainRaw=val('gain').trim();
+ const countRaw=val('count').trim();
+ const count=countRaw===''?1:Number(countRaw);
+ let gain=gainRaw===''?null:Number(gainRaw);
+ const warnings=[];
+ // 「1回で増える経験値」が空欄なら、基礎作業時間＋作業速度から自動算出
+ if(gain===null){
+   const baseRaw=val('baseWorkMin').trim(), speedRaw=val('workSpeed').trim();
+   if(baseRaw!=='' && speedRaw!==''){
+     const base=Number(baseRaw), speed=Number(speedRaw);
+     if(base>0 && speed>0) gain=base/(speed/100);
+     else warnings.push('基礎作業時間と作業速度は0より大きい値にしてください。');
+   }else{
+     warnings.push('「1回で増える経験値」または「基礎作業時間＋作業速度」を入力すると、経験値を自動計算できます。');
+   }
+ }
+ if(!Number.isFinite(count)||count<1){
+   document.getElementById('xpResult').innerHTML='<div class="warn">取得回数は1以上を入力してください。</div>';return;
+ }
+ if(gain===null || !Number.isFinite(gain) || gain<0){
+   document.getElementById('xpResult').innerHTML='<div class="warn">'+warnings.join('<br>')+'</div>';return;
+ }
+ const totalGain=gain*count;
+ let html='<div class="big">'+count+'回で <b>+'+f(totalGain)+'pt</b></div><div>1回あたり <b>'+f(gain)+'pt</b></div>';
+ if(warnings.length) html+='<div class="warn">⚠️ '+warnings.join('<br>⚠️ ')+'</div>';
+ if(lvRaw!=='' && curRaw!==''){
+   const lv=Number(lvRaw),cur=Number(curRaw);
+   if(Number.isFinite(lv)&&lv>=1&&Number.isFinite(cur)&&cur>=0){
+     const levelBase=Math.pow(lv,6)-1;
+     const after=levelBase+cur+totalGain;
+     let newLv=lv;
+     while(after >= Math.pow(newLv+1,6)-1) newLv++;
+     const newBase=Math.pow(newLv,6)-1;
+     const remain=after-newBase;
+     const nextNeed=(Math.pow(newLv+1,6)-1)-after;
+     html+='<hr><div>現在Lv '+lv+'・現在経験値 '+f(cur)+'%</div><div class="big">予測：Lv '+newLv+'</div><div>次Lvまで残り <b>'+f(Math.max(0,nextNeed))+'pt</b></div>';
+   }
+ }else{
+   html+='<div class="warn">⚠️ 現在Lv・現在の経験値が未入力のため、Lvアップ予測は省略しています。</div>';
+ }
+ document.getElementById('xpResult').innerHTML=html;
 }
 function addSale(){
  const count=num('scount'),gain=num('sgain');
