@@ -44,8 +44,23 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 .optional{font-size:.8em;opacity:.7;margin-left:6px;font-weight:normal}
 .warning{border-left:4px solid #d98c00;padding:8px 10px}
 </style>
-<style id="modecss">.mode-switch{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0;padding:10px;border:1px solid #ddd;border-radius:10px;background:#fafafa}.mode-switch button{padding:8px 14px;border-radius:8px;border:1px solid #bbb;background:#fff}.mode-switch button.active{font-weight:700}.advanced-only{display:none}.mode-help{font-size:.9em;color:#666;margin:4px 0 10px}.optional-warning{margin-top:8px;padding:8px 10px;border-radius:8px;background:#fff8dc;border:1px solid #ead58a;color:#6b5b00}</style></head>
-<body><div id="xpModeSwitch" class="mode-switch"><strong>経験値計算モード</strong><button type="button" id="simpleModeBtn" class="active" onclick="setXpMode('simple')">かんたん</button><button type="button" id="advancedModeBtn" onclick="setXpMode('advanced')">詳細設定</button><span class="mode-help">普段は「かんたん」でOK。減衰や基礎作業時間を使うときだけ「詳細設定」にしてください。</span></div><button id="tabprofit" style="margin:6px" onclick="showTab('profit')">収支</button>
+<style id="precisionGuidanceCSS">
+.precision-note{margin:8px 0;padding:9px 11px;border-radius:9px;background:#f6f8fb;border:1px solid #d8dee8;font-size:.92em;line-height:1.55}
+.precision-note strong{display:block;margin-bottom:3px}
+.precision-note.warn{background:#fff8df;border-color:#ead58a;color:#5d5000}
+.precision-note.ok{background:#f0f8f0;border-color:#b9d7b9;color:#285b2b}
+.precision-toggle{display:flex;align-items:center;gap:7px;margin:8px 0}
+.precision-extra{display:none}
+</style>
+
+</head>
+<body>
+
+<div id="precisionGuidance" class="precision-note">
+  <strong>ℹ️ より正確に計算するには</strong>
+  分かる項目だけ入力してください。未入力でも、入力済みの情報から計算できる範囲で結果を出します。
+</div>
+<button id="tabprofit" style="margin:6px" onclick="showTab('profit')">収支</button>
 <div class="wrap">
 <h1>経験値・成果量・備忘録</h1>
 
@@ -60,7 +75,7 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 <div id="xp" class="section active">
 <div class="card">
 <h2>経験値計算</h2>
-<div class="note">🔰 <b>分かるところだけ入力してください。</b> 必須項目はありません。<br>「1回の経験値」が分かるならそれだけでOK。分からない場合は「詳細」を開いて、基礎作業時間＋作業速度から自動計算できます。</div>
+<div class="note">🔰 <b>分かるところだけ入力してください。</b> 任意入力はありません。<br>「1回の経験値」が分かるならそれだけでOK。分からない場合は「詳細」を開いて、基礎作業時間＋作業速度から自動計算できます。</div>
 <div class="grid2"><div><label>現在Lv<span class="optional">任意</span></label><input id="level" type="number" min="1" placeholder="例：8"></div><div><label>現在の経験値（%）<span class="optional">任意</span></label><input id="current" type="number" min="0" max="99.999999" step="0.001" placeholder="例：99.92"></div></div>
 <div class="grid2"><div><label>1回で増える経験値（pt）<span class="optional">任意</span></label><input id="gain" type="number" min="0" step="0.000001" placeholder="例：0.0147"></div><div><label>取得回数<span class="optional">任意</span></label><input id="count" type="number" min="1" value="1"></div></div>
 <details style="margin-top:10px"><summary>⚙️ 基礎作業時間・作業速度から自動計算（任意）</summary>
@@ -183,6 +198,16 @@ th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:to
 <div class="card"><button class="del" onclick="clearBooks()">図鑑だけ全削除</button></div>
 </div>
 
+
+
+<div class="precision-toggle">
+  <label><input type="checkbox" id="useSalesDecay" onchange="toggleSalesDecay()"> 売上減衰を考慮する</label>
+</div>
+<div id="salesDecayGuide" class="precision-note precision-extra">
+  <strong>📌 販売経験値をより正確にするには</strong>
+  今日すでに受け取った売上と、次に受け取る売上を入力してください。
+  分からない場合は空欄でも構いません。エラーにはせず、入力済みの情報で概算します。
+</div>
 
 <div id="salesdecayTab" class="tab" style="display:none">
 <div class="card"><h2>📉 販売経験値・減衰シミュレーター</h2><div class="note">その日の「すでに受け取った売上」と「次に受け取る売上」から、累計売上による販売経験値の減衰を考慮して今回増える経験値を計算します。記事掲載値を使った目安計算です。</div><label>現在Lv</label><input id="sdLevel" type="number" min="1" value="8"><label>現在の経験値（%）</label><input id="sdCurrent" type="number" min="0" max="99.999999" step="0.001" value="0"><label>今日すでに受け取った売上（G）</label><input id="sdReceived" type="number" min="0" step="1" value="0"><label>次に受け取る売上（G）</label><input id="sdNext" type="number" min="0" step="1" value="0"><button onclick="calcSalesDecay()">減衰を考慮して計算</button></div>
@@ -1186,5 +1211,64 @@ function importRecipeBook(){
   input.click();
 }
 </script>
-<script id="modejs">(function(){function applyMode(m){document.documentElement.dataset.xpMode=m;document.querySelectorAll('.advanced-only').forEach(function(e){e.style.display=m==='advanced'?'':'none'});var a=document.getElementById('simpleModeBtn'),b=document.getElementById('advancedModeBtn');if(a)a.classList.toggle('active',m==='simple');if(b)b.classList.toggle('active',m==='advanced');try{localStorage.setItem('xpcalc_mode',m)}catch(e){}}window.setXpMode=function(m){applyMode(m==='advanced'?'advanced':'simple')};document.addEventListener('DOMContentLoaded',function(){var m='simple';try{m=localStorage.getItem('xpcalc_mode')||'simple'}catch(e){}applyMode(m);document.querySelectorAll('input,select,textarea').forEach(function(e){e.removeAttribute('required')})})})();</script></body>
+<script id="precisionFriendlyJS">
+(function(){
+  function n(id){
+    var e=document.getElementById(id);
+    if(!e) return null;
+    var v=parseFloat(e.value);
+    return Number.isFinite(v)?v:null;
+  }
+
+  window.toggleSalesDecay=function(){
+    var cb=document.getElementById('useSalesDecay');
+    var on=!!(cb&&cb.checked);
+    var guide=document.getElementById('salesDecayGuide');
+    if(guide) guide.style.display=on?'block':'none';
+
+    ['sdLevel','sdCurrent','sdReceived','sdNext'].forEach(function(id){
+      var e=document.getElementById(id);
+      if(e){
+        var row=e.closest('label,div,tr');
+        if(row && id!=='sdLevel') row.style.display=on?'':'';
+      }
+    });
+  };
+
+  function updatePrecisionGuidance(){
+    var note=document.getElementById('precisionGuidance');
+    if(!note) return;
+
+    var base=n('baseTime') ?? n('workBaseTime') ?? n('baseWorkTime');
+    var speed=n('workSpeed') ?? n('speed') ?? n('workSpeedPercent');
+    var missing=[];
+    if(base===null) missing.push('基礎作業時間');
+    if(speed===null) missing.push('作業速度');
+
+    if(missing.length){
+      note.className='precision-note warn';
+      note.innerHTML='<strong>🟡 概算で計算できます</strong>'+
+        missing.join('・')+'が未入力です。分かる場合は入力すると、より正確に計算できます。';
+    }else{
+      note.className='precision-note ok';
+      note.innerHTML='<strong>🟢 より正確に計算できます</strong>基礎作業時間・作業速度が入力されています。';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded',function(){
+    // New fields are guidance-only; never force them as required.
+    document.querySelectorAll('input,select,textarea').forEach(function(e){
+      e.removeAttribute('required');
+      e.addEventListener('input',updatePrecisionGuidance);
+      e.addEventListener('change',updatePrecisionGuidance);
+    });
+    var cb=document.getElementById('useSalesDecay');
+    if(cb) cb.checked=false;
+    toggleSalesDecay();
+    updatePrecisionGuidance();
+  });
+})();
+</script>
+
+</body>
 </html>
