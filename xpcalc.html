@@ -278,9 +278,9 @@ function calcWorkXP(){
   const runs=Math.max(1,Math.floor(Number(document.getElementById('workSimRuns')?.value)||1));
   const actualMin=base*100/speed;
   const actualSec=actualMin*60;
-  const roundedSec=Math.ceil(actualSec);
-  const roundedMin=roundedSec/60;
-  const onePt=roundedMin;
+  const exactMin=actualMin;
+  const exactSec=actualSec;
+  const onePt=exactMin;
   const perBatch=onePt*count;
   const total=perBatch*runs;
   const fmt=n=>Number(n).toLocaleString('ja-JP',{maximumFractionDigits:4});
