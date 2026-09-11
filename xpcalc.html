@@ -1461,65 +1461,104 @@ function showImportReflectMenu_(){
   el.appendChild(box);
 }
 function setFirstExisting_(ids,value){
-  for(const id of ids){
+  const list=Array.isArray(ids)?ids:[ids];
+  for(const id of list){
     const x=document.getElementById(id);
     if(x){
-      x.value=value==null?'':value;
+      if(x.type==='checkbox') x.checked=!!value;
+      else x.value=value==null?'':value;
       x.dispatchEvent(new Event('input',{bubbles:true}));
+      x.dispatchEvent(new Event('change',{bubbles:true}));
       return id;
     }
   }
   return null;
 }
+
+function setByLabelText_(labels,value){
+  const wanted=labels.map(s=>String(s).replace(/\s/g,''));
+  const all=[...document.querySelectorAll('label')];
+  for(const lab of all){
+    const t=(lab.textContent||'').replace(/\s/g,'');
+    if(wanted.some(w=>t.includes(w))){
+      const id=lab.htmlFor;
+      if(id && setFirstExisting_([id],value)) return id;
+      const input=lab.querySelector('input,select,textarea');
+      if(input){
+        if(input.type==='checkbox') input.checked=!!value;
+        else input.value=value==null?'':value;
+        input.dispatchEvent(new Event('input',{bubbles:true}));
+        input.dispatchEvent(new Event('change',{bubbles:true}));
+        return input.id||'label-input';
+      }
+    }
+  }
+  return null;
+}
+
 function reflectImportToXP(){
   const d=lastSaleImport;
-  if(!d){alert('先に取り込んでください。');return;}
-  let changed=false;
-  if(d.level){ setFirstExisting_(['level'],d.level); changed=true; }
-  if(d.currentXp){ setFirstExisting_(['current'],d.currentXp); changed=true; }
-  if(d.observedXp){ setFirstExisting_(['gain','sgain'],d.observedXp); changed=true; }
-  if(d.qty){ setFirstExisting_(['count'],d.qty); changed=true; }
-  if(changed) alert('経験値計算へ反映しました。');
-  else alert('経験値計算へ反映できる値がありません。');
+  if(!d){alert('先に販売結果を取り込んでください。');return;}
+  let changed=0;
+  if(d.level && (setFirstExisting_(['lv','xpLv','level'],d.level)||setByLabelText_(['Lv','レベル'],d.level))) changed++;
+  if(d.currentXp && (setFirstExisting_(['currentXp','xpCurrent','current','nowXp'],d.currentXp)||setByLabelText_(['現在経験値'],d.currentXp))) changed++;
+  if(d.observedXp && (setFirstExisting_(['xpGain','saleXp','gain','workXp'],d.observedXp)||setByLabelText_(['獲得経験値','増加経験値','販売経験値'],d.observedXp))) changed++;
+  show('xp');
+  if(changed) alert('販売結果のデータを「経験値計算」へ反映しました。');
+  else alert('経験値計算の入力欄を特定できませんでした。');
 }
 function reflectImportToNextLV(){
   const d=lastSaleImport;
-  if(!d){alert('先に取り込んでください。');return;}
-  let changed=false;
-  if(d.level){setFirstExisting_(['nextLv'],d.level);changed=true;}
-  if(d.currentXp){setFirstExisting_(['nextCurrent'],d.currentXp);changed=true;}
-  if(d.observedXp){setFirstExisting_(['nextGain','nextSaleGain'],d.observedXp);changed=true;}
-  if(changed) alert('「次のLVアップまで」へ反映しました。');
-  else alert('次のLVアップ計算へ反映できる値がありません。');
+  if(!d){alert('先に販売結果を取り込んでください。');return;}
+  let changed=0;
+  if(d.level && (setFirstExisting_(['nextLv'],d.level)||setByLabelText_(['Lv','レベル'],d.level))) changed++;
+  if(d.currentXp && (setFirstExisting_(['nextCurrent'],d.currentXp)||setByLabelText_(['現在経験値'],d.currentXp))) changed++;
+  if(d.observedXp && (setFirstExisting_(['nextGain','nextSaleGain'],d.observedXp)||setByLabelText_(['今回の獲得経験値','販売経験値'],d.observedXp))) changed++;
+  show('xp');
+  if(changed) alert('販売結果のデータを「次のLVアップまで」へ反映しました。');
+  else alert('次のLVアップ用の入力欄を特定できませんでした。');
 }
 function reflectImportToBalance(){
   const d=lastSaleImport;
-  if(!d){alert('先に取り込んでください。');return;}
-  // 現在のページでは収支専用入力欄を勝手に決めず、販売結果へ渡せる売上情報を明示する。
-  applyImportedSaleToRecord();
-  alert('販売価格・販売数を販売結果へ反映しました。売上・収支計算ではこの値を利用できます。');
+  if(!d){alert('先に販売結果を取り込んでください。');return;}
+  let changed=0;
+  const amount=d.net||d.total;
+  if(amount && (setFirstExisting_(['balanceSales','salesAmount','revenue','uriage','saleRevenue'],amount)||setByLabelText_(['売上','販売額','売上金額','収入'],amount))) changed++;
+  if(d.tax && (setFirstExisting_(['tax','saleTax'],d.tax)||setByLabelText_(['税','税金','税額'],d.tax))) changed++;
+  show('balance');
+  if(changed) alert('販売結果の売上・差し引き額を「収支・売上」へ反映しました。');
+  else alert('収支・売上の入力欄を特定できませんでした。');
 }
 function reflectImportToForecast(){
   const d=lastSaleImport;
-  if(!d){alert('先に取り込んでください。');return;}
-  let changed=false;
-  if(d.qty){setFirstExisting_(['sold'],d.qty);changed=true;}
-  if(d.unit){setFirstExisting_(['sprice'],d.unit);changed=true;}
-  if(changed){show('xp');alert('販売予測へ反映しました。経過時間は取り込みデータにないため、入力してください。');}
-  else alert('販売予測へ反映できる販売数・単価がありません。');
+  if(!d){alert('先に販売結果を取り込んでください。');return;}
+  let changed=0;
+  if(d.qty && (setFirstExisting_(['sold','forecastSold','saleForecastSold'],d.qty)||setByLabelText_(['売れた数','販売数'],d.qty))) changed++;
+  if(d.unit && (setFirstExisting_(['forecastPrice','saleForecastPrice','salesForecastPrice'],d.unit)||setByLabelText_(['販売価格','単価'],d.unit))) changed++;
+  show('forecast');
+  if(changed) alert('販売結果の販売数・単価を「販売予測」へ反映しました。\\n経過時間は実際の経過時間を入力してください。');
+  else alert('販売予測の入力欄を特定できませんでした。');
 }
 function reflectImportToAverage(){
   const d=lastSaleImport;
-  if(!d){alert('先に取り込んでください。');return;}
-  alert('今回の販売結果には「成果物名・作業回数」がないため、平均・50回期待値へは自動反映できません。成果量の記録から入力してください。');
+  if(!d){alert('先に販売結果を取り込んでください。');return;}
+  let changed=0;
+  if(d.qty && (setFirstExisting_(['resultQty','outputQty','outQty','quantity'],d.qty)||setByLabelText_(['数量','販売数','個数'],d.qty))) changed++;
+  if(d.total && (setFirstExisting_(['totalAmount','avgAmount','resultAmount'],d.total)||setByLabelText_(['金額','売上','合計'],d.total))) changed++;
+  show('avg');
+  if(changed) alert('販売結果を「平均・50回期待値」へ反映しました。');
+  else alert('平均・50回期待値の入力欄を特定できませんでした。');
 }
 function reflectImportToOutput(){
   const d=lastSaleImport;
-  if(!d){alert('先に取り込んでください。');return;}
-  if(!d.qty){alert('取り込み結果に販売数がないため、成果量へ反映できません。');return;}
-  setFirstExisting_(['oqty'],d.qty);
-  setFirstExisting_(['ocount'],1);
-  alert('販売数を成果量の「成果量」へ反映しました。これは販売数を成果量として扱うだけなので、必要なら作業回数・成果物名を確認してください。');
+  if(!d){alert('先に販売結果を取り込んでください。');return;}
+  let changed=0;
+  if(d.qty && (setFirstExisting_(['outQty','resultQty','outputQty','quantity'],d.qty)||setByLabelText_(['成果量','数量'],d.qty))) changed++;
+  if(changed){
+    alert('販売結果の数量を「成果量」へ反映しました。');
+  }else{
+    alert('成果量の入力欄を特定できませんでした。');
+  }
 }
 function reflectImportToRecord(){
   const d=lastSaleImport;
@@ -1529,12 +1568,15 @@ function reflectImportToRecord(){
 }
 function reflectImportToMemo(){
   const d=lastSaleImport;
-  if(!d){alert('先に取り込んでください。');return;}
-  const el=document.getElementById('mtext');
-  if(el){el.value=d.raw||'';el.dispatchEvent(new Event('input',{bubbles:true}));show('memo');el.scrollIntoView({behavior:'smooth',block:'start'});alert('取り込んだ販売結果を備忘録の内容欄へ反映しました。保存は「備忘録を保存」を押してください。');}
-  else alert('備忘録の入力欄が見つかりません。');
+  if(!d){alert('先に販売結果を取り込んでください。');return;}
+  const text=d.raw||'';
+  if(setFirstExisting_(['memoText','memo','noteText'],text)||setByLabelText_(['備忘録','メモ'],text)){
+    show('memo');
+    alert('取り込んだ販売結果を「備忘録」へ反映しました。');
+  }else{
+    alert('備忘録の入力欄を特定できませんでした。');
+  }
 }
-
 function parseSaleImport(){
   lastSaleImport=parseSaleImportText_(document.getElementById('saleImportText').value);
   document.getElementById('saleImportResult').innerHTML=renderSaleImport_(lastSaleImport);
