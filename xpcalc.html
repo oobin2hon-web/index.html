@@ -600,31 +600,57 @@ function calcNextLevel(){
   const minutesRaw=(document.getElementById('nextMinutes')?.value||'').trim();
   const saleGainRaw=(document.getElementById('nextSaleGain')?.value||'').trim();
   const out=document.getElementById('nextLevelResult');
+
   if(!Number.isFinite(lv)||lv<1||!Number.isFinite(cur)||cur<0||cur>=100||!Number.isFinite(gain)||gain<=0){
     out.innerHTML='<div class="note warning">⚠️ 現在Lv・現在の経験値（%）・1回で増える経験値（%）を正しく入力してください。</div>';
     return;
   }
-  const remain=Math.max(0,100-cur);
-  const runs=Math.ceil(remain/gain);
-  const after=Math.min(100,cur+runs*gain);
+
+  const workRemain=Math.max(0,100-cur);
+  const workRuns=Math.ceil(workRemain/gain);
+  const workAfter=Math.min(100,cur+workRuns*gain);
+
+  // 「販売経験値」は「1回あたり」ではなく、今回の販売・売上回収で得るXPそのもの。
+  // 減衰計算から渡された値をここで再計算しない。
+  const saleGain=saleGainRaw===''?0:Math.max(0,Number(saleGainRaw)||0);
+  const combinedGain=gain+saleGain;
+  const combinedRuns=combinedGain>0?Math.ceil(workRemain/combinedGain):0;
+  const combinedAfter=Math.min(100,cur+combinedGain);
+
   let html='<div class="big">Lv '+lv+' → Lv '+(lv+1)+'</div>'+
     '<div>現在の経験値：<b>'+f(cur)+'%</b></div>'+
-    '<div>次のLVまで残り：<b>'+f(remain)+'%</b></div>'+
-    '<div>1回の増加：<b>'+f(gain)+'%</b></div>'+
-    '<div class="big">必要回数：<b>'+runs.toLocaleString('ja-JP')+'回</b></div>'+
-    '<div>その回数後の経験値：<b>'+f(after)+'%</b></div>';
+    '<div>次のLVまで残り：<b>'+f(workRemain)+'%</b></div>'+
+    '<hr>'+
+    '<div>作業1回の増加：<b>+'+f(gain)+'%</b></div>';
+
+  if(saleGainRaw!==''){
+    html+='<div>今回の販売経験値（減衰後）：<b>+'+f(saleGain)+'%</b></div>'+
+      '<div>作業＋今回販売の合計増加：<b>+'+f(combinedGain)+'%</b></div>'+
+      '<div class="big">今回反映後：<b>'+f(combinedAfter)+'%</b></div>';
+    if(combinedAfter>=100){
+      const over=combinedAfter-100;
+      html+='<div class="big">🎉 次のLVへ！ 繰り越し '+f(over)+'%</div>';
+    }
+    html+='<div>今回の販売を反映した状態から、作業だけで必要な回数：<b>'+Math.ceil(Math.max(0,100-combinedAfter)/gain).toLocaleString('ja-JP')+'回</b></div>';
+  }else{
+    html+='<div class="big">作業だけなら必要回数：<b>'+workRuns.toLocaleString('ja-JP')+'回</b></div>'+
+      '<div>その回数後の経験値：<b>'+f(workAfter)+'%</b></div>';
+  }
+
   if(minutesRaw!==''){
     const min=Number(minutesRaw);
     if(Number.isFinite(min)&&min>=0){
-      html+='<div>必要時間：約 <b>'+formatDuration(min*runs)+'</b></div>';
+      html+='<hr><div>作業だけで必要な時間：約 <b>'+formatDuration(min*workRuns)+'</b></div>';
     }
   }
+
   if(saleGainRaw!==''){
-    const sg=Number(saleGainRaw);
-    if(Number.isFinite(sg)&&sg>0) html+='<hr><div>販売だけで上げる場合：約 <b>'+Math.ceil(remain/sg).toLocaleString('ja-JP')+'回相当</b>（1回あたり '+f(sg)+'%）</div>';
+    html+='<hr><div class="note">※「販売経験値」は、販売減衰計算で求めた今回分のXPをそのまま加算しています。売上金額をもう一度XP換算しないため、二重計算しません。</div>';
   }
-  out.innerHTML=html+'<p class="note">※ゲーム内で表示される経験値%を基準に計算しています。内部の非公開ポイントは画面に表示しません。</p>';
+
+  out.innerHTML=html+'<p class="note">※ゲーム内で表示される経験値%を基準に計算しています。</p>';
 }
+
 function formatDuration(min){
   if(min<60) return f(min)+'分';
   const h=Math.floor(min/60), m=min-h*60;
@@ -1140,56 +1166,254 @@ function renderSaleImport_(d){
   if(d.total)rows.push('売上（総額）：'+f(d.total)+' G');
   if(d.tax)rows.push('税・差額：'+f(d.tax)+' G');
   if(d.net)rows.push('差し引き：'+f(d.net)+' G');
-  return '<h3>取り込み結果</h3>'+(rows.length?rows.map(x=>'<div>'+x+'</div>').join(''):'<div class="note warning">⚠️ 販売結果を読み取れませんでした。</div>')+
-(d.total?'<div class="note" style="margin-top:8px">⬇️ 「販売経験値へ反映」は、上で認識した<strong>売上総額</strong>だけを減衰計算へ渡します。販売数・単価・税・差し引き額などの数字は売上額として使いません。</div><button onclick="applySaleImport()">販売経験値へ反映</button>':'');
+  return '<h3>取り込み結果</h3>'+
+    (rows.length?rows.map(x=>'<div>'+x+'</div>').join(''):'<div class="note warning">⚠️ 販売結果を読み取れませんでした。</div>')+
+    (d.total?
+      '<div class="note" style="margin-top:10px">⚠️ ここではまだ経験値を変更しません。まず取り込み内容を確認してください。</div>'+
+      '<button onclick="showImportReflectMenu_()">📥 取り込み結果から反映先を選ぶ</button>'+
+      '<button class="sub" onclick="judgeSaleImport()">① 販売経験値を判定</button>'
+      :'');
 }
-let lastSaleImport=null;
+
+function importReflectButton_(label, fn){
+  return '<button type="button" onclick="'+fn+'()">'+label+'</button>';
+}
+function showImportReflectMenu_(){
+  const d=lastSaleImport;
+  if(!d){
+    alert('先に取り込み結果を作成してください。');
+    return;
+  }
+  const el=document.getElementById('saleImportCard');
+  if(!el) return;
+
+  let box=document.getElementById('importReflectMenu');
+  if(box) return;
+
+  box=document.createElement('div');
+  box.id='importReflectMenu';
+  box.className='note';
+  box.style.marginTop='10px';
+  box.innerHTML=
+    '<b>📥 取り込み結果を反映</b>'+
+    '<div style="margin-top:6px">内容を確認して、必要な場所だけ反映してください。反映しただけでは経験値の確定・保存は行いません。</div>'+
+    '<div class="btnrow" style="margin-top:8px">'+
+      importReflectButton_('販売結果へ反映','applyImportedSaleToRecord')+
+      importReflectButton_('経験値計算へ反映','reflectImportToXP')+
+      importReflectButton_('次のLVアップへ反映','reflectImportToNextLV')+
+      importReflectButton_('収支へ反映','reflectImportToBalance')+
+      importReflectButton_('販売予測へ反映','reflectImportToForecast')+
+      importReflectButton_('平均・50回期待値へ反映','reflectImportToAverage')+
+      importReflectButton_('成果量へ反映','reflectImportToOutput')+
+      importReflectButton_('記録へ反映','reflectImportToRecord')+
+      importReflectButton_('備忘録へ反映','reflectImportToMemo')+
+    '</div>';
+  el.appendChild(box);
+}
+function setFirstExisting_(ids,value){
+  for(const id of ids){
+    const x=document.getElementById(id);
+    if(x){
+      x.value=value==null?'':value;
+      x.dispatchEvent(new Event('input',{bubbles:true}));
+      return id;
+    }
+  }
+  return null;
+}
+function reflectImportToXP(){
+  const d=lastSaleImport;
+  if(!d){alert('先に取り込んでください。');return;}
+  // XP関連欄は「今回販売XP」の候補へ。確定は判定→減衰→反映の手順で行う。
+  if(d.observedXp!=null) setFirstExisting_(['xpGain','gain','workXp'],d.observedXp);
+  else alert('取り込み結果に経験値が見つかりません。');
+}
+function reflectImportToNextLV(){
+  const d=lastSaleImport;
+  if(!d){alert('先に取り込んでください。');return;}
+  const v=d.observedXp!=null?d.observedXp:(d.total? salesXpEstimate(d.total):'');
+  if(v===''){alert('次のLVアップへ反映できる経験値がありません。');return;}
+  if(setFirstExisting_(['nextSaleGain'],v)) alert('「次のLVアップまで」の販売経験値欄へ反映しました。\\n減衰が必要な場合は、先に販売経験値の判定・減衰を行ってください。');
+  else alert('「次のLVアップまで」の入力欄が見つかりません。');
+}
+function reflectImportToBalance(){
+  const d=lastSaleImport;
+  if(!d){alert('先に取り込んでください。');return;}
+  const id=setFirstExisting_(['balanceSales','salesAmount','revenue','uriage','saleRevenue'],d.net!=null?d.net:d.total);
+  if(!id) alert('収支用の売上入力欄が見つかりません。');
+}
+function reflectImportToForecast(){
+  const d=lastSaleImport;
+  if(!d){alert('先に取り込んでください。');return;}
+  let id=setFirstExisting_(['forecastPrice','saleForecastPrice','salesForecastPrice','sprice'],d.unit);
+  if(d.qty) setFirstExisting_(['forecastQty','saleForecastQty','salesForecastQty','scount'],d.qty);
+  if(!id && !d.qty) alert('販売予測用の入力欄が見つかりません。');
+}
+function reflectImportToAverage(){
+  const d=lastSaleImport;
+  if(!d){alert('先に取り込んでください。');return;}
+  const total=d.qty||1;
+  const amount=d.total||0;
+  const id=setFirstExisting_(['avgAmount','totalAmount','resultAmount','quantity'],amount);
+  if(id) setFirstExisting_(['avgRuns','workCount','runCount'],total);
+  else alert('平均・50回期待値用の入力欄が見つかりません。');
+}
+function reflectImportToOutput(){
+  const d=lastSaleImport;
+  if(!d){alert('先に取り込んでください。');return;}
+  const id=setFirstExisting_(['outQty','resultQty','outputQty','quantity'],d.qty);
+  if(!id) alert('成果量用の入力欄が見つかりません。');
+}
+function reflectImportToRecord(){
+  const d=lastSaleImport;
+  if(!d){alert('先に取り込んでください。');return;}
+  // 記録機能に専用APIがある場合のみ呼び出す。なければ販売結果へ反映して記録前確認を促す。
+  if(typeof saveRecordFromImport==='function') saveRecordFromImport(d);
+  else if(typeof addRecord==='function') addRecord(d);
+  else alert('記録への自動反映機能は現在のページにはありません。まず「販売結果へ反映」で内容を確認してください。');
+}
+function reflectImportToMemo(){
+  const d=lastSaleImport;
+  if(!d){alert('先に取り込んでください。');return;}
+  const text=(d.rawText||'').trim();
+  if(typeof addMemo==='function') addMemo(text);
+  else if(setFirstExisting_(['memoText','memo','noteText'],text)) alert('備忘録欄へ反映しました。');
+  else alert('備忘録用の入力欄が見つかりません。');
+}
+
+function applyImportedSaleToRecord(){
+  if(!lastSaleImport||!lastSaleImport.total){
+    alert('先に販売結果を取り込んでください。');
+    return;
+  }
+  const d=lastSaleImport;
+
+  // 取り込み結果を「販売結果」入力欄へ渡すだけ。
+  // 経験値の確定・減衰計算・記録保存はここでは行わない。
+  if(d.level) setv('slv',d.level);
+  if(d.qty) setv('scount',d.qty);
+  if(d.unit) setv('sprice',d.unit);
+
+  // 実測XPは参考値として表示されているだけなので、
+  // 自動で販売経験値欄へ入れず、減衰計算後に確定する。
+  show('xp');
+
+  const card=document.getElementById('saleImportCard');
+  if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
+
+  alert('取り込み結果を「販売結果」の入力欄へ反映しました。\n\n販売数・販売価格・Lvを確認してください。\n販売経験値は減衰計算後に確定します。');
+}
 function parseSaleImport(){
   lastSaleImport=parseSaleImportText_(document.getElementById('saleImportText').value);
   document.getElementById('saleImportResult').innerHTML=renderSaleImport_(lastSaleImport);
 }
-function applySaleImport(){
-  if(!lastSaleImport||!lastSaleImport.total){
-    alert('「売上回収額」を認識できませんでした。\n売上回収 100000G のように、回収額を明記してください。');
-    return;
-  }
-
-  const amount=Number(lastSaleImport.total)||0;
+function saleImportBefore_(){
   const beforeRaw=(document.getElementById('decayBefore')?.value||'').trim();
   const before=beforeRaw===''?0:Number(beforeRaw);
-
   if(!Number.isFinite(before)||before<0){
     alert('5:00以降の回収済み売上は0以上で入力してください。');
+    return null;
+  }
+  return before;
+}
+
+/* ① 判定：取り込んだデータから今回回収する売上を確定。
+   この段階では経験値欄を変更しない。 */
+function judgeSaleImport(){
+  if(!lastSaleImport||!lastSaleImport.total){
+    alert('先に販売結果を取り込んでください。');
     return;
   }
+  const amount=Number(lastSaleImport.total)||0;
+  const before=saleImportBefore_();
+  if(before===null)return;
 
-  // ここで初めて減衰を計算。販売価格×販売数や差し引き額は使わない。
-  const r=saleXPWithDecay(amount,before);
-
-  const decayEl=document.getElementById('decaySale');
-  if(decayEl) decayEl.value=amount;
-
-  // 反映先は専用の販売XP欄だけ。作業XPや成果量などは変更しない。
-  const saleGainEl=document.getElementById('nextSaleGain');
-  if(saleGainEl) saleGainEl.value=f(r.xp);
-
-  window.__pendingSaleXP={
-    amount:r.amount,
-    before:r.before,
-    after:r.after,
-    xp:r.xp,
-    createdAt:Date.now()
-  };
+  const preXp=salesXpEstimate(amount);
+  window.__saleJudgement={amount,before,preXp,judgedAt:Date.now()};
+  window.__pendingSaleXP=null;
 
   const out=document.getElementById('saleImportResult');
   out.innerHTML=renderSaleImport_(lastSaleImport)+
-    '<hr><h3>販売経験値への反映内容</h3>'+
-    '<div>今回の売上回収額：<b>'+f(r.amount)+' G</b></div>'+
+    '<hr><h3>① 販売経験値の判定結果</h3>'+
+    '<div>今回回収すると判定した売上：<b>'+f(amount)+' G</b></div>'+
+    '<div>5:00以降の回収済み売上：<b>'+f(before)+' G</b></div>'+
+    '<div>減衰前の販売経験値：<b>+'+f(preXp)+'%</b></div>'+
+    '<div class="note">👀 この金額・経験値が正しいか確認してください。<br>まだ「販売経験値」には反映していません。</div>'+
+    '<button onclick="showImportReflectMenu_()">📥 取り込み結果から反映先を選ぶ</button>'+
+    '<button onclick="applySaleDecayFromJudgement()">③ この判定結果に減衰を反映</button>';
+}
+
+/* ② 減衰：①で確認した判定結果だけを使う。
+   ここでも次LV計算欄は変更しない。 */
+function applySaleDecayFromJudgement(){
+  const j=window.__saleJudgement;
+  if(!j){
+    alert('先に「販売経験値を判定」を押してください。');
+    return;
+  }
+
+  const r=saleXPWithDecay(j.amount,j.before);
+  window.__pendingSaleXP={
+    amount:r.amount,before:r.before,after:r.after,
+    xp:r.xp,preXp:j.preXp,createdAt:Date.now()
+  };
+
+  const decayEl=document.getElementById('decaySale');
+  if(decayEl) decayEl.value=r.amount;
+
+  const out=document.getElementById('saleImportResult');
+  out.innerHTML=renderSaleImport_(lastSaleImport)+
+    '<hr><h3>② 減衰を反映した結果</h3>'+
+    '<div>今回回収：<b>'+f(r.amount)+' G</b></div>'+
     '<div>5:00以降の回収済み売上：<b>'+f(r.before)+' G</b></div>'+
     '<div>回収後の当日累計：<b>'+f(r.after)+' G</b></div>'+
-    '<div class="big">減衰後の販売経験値：<b>+'+f(r.xp)+'%</b></div>'+
-    '<div class="note">✅ この値だけを「販売経験値」として反映しました。49万Gなど別の数字へ置き換えません。販売数・単価・税・差し引き額は販売経験値の売上回収額には使用していません。</div>';
+    '<div>減衰前：<b>+'+f(j.preXp)+'%</b></div>'+
+    '<div class="big">減衰後：<b>+'+f(r.xp)+'%</b></div>'+
+    '<div class="note">👀 減衰後の値を確認してください。まだ「販売経験値」欄は変更していません。</div>'+
+    '<button onclick="commitSaleXP()">④ 確認した販売経験値を反映</button>';
 }
+
+/* ③ 最終反映：ユーザーが確認して押したときだけ反映。 */
+function commitSaleXP(){
+  const p=window.__pendingSaleXP;
+  if(!p){
+    alert('先に「減衰を反映」を実行してください。');
+    return;
+  }
+  if(!confirm('減衰後の販売経験値 +'+f(p.xp)+'% を「販売経験値」へ反映しますか？\n\n今回回収：'+f(p.amount)+' G\n減衰後XP：+'+f(p.xp)+'%')){
+    return;
+  }
+
+  const saleGainEl=document.getElementById('nextSaleGain');
+  if(!saleGainEl){
+    alert('販売経験値の反映先が見つかりません。');
+    return;
+  }
+  saleGainEl.value=f(p.xp);
+  p.committed=true;
+  p.committedAt=Date.now();
+
+  if(document.getElementById('nextLv')?.value &&
+     document.getElementById('nextCurrent')?.value &&
+     document.getElementById('nextGain')?.value &&
+     typeof calcNextLevel==='function'){
+    calcNextLevel();
+  }
+
+  const out=document.getElementById('saleImportResult');
+  out.innerHTML=renderSaleImport_(lastSaleImport)+
+    '<hr><h3>③ 販売経験値へ反映しました</h3>'+
+    '<div>今回回収：<b>'+f(p.amount)+' G</b></div>'+
+    '<div>減衰後の販売経験値：<b>+'+f(p.xp)+'%</b></div>'+
+    '<div class="big">販売経験値欄：<b>+'+f(p.xp)+'%</b></div>'+
+    '<div class="note">✅ 最終確認後に反映しました。売上額を別の数字へ置き換えたり、販売数・単価・税・差し引き額を販売経験値として二重計算したりしません。</div>';
+}
+
+/* 旧関数名は互換性のため残す。直接呼ばれても一気に反映せず判定だけ行う。 */
+function applySaleImport(){
+  judgeSaleImport();
+}
+
 function importSaleFile(file){
   if(!file)return;
   const reader=new FileReader();
@@ -1209,22 +1433,22 @@ function calcSaleDecay(){
   const amount=Number(document.getElementById('decaySale')?.value);
   const beforeRaw=(document.getElementById('decayBefore')?.value||'').trim();
   const out=document.getElementById('decayResult');
-  if(!Number.isFinite(amount)||amount<0){out.innerHTML='<div class="note warning">⚠️ 今回回収する売上を入力してください。</div>';return;}
+  if(!Number.isFinite(amount)||amount<0){
+    out.innerHTML='<div class="note warning">⚠️ 今回回収する売上を入力してください。</div>';
+    return;
+  }
   const before=beforeRaw===''?0:Number(beforeRaw);
-  if(!Number.isFinite(before)||before<0){out.innerHTML='<div class="note warning">⚠️ 5:00以降の回収済み売上は0以上で入力してください。</div>';return;}
+  if(!Number.isFinite(before)||before<0){
+    out.innerHTML='<div class="note warning">⚠️ 5:00以降の回収済み売上は0以上で入力してください。</div>';
+    return;
+  }
   const r=saleXPWithDecay(amount,before);
-
-  const saleGainEl=document.getElementById('nextSaleGain');
-  if(saleGainEl) saleGainEl.value=f(r.xp);
-
-  window.__pendingSaleXP={amount:r.amount,before:r.before,after:r.after,xp:r.xp,createdAt:Date.now()};
-
   out.innerHTML='<h3>計算結果</h3>'+
     '<div>5:00以降の回収済み売上：<b>'+f(r.before)+' G</b></div>'+
     '<div>今回回収：<b>'+f(r.amount)+' G</b></div>'+
     '<div>回収後の当日累計：<b>'+f(r.after)+' G</b></div>'+
     '<div class="big">今回の販売経験値：<b>+'+f(r.xp)+'%</b></div>'+
-    '<div class="note">✅ 減衰後の販売経験値を「販売経験値」欄へ反映しました。ほかの経験値・成果量・記録には影響しません。</div>'+
+    '<div class="note">ℹ️ これは確認用の計算結果です。「販売経験値」欄は自動変更しません。取り込み結果を反映する場合は「判定 → 減衰 → 最終反映」を使ってください。</div>'+
     '<p class="note">※減衰は販売経験値だけに適用。毎日5:00で累計を0から数え直す想定です。</p>';
 }
 function showTab(name){
