@@ -300,8 +300,19 @@ input[type="text"]{max-width:220px;}
 }
 </style>
 
+
+<style id="simpleModeStyle">
+/* シンプルモード：基本計算と取り込みを優先し、詳細機能は詳細モードへ */
+.simple-hidden{display:none!important}
+#tabprofit,#tablog,#tabmemo,#tabbook,#tabrecipe{display:none!important}
+#out{display:none!important}
+#log,#memo,#book,#profitTab,#recipeTab{display:none!important}
+</style>
 </head>
-<body><button id="tabprofit" style="margin:6px" onclick="showTab('profit')">収支</button>
+<body>
+<div id="modeBar" style="position:sticky;top:0;z-index:999;background:#fff;border-bottom:1px solid #ddd;padding:8px;text-align:center;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><a href="xpcalc.html" style="text-decoration:none"><button type="button">🟢 シンプルモード</button></a><a href="xpcalc_detail.html" style="text-decoration:none"><button type="button">🔵 詳細モード</button></a></div>
+<div style="text-align:center;font-size:12px;color:#666;margin:4px 0 8px">💾 データは同じ保存領域を使うため、2つのモードで記録・入力内容を共有できます。</div>
+<button id="tabprofit" style="margin:6px" onclick="showTab('profit')">収支</button>
 <div class="wrap">
 <h1>経験値・成果量・備忘録</h1>
 <div class="note import-helper" data-import-side="work" style="margin-top:8px">
@@ -2164,6 +2175,34 @@ function importRecipeBook(){
     p.innerHTML='🔗 <b>関係：</b>'+d[3];
     h.insertAdjacentElement('afterend',p);
   });
+})();
+</script>
+
+<script id="simpleModeScript">
+(function(){
+  function hideRangeByHeading(text, nextText){
+    const root=document.getElementById('xp'); if(!root) return;
+    const hs=[...root.querySelectorAll('h2')];
+    const h=hs.find(x=>(x.textContent||'').includes(text)); if(!h)return;
+    let n=h; while(n){
+      if(n!==h && n.matches && n.matches('h2') && nextText && (n.textContent||'').includes(nextText)) break;
+      if(n!==h || text) n.classList.add('simple-hidden');
+      n=n.nextElementSibling;
+    }
+  }
+  function apply(){
+    // 詳細な販売経験値・減衰計算
+    hideRangeByHeading('販売経験値・減衰計算','販売結果取り込み');
+    // 販売予測
+    hideRangeByHeading('販売ペース・完売予測','作業記録を保存');
+    // 作業記録
+    hideRangeByHeading('作業記録を保存',null);
+    // 販売記録は基本入力なので残す。
+    const bar=document.getElementById('modeBar'); if(bar){
+      const b=bar.querySelectorAll('button'); if(b[0]) b[0].disabled=true;
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply); else apply();
 })();
 </script>
 </body>
