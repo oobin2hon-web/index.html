@@ -1198,6 +1198,8 @@ function parseWorkImportText_(raw){
 
   const level=(clean.match(/\bLV\s*(\d+)/i)||[])[1]||'';
   const xp=(clean.match(/\(([+-]?[0-9]+(?:\.[0-9]+)?)%\)/)||[])[1]||'';
+  const itemMatch=clean.match(/(?:販売棚|販売)\s+([^0-9\s][^0-9]*?)(?=\s+[0-9][0-9,]*\s*(?:杯|個|本|枚|瓶|塊|kg|Ｇ|G))/i);
+  const item=itemMatch?itemMatch[1].trim():'';
   const current=(clean.match(/(?:^|\s)(\d+(?:\.\d+)?)%\s*資金|資金[\s\S]{0,80}?(\d+(?:\.\d+)?)%/i)||[]);
   const currentXp=current[1]||current[2]||'';
 
@@ -1253,81 +1255,58 @@ function parseWorkImport(){
 
 function reflectWorkToWorkRecord(){
   const d=lastWorkImport;
-  if(!d){
-    alert('先に「作業結果を取り込む」で取り込み結果を作成してください。');
-    return;
-  }
-
+  if(!d){alert('先に作業結果を取り込んでください。');return;}
   let changed=0;
-  if(d.level && setFirstExisting_(['wlv'],d.level)) changed++;
-  if(d.currentXp && setFirstExisting_(['wcurrent','workCurrentXp'],d.currentXp)) changed++;
-  if(d.observedXp && setFirstExisting_(['wgain'],d.observedXp)) changed++;
-  if(d.count && setFirstExisting_(['wcount'],d.count)) changed++;
-
-  // 取り込み本文から職種・作業名らしい情報を取れる場合だけ補助的に入れる。
+  if(d.level){setv('wlv',d.level);changed++;}
+  if(d.observedXp){setv('wgain',d.observedXp);changed++;}
+  if(d.count){setv('wcount',d.count);changed++;}
   const raw=d.raw||'';
   const job=(raw.match(/(?:職種|職業)\s*[:：]\s*([^\n]+)/i)||[])[1];
   const task=(raw.match(/(?:作業名|作業内容)\s*[:：]\s*([^\n]+)/i)||[])[1];
-  if(job && setFirstExisting_(['wjob'],job.trim())) changed++;
-  if(task && setFirstExisting_(['wname'],task.trim())) changed++;
-
-  show('work');
-  const card=document.querySelector('#work .card');
-  if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
-
-  if(changed){
-    alert('取り込み結果を「作業記録を保存」の入力欄へ反映しました。\\n\\n内容を確認してから「作業記録を保存」を押してください。');
-  }else{
-    alert('作業記録へ反映できる項目が見つかりませんでした。');
-  }
+  if(job){setv('wjob',job.trim());changed++;}
+  if(task){setv('wname',task.trim());changed++;}
+  show('xp');focusElement_('wjob');
+  alert(changed+'項目を「作業記録」の入力欄へ反映しました。保存する場合は「作業記録を保存」を押してください。');
 }
-
 function reflectWorkToOutput(){
   const d=lastWorkImport;
   if(!d){alert('先に作業結果を取り込んでください。');return;}
   if(!d.outputs.length){alert('成果物を読み取れませんでした。');return;}
-  // 成果量欄を探して最初の成果物を反映。複数成果物対応欄があれば順番に入れる。
-  const ids=['outputName','resultName','productName','outName'];
-  const qtyIds=['outputQty','resultQty','outQty','quantity'];
-  const unitIds=['outputUnit','resultUnit','outUnit'];
-  let used=0;
-  d.outputs.forEach((o,i)=>{
-    const ni=setFirstExisting_(i?ids.map(x=>x+(i+1)):ids,o.name);
-    const qi=setFirstExisting_(i?qtyIds.map(x=>x+(i+1)):qtyIds,o.qty);
-    const ui=setFirstExisting_(i?unitIds.map(x=>x+(i+1)):unitIds,o.unit);
-    if(ni||qi||ui) used++;
-  });
-  if(!used) alert('成果量用の入力欄が見つかりません。');
+  const o=d.outputs[0];
+  setv('oitem',o.name); setv('oqty',o.qty); setv('ocount',d.count||1); setv('ounit',o.unit||'個');
+  show('out'); calcOut(); focusElement_('oitem');
+  alert('最初の成果物を「成果量」へ反映しました。複数成果物は1件ずつ確認して保存してください。');
 }
-
 function reflectWorkToXP(){
   const d=lastWorkImport;
   if(!d){alert('先に作業結果を取り込んでください。');return;}
-  if(d.observedXp) setFirstExisting_(['xpGain','gain','workXp'],d.observedXp);
-  else alert('作業結果に経験値が見つかりません。');
+  let changed=0;
+  if(d.level){setv('level',d.level);changed++;}
+  if(d.currentXp){setv('current',d.currentXp);changed++;}
+  if(d.observedXp){setv('gain',d.observedXp);changed++;}
+  if(d.count){setv('count',d.count);}
+  show('xp'); focusElement_('level');
+  alert(changed+'項目を「経験値計算」へ反映しました。');
 }
-
 function reflectWorkToNextLV(){
   const d=lastWorkImport;
   if(!d){alert('先に作業結果を取り込んでください。');return;}
-  let ok=false;
-  if(d.level) ok=!!setFirstExisting_(['nextLv'],d.level)||ok;
-  if(d.currentXp) ok=!!setFirstExisting_(['nextCurrent'],d.currentXp)||ok;
-  if(d.observedXp) ok=!!setFirstExisting_(['nextGain','nextWorkGain'],d.observedXp)||ok;
-  if(!ok) alert('次のLVアップ用の入力欄が見つかりません。');
+  let changed=0;
+  if(d.level){setv('nextLv',d.level);changed++;}
+  if(d.currentXp){setv('nextCurrent',d.currentXp);changed++;}
+  if(d.observedXp){setv('nextGain',d.observedXp);changed++;}
+  show('xp'); focusElement_('nextLv');
+  alert(changed+'項目を「次のLVアップまで」に反映しました。');
 }
-
 function reflectWorkToAverage(){
   const d=lastWorkImport;
   if(!d){alert('先に作業結果を取り込んでください。');return;}
-  let ok=false;
-  if(d.count) ok=!!setFirstExisting_(['workCount','runCount','avgRuns'],d.count)||ok;
-  if(d.outputs[0]) {
-    ok=!!setFirstExisting_(['resultQty','outputQty','outQty','quantity'],d.outputs[0].qty)||ok;
-  }
-  if(!ok) alert('平均・50回期待値用の入力欄が見つかりません。');
+  if(!d.outputs.length){alert('成果物を読み取れませんでした。');return;}
+  const o=d.outputs[0];
+  setv('oitem',o.name);setv('oqty',o.qty);setv('ocount',d.count||1);setv('ounit',o.unit||'個');
+  show('out');calcOut();focusElement_('oqty');
+  alert('成果量の入力欄へ反映し、1回平均・50回期待値を計算しました。');
 }
-
 function reflectWorkToRecord(){
   const d=lastWorkImport;
   if(!d){alert('先に作業結果を取り込んでください。');return;}
@@ -1382,6 +1361,8 @@ function parseSaleImportText_(raw){
   return {
     level,
     currentXp,
+    item,
+    
     observedXp:xp,
     qty:qty?Number(qty.replace(/,/g,'')):0,
     unit:unit?Number(unit.replace(/,/g,'')):0,
@@ -1394,37 +1375,35 @@ function parseSaleImportText_(raw){
 
 function renderSaleImport_(d){
   const rows=[];
+  if(d.item)rows.push('販売物：'+esc(d.item));
   if(d.level)rows.push('Lv：'+d.level);
   if(d.currentXp)rows.push('現在経験値：'+d.currentXp+'%');
   if(d.observedXp)rows.push('実測の増加経験値：+'+d.observedXp+'%');
   if(d.qty)rows.push('販売数：'+f(d.qty));
   if(d.unit)rows.push('単価：'+f(d.unit)+' G');
-  if(d.total)rows.push('売上（総額）：'+f(d.total)+' G');
+  if(d.total)rows.push('売上（回収対象）：'+f(d.total)+' G');
   if(d.tax)rows.push('税・差額：'+f(d.tax)+' G');
   if(d.net)rows.push('差し引き：'+f(d.net)+' G');
-
   const buttons =
     '<div class="note" style="margin-top:10px">'+
-      '<b>📥 この販売結果を各項目へ反映</b>'+
-      '<div style="margin-top:4px">取り込んだだけでは保存・経験値確定はしません。必要な場所だけ押してください。</div>'+
+      '<b>📥 この取り込み結果を各機能へ反映</b>'+
+      '<div style="margin-top:4px">ボタンを押すと、その機能の実際の入力欄へデータを入れます。保存・確定は各機能の保存/計算ボタンで行います。</div>'+
       '<div class="btnrow" style="margin-top:8px">'+
-        '<button type="button" onclick="applyImportedSaleToRecord()">💰 販売結果へ反映</button>'+
+        '<button type="button" onclick="applyImportedSaleToRecord()">💰 販売記録へ反映</button>'+
         '<button type="button" onclick="reflectImportToXP()">⭐ 経験値計算へ反映</button>'+
         '<button type="button" onclick="reflectImportToNextLV()">⬆ 次のLVアップへ反映</button>'+
-        '<button type="button" onclick="reflectImportToBalance()">💴 収支・売上へ反映</button>'+
+        '<button type="button" onclick="reflectImportToDecay()">📉 減衰計算へ反映</button>'+
+        '<button type="button" onclick="reflectImportToProfit()">💴 収支計算へ反映</button>'+
         '<button type="button" onclick="reflectImportToForecast()">📈 販売予測へ反映</button>'+
-        '<button type="button" onclick="reflectImportToAverage()">📊 平均・50回期待値へ反映</button>'+
         '<button type="button" onclick="reflectImportToOutput()">📦 成果量へ反映</button>'+
-        '<button type="button" onclick="reflectImportToRecord()">📝 記録へ反映</button>'+
-        '<button type="button" onclick="reflectImportToMemo()">📌 備忘録へ反映</button>'+
-      '</div>'+
+        '<button type="button" onclick="reflectImportToMemo()">📌 備忘録へ反映</button>'+ 
+        '<button type="button" onclick="reflectImportToRecord()">📝 記録へ保存</button>'+ 
+      '</div>'+ 
     '</div>';
-
   return '<h3>販売結果の取り込み結果</h3>'+
     (rows.length?rows.map(x=>'<div>'+x+'</div>').join(''):'<div class="note warning">⚠️ 販売結果を読み取れませんでした。</div>')+
-    (d.total?buttons:'');
+    (rows.length?buttons:'');
 }
-
 function importReflectButton_(label, fn){
   return '<button type="button" onclick="'+fn+'()">'+label+'</button>';
 }
@@ -1496,86 +1475,77 @@ function setByLabelText_(labels,value){
   return null;
 }
 
+function saleImportGuard_(){
+  if(!lastSaleImport){alert('先に「内容を取り込む」を押して販売結果を作成してください。');return null;}
+  return lastSaleImport;
+}
+function focusElement_(id){
+  const e=document.getElementById(id); if(e) e.scrollIntoView({behavior:'smooth',block:'center'});
+}
 function reflectImportToXP(){
-  const d=lastSaleImport;
-  if(!d){alert('先に販売結果を取り込んでください。');return;}
+  const d=saleImportGuard_(); if(!d)return;
   let changed=0;
-  if(d.level && (setFirstExisting_(['lv','xpLv','level'],d.level)||setByLabelText_(['Lv','レベル'],d.level))) changed++;
-  if(d.currentXp && (setFirstExisting_(['currentXp','xpCurrent','current','nowXp'],d.currentXp)||setByLabelText_(['現在経験値'],d.currentXp))) changed++;
-  if(d.observedXp && (setFirstExisting_(['xpGain','saleXp','gain','workXp'],d.observedXp)||setByLabelText_(['獲得経験値','増加経験値','販売経験値'],d.observedXp))) changed++;
-  show('xp');
-  if(changed) alert('販売結果のデータを「経験値計算」へ反映しました。');
-  else alert('経験値計算の入力欄を特定できませんでした。');
+  if(d.level){setv('level',d.level);changed++;}
+  if(d.currentXp){setv('current',d.currentXp);changed++;}
+  if(d.observedXp){setv('gain',d.observedXp);changed++;}
+  if(d.qty){setv('count',1);}
+  show('xp'); focusElement_('level');
+  alert(changed+'項目を「経験値計算」に反映しました。');
 }
 function reflectImportToNextLV(){
-  const d=lastSaleImport;
-  if(!d){alert('先に販売結果を取り込んでください。');return;}
+  const d=saleImportGuard_(); if(!d)return;
   let changed=0;
-  if(d.level && (setFirstExisting_(['nextLv'],d.level)||setByLabelText_(['Lv','レベル'],d.level))) changed++;
-  if(d.currentXp && (setFirstExisting_(['nextCurrent'],d.currentXp)||setByLabelText_(['現在経験値'],d.currentXp))) changed++;
-  if(d.observedXp && (setFirstExisting_(['nextGain','nextSaleGain'],d.observedXp)||setByLabelText_(['今回の獲得経験値','販売経験値'],d.observedXp))) changed++;
-  show('xp');
-  if(changed) alert('販売結果のデータを「次のLVアップまで」へ反映しました。');
-  else alert('次のLVアップ用の入力欄を特定できませんでした。');
+  if(d.level){setv('nextLv',d.level);changed++;}
+  if(d.currentXp){setv('nextCurrent',d.currentXp);changed++;}
+  // 販売XPは作業XP(nextGain)ではなく、販売XP欄(nextSaleGain)へ入れる。
+  if(d.observedXp){setv('nextSaleGain',d.observedXp);changed++;}
+  show('xp'); focusElement_('nextLv');
+  alert(changed+'項目を「次のLVアップまで」に反映しました。');
 }
-function reflectImportToBalance(){
-  const d=lastSaleImport;
-  if(!d){alert('先に販売結果を取り込んでください。');return;}
+function reflectImportToDecay(){
+  const d=saleImportGuard_(); if(!d)return;
+  if(!d.total){alert('今回回収する売上を読み取れていません。');return;}
+  setv('decaySale',d.total);
+  show('xp'); focusElement_('decaySale');
+  alert('今回回収する売上 '+f(d.total)+' G を「販売経験値・減衰計算」へ反映しました。\n「5:00以降の回収済み売上」を確認してから計算してください。');
+}
+function reflectImportToProfit(){
+  const d=saleImportGuard_(); if(!d)return;
   let changed=0;
-  const amount=d.net||d.total;
-  if(amount && (setFirstExisting_(['balanceSales','salesAmount','revenue','uriage','saleRevenue'],amount)||setByLabelText_(['売上','販売額','売上金額','収入'],amount))) changed++;
-  if(d.tax && (setFirstExisting_(['tax','saleTax'],d.tax)||setByLabelText_(['税','税金','税額'],d.tax))) changed++;
-  show('balance');
-  if(changed) alert('販売結果の売上・差し引き額を「収支・売上」へ反映しました。');
-  else alert('収支・売上の入力欄を特定できませんでした。');
+  if(d.item){setv('pfName',d.item);changed++;}
+  if(d.unit){setv('pfPrice',d.unit);changed++;}
+  if(d.qty){setv('pfQty',d.qty);changed++;}
+  showTab('profit'); focusElement_('pfName');
+  alert(changed+'項目を「収支計算」へ反映しました。\n原価・作業時間は取り込み結果に無いため、必要なら入力してください。');
 }
 function reflectImportToForecast(){
-  const d=lastSaleImport;
-  if(!d){alert('先に販売結果を取り込んでください。');return;}
+  const d=saleImportGuard_(); if(!d)return;
   let changed=0;
-  if(d.qty && (setFirstExisting_(['sold','forecastSold','saleForecastSold'],d.qty)||setByLabelText_(['売れた数','販売数'],d.qty))) changed++;
-  if(d.unit && (setFirstExisting_(['forecastPrice','saleForecastPrice','salesForecastPrice'],d.unit)||setByLabelText_(['販売価格','単価'],d.unit))) changed++;
-  show('forecast');
-  if(changed) alert('販売結果の販売数・単価を「販売予測」へ反映しました。\\n経過時間は実際の経過時間を入力してください。');
-  else alert('販売予測の入力欄を特定できませんでした。');
-}
-function reflectImportToAverage(){
-  const d=lastSaleImport;
-  if(!d){alert('先に販売結果を取り込んでください。');return;}
-  let changed=0;
-  if(d.qty && (setFirstExisting_(['resultQty','outputQty','outQty','quantity'],d.qty)||setByLabelText_(['数量','販売数','個数'],d.qty))) changed++;
-  if(d.total && (setFirstExisting_(['totalAmount','avgAmount','resultAmount'],d.total)||setByLabelText_(['金額','売上','合計'],d.total))) changed++;
-  show('avg');
-  if(changed) alert('販売結果を「平均・50回期待値」へ反映しました。');
-  else alert('平均・50回期待値の入力欄を特定できませんでした。');
+  if(d.qty){setv('sold',d.qty);changed++;}
+  if(d.unit){setv('forecastPrice',d.unit);}
+  show('xp'); focusElement_('sold');
+  alert((changed?'販売数を':'')+'「販売予測」へ反映しました。\n現在の在庫数と経過時間は実測値を入力してください。');
 }
 function reflectImportToOutput(){
-  const d=lastSaleImport;
-  if(!d){alert('先に販売結果を取り込んでください。');return;}
-  let changed=0;
-  if(d.qty && (setFirstExisting_(['outQty','resultQty','outputQty','quantity'],d.qty)||setByLabelText_(['成果量','数量'],d.qty))) changed++;
-  if(changed){
-    alert('販売結果の数量を「成果量」へ反映しました。');
-  }else{
-    alert('成果量の入力欄を特定できませんでした。');
-  }
+  const d=saleImportGuard_(); if(!d)return;
+  if(!d.qty){alert('販売数を読み取れていません。');return;}
+  // 販売数を成果量へ流し込むのではなく、明示的に「数量」として入力し、既存の50回計算を使える状態にする。
+  setv('oqty',d.qty); setv('ocount',1); if(d.item)setv('oitem',d.item); if(d.unit)setv('ounit','個');
+  show('out'); calcOut(); focusElement_('oqty');
+  alert('販売数を「成果量」へ入力しました。これは販売数を成果量として扱うため、必要なら内容を確認してから保存してください。');
 }
 function reflectImportToRecord(){
-  const d=lastSaleImport;
-  if(!d){alert('先に取り込んでください。');return;}
+  const d=saleImportGuard_(); if(!d)return;
   applyImportedSaleToRecord();
-  alert('販売記録の入力欄へ反映しました。保存は「販売記録を保存」を押したときに行われます。');
+  alert('販売結果を記録用の販売入力欄へ反映しました。保存する場合は「販売記録を保存」を押してください。');
 }
 function reflectImportToMemo(){
-  const d=lastSaleImport;
-  if(!d){alert('先に販売結果を取り込んでください。');return;}
-  const text=d.raw||'';
-  if(setFirstExisting_(['memoText','memo','noteText'],text)||setByLabelText_(['備忘録','メモ'],text)){
-    show('memo');
-    alert('取り込んだ販売結果を「備忘録」へ反映しました。');
-  }else{
-    alert('備忘録の入力欄を特定できませんでした。');
-  }
+  const d=saleImportGuard_(); if(!d)return;
+  setv('mtitle',d.item?('販売結果：'+d.item):'販売結果の取り込み');
+  setv('mtext',d.raw||'');
+  if(d.item)setv('mtags','販売,'+d.item);
+  show('memo'); focusElement_('mtitle');
+  alert('取り込んだ販売結果を「備忘録」の入力欄へ反映しました。保存する場合は「備忘録を保存」を押してください。');
 }
 function parseSaleImport(){
   lastSaleImport=parseSaleImportText_(document.getElementById('saleImportText').value);
