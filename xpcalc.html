@@ -378,6 +378,25 @@ input[type="text"]{max-width:220px;}
 </div>
 <div class="card" id="saleImportCard">
 <h2>販売結果取り込み（入力補助）</h2>
+
+<div class="note" style="margin-bottom:10px">
+  <b>📥 結果の取り込み</b>
+  <div style="margin-top:6px">取り込む種類を選んでください。</div>
+  <div class="btnrow" style="margin-top:8px">
+    <button type="button" onclick="show('saleImportCard')">💰 販売結果を取り込む</button>
+    <button type="button" onclick="show('workImportCard');openWorkImport()">🔨 作業結果を取り込む</button>
+  </div>
+</div>
+<div id="workImportCard" class="card">
+  <h2>🔨 作業結果の取り込み</h2>
+  <div class="note">SOLDOUT2の作業結果画面からコピーした内容を貼り付けてください。</div>
+  <textarea id="workImportText" placeholder="作業結果をここに貼り付け"></textarea>
+  <div class="btnrow">
+    <button type="button" onclick="parseWorkImport()">作業結果を取り込む</button>
+    <button type="button" class="sub" onclick="document.getElementById('workImportText').value='';document.getElementById('workImportResult').innerHTML=''">クリア</button>
+  </div>
+  <div id="workImportResult"></div>
+</div>
 <div class="note">販売結果の画面をコピーして貼り付けるか、保存したWebアーカイブ（.webarchive）/HTML/TXTを選択してください。ここは<strong>入力補助専用</strong>で、販売記録などを勝手に変更しません。</div>
 <textarea id="saleImportText" rows="6" placeholder="例：
 商店
@@ -1107,6 +1126,129 @@ function extractMoney_(text){
    「売上回収」「今回回収」「回収する売上」を最優先。
    それが無い場合だけ「総額」「売上」「販売額」を使う。
    「差し引き」「税」「販売数」「単価」「資金の増減」は売上回収額にしない。 */
+
+let lastWorkImport=null;
+
+function parseWorkImportText_(raw){
+  const text=String(raw||'').replace(/\u00a0/g,' ').replace(/\r/g,'\n');
+  const flat=text.replace(/<[^>]*>/g,' ').replace(/&nbsp;/gi,' ');
+  const clean=flat.replace(/\s+/g,' ').trim();
+
+  const level=(clean.match(/\bLV\s*(\d+)/i)||[])[1]||'';
+  const xp=(clean.match(/\(([+-]?[0-9]+(?:\.[0-9]+)?)%\)/)||[])[1]||'';
+  const current=(clean.match(/(?:^|\s)(\d+(?:\.\d+)?)%\s*資金|資金[\s\S]{0,80}?(\d+(?:\.\d+)?)%/i)||[]);
+  const currentXp=current[1]||current[2]||'';
+
+  const countMatch=clean.match(/(?:作業回数|回数|作業)\s*[:：=]?\s*([0-9][0-9,]*)\s*回/i);
+  const count=countMatch?Number(countMatch[1].replace(/,/g,'')):0;
+
+  const rows=[];
+  // 「名称 数量単位」の連続した成果物をできるだけ拾う
+  const re=/([^\s\d:：=+＋()（）]+(?:\s+[^\s\d:：=+＋()（）]+){0,2})\s+([0-9][0-9,]*(?:\.[0-9]+)?)\s*(個|本|枚|瓶|塊|kg|Ｇ|G|組|匹|頭|羽|枚|束|袋|缶|箱|着|冊|枚|点)/gi;
+  let m;
+  while((m=re.exec(clean))){
+    const name=m[1].trim();
+    if(/^(作業回数|販売数|単価|売上|資金|差し引き|総額|販売額)$/i.test(name)) continue;
+    rows.push({name,qty:Number(m[2].replace(/,/g,'')),unit:m[3]});
+  }
+
+  return {level,currentXp,observedXp:xp,count,outputs:rows,raw:text};
+}
+
+function renderWorkImport_(d){
+  const rows=[];
+  if(d.level) rows.push('Lv：'+d.level);
+  if(d.currentXp) rows.push('現在経験値：'+d.currentXp+'%');
+  if(d.observedXp) rows.push('実測の増加経験値：+'+d.observedXp+'%');
+  if(d.count) rows.push('作業回数：'+f(d.count)+'回');
+  if(d.outputs.length){
+    rows.push('<b>成果物</b>');
+    d.outputs.forEach(o=>rows.push(o.name+'：'+f(o.qty)+o.unit));
+  }
+  return '<h3>作業結果取り込み</h3>'+
+    (rows.length?rows.map(x=>'<div>'+x+'</div>').join(''):'<div class="note warning">⚠️ 作業結果を読み取れませんでした。</div>')+
+    '<div class="note" style="margin-top:10px">⚠️ ここではまだ経験値や記録を確定しません。内容を確認して反映先を選んでください。</div>'+
+    '<div class="btnrow" style="margin-top:8px">'+
+      '<button onclick="reflectWorkToOutput()">成果量へ反映</button>'+
+      '<button onclick="reflectWorkToXP()">経験値計算へ反映</button>'+
+      '<button onclick="reflectWorkToNextLV()">次のLVアップへ反映</button>'+
+      '<button onclick="reflectWorkToAverage()">平均・50回期待値へ反映</button>'+
+      '<button onclick="reflectWorkToRecord()">記録へ反映</button>'+
+      '<button onclick="reflectWorkToMemo()">備忘録へ反映</button>'+
+    '</div>';
+}
+
+function openWorkImport(){
+  const el=document.getElementById('workImportCard');
+  if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function parseWorkImport(){
+  lastWorkImport=parseWorkImportText_(document.getElementById('workImportText').value);
+  document.getElementById('workImportResult').innerHTML=renderWorkImport_(lastWorkImport);
+}
+
+function reflectWorkToOutput(){
+  const d=lastWorkImport;
+  if(!d){alert('先に作業結果を取り込んでください。');return;}
+  if(!d.outputs.length){alert('成果物を読み取れませんでした。');return;}
+  // 成果量欄を探して最初の成果物を反映。複数成果物対応欄があれば順番に入れる。
+  const ids=['outputName','resultName','productName','outName'];
+  const qtyIds=['outputQty','resultQty','outQty','quantity'];
+  const unitIds=['outputUnit','resultUnit','outUnit'];
+  let used=0;
+  d.outputs.forEach((o,i)=>{
+    const ni=setFirstExisting_(i?ids.map(x=>x+(i+1)):ids,o.name);
+    const qi=setFirstExisting_(i?qtyIds.map(x=>x+(i+1)):qtyIds,o.qty);
+    const ui=setFirstExisting_(i?unitIds.map(x=>x+(i+1)):unitIds,o.unit);
+    if(ni||qi||ui) used++;
+  });
+  if(!used) alert('成果量用の入力欄が見つかりません。');
+}
+
+function reflectWorkToXP(){
+  const d=lastWorkImport;
+  if(!d){alert('先に作業結果を取り込んでください。');return;}
+  if(d.observedXp) setFirstExisting_(['xpGain','gain','workXp'],d.observedXp);
+  else alert('作業結果に経験値が見つかりません。');
+}
+
+function reflectWorkToNextLV(){
+  const d=lastWorkImport;
+  if(!d){alert('先に作業結果を取り込んでください。');return;}
+  let ok=false;
+  if(d.level) ok=!!setFirstExisting_(['nextLv'],d.level)||ok;
+  if(d.currentXp) ok=!!setFirstExisting_(['nextCurrent'],d.currentXp)||ok;
+  if(d.observedXp) ok=!!setFirstExisting_(['nextGain','nextWorkGain'],d.observedXp)||ok;
+  if(!ok) alert('次のLVアップ用の入力欄が見つかりません。');
+}
+
+function reflectWorkToAverage(){
+  const d=lastWorkImport;
+  if(!d){alert('先に作業結果を取り込んでください。');return;}
+  let ok=false;
+  if(d.count) ok=!!setFirstExisting_(['workCount','runCount','avgRuns'],d.count)||ok;
+  if(d.outputs[0]) {
+    ok=!!setFirstExisting_(['resultQty','outputQty','outQty','quantity'],d.outputs[0].qty)||ok;
+  }
+  if(!ok) alert('平均・50回期待値用の入力欄が見つかりません。');
+}
+
+function reflectWorkToRecord(){
+  const d=lastWorkImport;
+  if(!d){alert('先に作業結果を取り込んでください。');return;}
+  if(typeof saveWorkRecordFromImport==='function') saveWorkRecordFromImport(d);
+  else alert('作業結果を記録欄へ反映する専用機能が見つかりません。');
+}
+
+function reflectWorkToMemo(){
+  const d=lastWorkImport;
+  if(!d){alert('先に作業結果を取り込んでください。');return;}
+  const text=d.raw||'';
+  if(setFirstExisting_(['memoText','memo','noteText'],text)) alert('備忘録欄へ反映しました。');
+  else alert('備忘録用の入力欄が見つかりません。');
+}
+
 function parseSaleImportText_(raw){
   const text=String(raw||'').replace(/\u00a0/g,' ').replace(/\r/g,'\n');
   const flat=text.replace(/<[^>]*>/g,' ').replace(/&nbsp;/gi,' ');
@@ -1170,7 +1312,18 @@ function renderSaleImport_(d){
     (rows.length?rows.map(x=>'<div>'+x+'</div>').join(''):'<div class="note warning">⚠️ 販売結果を読み取れませんでした。</div>')+
     (d.total?
       '<div class="note" style="margin-top:10px">⚠️ ここではまだ経験値を変更しません。まず取り込み内容を確認してください。</div>'+
-      '<button onclick="showImportReflectMenu_()">📥 取り込み結果から反映先を選ぶ</button>'+
+      '<div class="note" style="margin-top:10px"><b>📌 各項目へ反映</b><div style="margin-top:5px">取り込み内容を確認して、必要な項目だけ押してください。反映しただけでは保存・経験値確定はしません。</div></div>'+
+      '<div class="grid2" style="margin-top:8px">'+
+      '<button onclick="applyImportedSaleToRecord()">② 販売結果へ反映</button>'+
+      '<button onclick="reflectImportToXP()">経験値計算へ反映</button>'+
+      '<button onclick="reflectImportToNextLV()">次のLVアップへ反映</button>'+
+      '<button onclick="reflectImportToBalance()">収支・売上へ反映</button>'+
+      '<button onclick="reflectImportToForecast()">販売予測へ反映</button>'+
+      '<button onclick="reflectImportToAverage()">平均・50回期待値へ反映</button>'+
+      '<button onclick="reflectImportToOutput()">成果量へ反映</button>'+
+      '<button onclick="reflectImportToRecord()">記録へ反映</button>'+
+      '<button onclick="reflectImportToMemo()">備忘録へ反映</button>'+
+      '</div>'+
       '<button class="sub" onclick="judgeSaleImport()">① 販売経験値を判定</button>'
       :'');
 }
@@ -1224,85 +1377,67 @@ function setFirstExisting_(ids,value){
 function reflectImportToXP(){
   const d=lastSaleImport;
   if(!d){alert('先に取り込んでください。');return;}
-  // XP関連欄は「今回販売XP」の候補へ。確定は判定→減衰→反映の手順で行う。
-  if(d.observedXp!=null) setFirstExisting_(['xpGain','gain','workXp'],d.observedXp);
-  else alert('取り込み結果に経験値が見つかりません。');
+  let changed=false;
+  if(d.level){ setFirstExisting_(['level'],d.level); changed=true; }
+  if(d.currentXp){ setFirstExisting_(['current'],d.currentXp); changed=true; }
+  if(d.observedXp){ setFirstExisting_(['gain','sgain'],d.observedXp); changed=true; }
+  if(d.qty){ setFirstExisting_(['count'],d.qty); changed=true; }
+  if(changed) alert('経験値計算へ反映しました。');
+  else alert('経験値計算へ反映できる値がありません。');
 }
 function reflectImportToNextLV(){
   const d=lastSaleImport;
   if(!d){alert('先に取り込んでください。');return;}
-  const v=d.observedXp!=null?d.observedXp:(d.total? salesXpEstimate(d.total):'');
-  if(v===''){alert('次のLVアップへ反映できる経験値がありません。');return;}
-  if(setFirstExisting_(['nextSaleGain'],v)) alert('「次のLVアップまで」の販売経験値欄へ反映しました。\\n減衰が必要な場合は、先に販売経験値の判定・減衰を行ってください。');
-  else alert('「次のLVアップまで」の入力欄が見つかりません。');
+  let changed=false;
+  if(d.level){setFirstExisting_(['nextLv'],d.level);changed=true;}
+  if(d.currentXp){setFirstExisting_(['nextCurrent'],d.currentXp);changed=true;}
+  if(d.observedXp){setFirstExisting_(['nextGain','nextSaleGain'],d.observedXp);changed=true;}
+  if(changed) alert('「次のLVアップまで」へ反映しました。');
+  else alert('次のLVアップ計算へ反映できる値がありません。');
 }
 function reflectImportToBalance(){
   const d=lastSaleImport;
   if(!d){alert('先に取り込んでください。');return;}
-  const id=setFirstExisting_(['balanceSales','salesAmount','revenue','uriage','saleRevenue'],d.net!=null?d.net:d.total);
-  if(!id) alert('収支用の売上入力欄が見つかりません。');
+  // 現在のページでは収支専用入力欄を勝手に決めず、販売結果へ渡せる売上情報を明示する。
+  applyImportedSaleToRecord();
+  alert('販売価格・販売数を販売結果へ反映しました。売上・収支計算ではこの値を利用できます。');
 }
 function reflectImportToForecast(){
   const d=lastSaleImport;
   if(!d){alert('先に取り込んでください。');return;}
-  let id=setFirstExisting_(['forecastPrice','saleForecastPrice','salesForecastPrice','sprice'],d.unit);
-  if(d.qty) setFirstExisting_(['forecastQty','saleForecastQty','salesForecastQty','scount'],d.qty);
-  if(!id && !d.qty) alert('販売予測用の入力欄が見つかりません。');
+  let changed=false;
+  if(d.qty){setFirstExisting_(['sold'],d.qty);changed=true;}
+  if(d.unit){setFirstExisting_(['sprice'],d.unit);changed=true;}
+  if(changed){show('xp');alert('販売予測へ反映しました。経過時間は取り込みデータにないため、入力してください。');}
+  else alert('販売予測へ反映できる販売数・単価がありません。');
 }
 function reflectImportToAverage(){
   const d=lastSaleImport;
   if(!d){alert('先に取り込んでください。');return;}
-  const total=d.qty||1;
-  const amount=d.total||0;
-  const id=setFirstExisting_(['avgAmount','totalAmount','resultAmount','quantity'],amount);
-  if(id) setFirstExisting_(['avgRuns','workCount','runCount'],total);
-  else alert('平均・50回期待値用の入力欄が見つかりません。');
+  alert('今回の販売結果には「成果物名・作業回数」がないため、平均・50回期待値へは自動反映できません。成果量の記録から入力してください。');
 }
 function reflectImportToOutput(){
   const d=lastSaleImport;
   if(!d){alert('先に取り込んでください。');return;}
-  const id=setFirstExisting_(['outQty','resultQty','outputQty','quantity'],d.qty);
-  if(!id) alert('成果量用の入力欄が見つかりません。');
+  if(!d.qty){alert('取り込み結果に販売数がないため、成果量へ反映できません。');return;}
+  setFirstExisting_(['oqty'],d.qty);
+  setFirstExisting_(['ocount'],1);
+  alert('販売数を成果量の「成果量」へ反映しました。これは販売数を成果量として扱うだけなので、必要なら作業回数・成果物名を確認してください。');
 }
 function reflectImportToRecord(){
   const d=lastSaleImport;
   if(!d){alert('先に取り込んでください。');return;}
-  // 記録機能に専用APIがある場合のみ呼び出す。なければ販売結果へ反映して記録前確認を促す。
-  if(typeof saveRecordFromImport==='function') saveRecordFromImport(d);
-  else if(typeof addRecord==='function') addRecord(d);
-  else alert('記録への自動反映機能は現在のページにはありません。まず「販売結果へ反映」で内容を確認してください。');
+  applyImportedSaleToRecord();
+  alert('販売記録の入力欄へ反映しました。保存は「販売記録を保存」を押したときに行われます。');
 }
 function reflectImportToMemo(){
   const d=lastSaleImport;
   if(!d){alert('先に取り込んでください。');return;}
-  const text=(d.rawText||'').trim();
-  if(typeof addMemo==='function') addMemo(text);
-  else if(setFirstExisting_(['memoText','memo','noteText'],text)) alert('備忘録欄へ反映しました。');
-  else alert('備忘録用の入力欄が見つかりません。');
+  const el=document.getElementById('mtext');
+  if(el){el.value=d.raw||'';el.dispatchEvent(new Event('input',{bubbles:true}));show('memo');el.scrollIntoView({behavior:'smooth',block:'start'});alert('取り込んだ販売結果を備忘録の内容欄へ反映しました。保存は「備忘録を保存」を押してください。');}
+  else alert('備忘録の入力欄が見つかりません。');
 }
 
-function applyImportedSaleToRecord(){
-  if(!lastSaleImport||!lastSaleImport.total){
-    alert('先に販売結果を取り込んでください。');
-    return;
-  }
-  const d=lastSaleImport;
-
-  // 取り込み結果を「販売結果」入力欄へ渡すだけ。
-  // 経験値の確定・減衰計算・記録保存はここでは行わない。
-  if(d.level) setv('slv',d.level);
-  if(d.qty) setv('scount',d.qty);
-  if(d.unit) setv('sprice',d.unit);
-
-  // 実測XPは参考値として表示されているだけなので、
-  // 自動で販売経験値欄へ入れず、減衰計算後に確定する。
-  show('xp');
-
-  const card=document.getElementById('saleImportCard');
-  if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
-
-  alert('取り込み結果を「販売結果」の入力欄へ反映しました。\n\n販売数・販売価格・Lvを確認してください。\n販売経験値は減衰計算後に確定します。');
-}
 function parseSaleImport(){
   lastSaleImport=parseSaleImportText_(document.getElementById('saleImportText').value);
   document.getElementById('saleImportResult').innerHTML=renderSaleImport_(lastSaleImport);
