@@ -355,7 +355,7 @@ input[type="text"]{max-width:220px;}
 </div>
 <div class="three-inputs">
 <div><label>1回の作業時間（分）<span class="optional">任意</span></label><input id="nextMinutes" type="number" min="0" step="0.001" placeholder="例：60"></div>
-<div><label>販売経験値（%）<span class="optional">任意</span></label><input id="nextSaleGain" type="number" min="0" step="0.000001" placeholder="例：0.17"></div>
+<div><label>販売経験値（%）<span class="optional">自動反映</span></label><input id="nextSaleGain" type="number" min="0" step="0.000001" placeholder="例：0.17"></div>
 </div>
 <button onclick="calcNextLevel()">次のLVアップまで計算</button>
 <div id="nextLevelResult" class="result"></div>
@@ -1073,27 +1073,63 @@ function saleXPWithDecay(amount,before){
   return {amount,before,after,xp:Math.max(0,saleXPFromDayTotal(after)-saleXPFromDayTotal(before))};
 }
 function extractMoney_(text){
-  const m=text.match(/[+＋]?\s*([0-9][0-9,]*(?:\.\d+)?)\s*G/gi)||[];
+  const m=String(text||'').match(/[+＋]?\s*([0-9][0-9,]*(?:\.\d+)?)\s*G/gi)||[];
   return m.map(x=>Number(x.replace(/[^0-9.]/g,''))).filter(Number.isFinite);
 }
+
+/* 販売結果のフリースタイル取込。
+   「売上回収」「今回回収」「回収する売上」を最優先。
+   それが無い場合だけ「総額」「売上」「販売額」を使う。
+   「差し引き」「税」「販売数」「単価」「資金の増減」は売上回収額にしない。 */
 function parseSaleImportText_(raw){
   const text=String(raw||'').replace(/\u00a0/g,' ').replace(/\r/g,'\n');
   const flat=text.replace(/<[^>]*>/g,' ').replace(/&nbsp;/gi,' ');
   const clean=flat.replace(/\s+/g,' ').trim();
+
   const level=(clean.match(/\bLV\s*(\d+)/i)||[])[1]||'';
   const xp=(clean.match(/\(([+-]?[0-9]+(?:\.[0-9]+)?)%\)/)||[])[1]||'';
-  const current=(clean.match(/(?:^|\s)(\d+(?:\.\d+)?)%\s*資金|資金[\s\S]{0,80}?(\d+(?:\.\d+)?)%/i)||[]); 
+  const current=(clean.match(/(?:^|\s)(\d+(?:\.\d+)?)%\s*資金|資金[\s\S]{0,80}?(\d+(?:\.\d+)?)%/i)||[]);
   const currentXp=current[1]||current[2]||'';
+
   const qty=(clean.match(/(?:販売棚|販売)[\s\S]{0,100}?([0-9][0-9,]*)\s*(?:杯|個|本|枚|瓶|塊|kg|Ｇ|G)/i)||[])[1]||'';
   const unit=(clean.match(/単価\s*@?\s*([0-9][0-9,]*(?:\.\d+)?)\s*G/i)||[])[1]||'';
-  const totalMatch=clean.match(/(?:総額|売上|販売額)\s*([0-9][0-9,]*(?:\.\d+)?)\s*G/i);
-  const total=totalMatch?Number(totalMatch[1].replace(/,/g,'')):0;
+
+  const moneyAfter=(labels)=>{
+    for(const label of labels){
+      const re=new RegExp(label+'\\s*[:：=]?\\s*[+＋]?\\s*([0-9][0-9,]*(?:\\.\\d+)?)\\s*G','i');
+      const m=clean.match(re);
+      if(m) return Number(m[1].replace(/,/g,''));
+    }
+    return 0;
+  };
+
+  // 「回収」が書かれている数字を最優先で採用。
+  const collected = moneyAfter([
+    '(?:今回|今)\\s*(?:回収|回収する)\\s*(?:売上|金額)?',
+    '売上\\s*(?:回収|回収額|回収金額)',
+    '回収(?:額|金額)?'
+  ]);
+
+  // 次に「総額」「売上」「販売額」。ただし「差し引き」「税」は除外。
+  const totalMatch = clean.match(/(?:総額|売上(?!\\s*(?:回収|回収額|回収金額))|販売額)\\s*[:：=]?\s*([0-9][0-9,]*(?:\.\d+)?)\s*G/i);
+  const total = collected || (totalMatch ? Number(totalMatch[1].replace(/,/g,'')) : 0);
+
   const diff=(clean.match(/資金の増減\s*[+＋]?\s*([0-9][0-9,]*(?:\.\d+)?)\s*G/i)||[])[1]||'';
   const net=(clean.match(/差し引き\s*([0-9][0-9,]*(?:\.\d+)?)\s*G/i)||[])[1]||'';
-  const money=extractMoney_(clean);
-  const saleAmount=total || (diff?Number(diff.replace(/,/g,'')):0) || (money[0]||0);
-  return {level,currentXp,observedXp:xp,qty:qty?Number(qty.replace(/,/g,'')):0,unit:unit?Number(unit.replace(/,/g,'')):0,total:saleAmount,tax:diff&&net?Math.max(0,Number(diff.replace(/,/g,''))-Number(net.replace(/,/g,''))):0,net:net?Number(net.replace(/,/g,'')):0,raw:text};
+
+  return {
+    level,
+    currentXp,
+    observedXp:xp,
+    qty:qty?Number(qty.replace(/,/g,'')):0,
+    unit:unit?Number(unit.replace(/,/g,'')):0,
+    total,
+    tax:diff&&net?Math.max(0,Number(diff.replace(/,/g,''))-Number(net.replace(/,/g,''))):0,
+    net:net?Number(net.replace(/,/g,'')):0,
+    raw:text
+  };
 }
+
 function renderSaleImport_(d){
   const rows=[];
   if(d.level)rows.push('Lv：'+d.level);
@@ -1104,7 +1140,8 @@ function renderSaleImport_(d){
   if(d.total)rows.push('売上（総額）：'+f(d.total)+' G');
   if(d.tax)rows.push('税・差額：'+f(d.tax)+' G');
   if(d.net)rows.push('差し引き：'+f(d.net)+' G');
-  return '<h3>取り込み結果</h3>'+(rows.length?rows.map(x=>'<div>'+x+'</div>').join(''):'<div class="note warning">⚠️ 販売結果を読み取れませんでした。</div>')+(d.total?'<button onclick="applySaleImport()">販売経験値へ反映</button>':'');
+  return '<h3>取り込み結果</h3>'+(rows.length?rows.map(x=>'<div>'+x+'</div>').join(''):'<div class="note warning">⚠️ 販売結果を読み取れませんでした。</div>')+
+(d.total?'<div class="note" style="margin-top:8px">⬇️ 「販売経験値へ反映」は、上で認識した<strong>売上総額</strong>だけを減衰計算へ渡します。販売数・単価・税・差し引き額などの数字は売上額として使いません。</div><button onclick="applySaleImport()">販売経験値へ反映</button>':'');
 }
 let lastSaleImport=null;
 function parseSaleImport(){
@@ -1112,11 +1149,46 @@ function parseSaleImport(){
   document.getElementById('saleImportResult').innerHTML=renderSaleImport_(lastSaleImport);
 }
 function applySaleImport(){
-  if(!lastSaleImport||!lastSaleImport.total){alert('売上総額を先に取り込んでください。');return;}
-  const el=document.getElementById('decaySale');
-  if(el)el.value=lastSaleImport.total;
+  if(!lastSaleImport||!lastSaleImport.total){
+    alert('「売上回収額」を認識できませんでした。\n売上回収 100000G のように、回収額を明記してください。');
+    return;
+  }
+
+  const amount=Number(lastSaleImport.total)||0;
+  const beforeRaw=(document.getElementById('decayBefore')?.value||'').trim();
+  const before=beforeRaw===''?0:Number(beforeRaw);
+
+  if(!Number.isFinite(before)||before<0){
+    alert('5:00以降の回収済み売上は0以上で入力してください。');
+    return;
+  }
+
+  // ここで初めて減衰を計算。販売価格×販売数や差し引き額は使わない。
+  const r=saleXPWithDecay(amount,before);
+
+  const decayEl=document.getElementById('decaySale');
+  if(decayEl) decayEl.value=amount;
+
+  // 反映先は専用の販売XP欄だけ。作業XPや成果量などは変更しない。
+  const saleGainEl=document.getElementById('nextSaleGain');
+  if(saleGainEl) saleGainEl.value=f(r.xp);
+
+  window.__pendingSaleXP={
+    amount:r.amount,
+    before:r.before,
+    after:r.after,
+    xp:r.xp,
+    createdAt:Date.now()
+  };
+
   const out=document.getElementById('saleImportResult');
-  out.innerHTML=renderSaleImport_(lastSaleImport)+'<div class="note">✅ 今回回収する売上に '+f(lastSaleImport.total)+' G を入力しました。ほかの販売記録・作業・成果量などは変更していません。</div>';
+  out.innerHTML=renderSaleImport_(lastSaleImport)+
+    '<hr><h3>販売経験値への反映内容</h3>'+
+    '<div>今回の売上回収額：<b>'+f(r.amount)+' G</b></div>'+
+    '<div>5:00以降の回収済み売上：<b>'+f(r.before)+' G</b></div>'+
+    '<div>回収後の当日累計：<b>'+f(r.after)+' G</b></div>'+
+    '<div class="big">減衰後の販売経験値：<b>+'+f(r.xp)+'%</b></div>'+
+    '<div class="note">✅ この値だけを「販売経験値」として反映しました。49万Gなど別の数字へ置き換えません。販売数・単価・税・差し引き額は販売経験値の売上回収額には使用していません。</div>';
 }
 function importSaleFile(file){
   if(!file)return;
@@ -1141,11 +1213,18 @@ function calcSaleDecay(){
   const before=beforeRaw===''?0:Number(beforeRaw);
   if(!Number.isFinite(before)||before<0){out.innerHTML='<div class="note warning">⚠️ 5:00以降の回収済み売上は0以上で入力してください。</div>';return;}
   const r=saleXPWithDecay(amount,before);
+
+  const saleGainEl=document.getElementById('nextSaleGain');
+  if(saleGainEl) saleGainEl.value=f(r.xp);
+
+  window.__pendingSaleXP={amount:r.amount,before:r.before,after:r.after,xp:r.xp,createdAt:Date.now()};
+
   out.innerHTML='<h3>計算結果</h3>'+
     '<div>5:00以降の回収済み売上：<b>'+f(r.before)+' G</b></div>'+
     '<div>今回回収：<b>'+f(r.amount)+' G</b></div>'+
     '<div>回収後の当日累計：<b>'+f(r.after)+' G</b></div>'+
     '<div class="big">今回の販売経験値：<b>+'+f(r.xp)+'%</b></div>'+
+    '<div class="note">✅ 減衰後の販売経験値を「販売経験値」欄へ反映しました。ほかの経験値・成果量・記録には影響しません。</div>'+
     '<p class="note">※減衰は販売経験値だけに適用。毎日5:00で累計を0から数え直す想定です。</p>';
 }
 function showTab(name){
