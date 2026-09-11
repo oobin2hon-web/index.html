@@ -304,6 +304,14 @@ input[type="text"]{max-width:220px;}
 <body><button id="tabprofit" style="margin:6px" onclick="showTab('profit')">収支</button>
 <div class="wrap">
 <h1>経験値・成果量・備忘録</h1>
+<div class="note import-helper" data-import-side="work" style="margin-top:8px">
+  <b>📥 取り込み補助</b>
+  <div style="margin-top:4px">作業結果をここから直接取り込めます。取り込んだ内容は確認後、この項目へ反映できます。</div>
+  <div class="btnrow" style="margin-top:6px">
+    <button type="button" onclick="show('workImportCard');openWorkImport()">🔨 作業結果を取り込む</button>
+  </div>
+</div>
+
 
 <div class="tabs">
 <button id="tabxp" class="active" onclick="show('xp')">経験値</button>
@@ -378,6 +386,14 @@ input[type="text"]{max-width:220px;}
 </div>
 <div class="card" id="saleImportCard">
 <h2>販売結果取り込み（入力補助）</h2>
+<div class="note import-helper" data-import-side="sale" style="margin-top:8px">
+  <b>📥 取り込み補助</b>
+  <div style="margin-top:4px">販売結果をここから直接取り込めます。取り込んだ内容は確認後、この項目へ反映できます。</div>
+  <div class="btnrow" style="margin-top:6px">
+    <button type="button" onclick="show('saleImportCard')">💰 販売結果を取り込む</button>
+  </div>
+</div>
+
 
 <div class="note" style="margin-bottom:10px">
   <b>📥 結果の取り込み</b>
@@ -415,6 +431,15 @@ LV 13
 </div>
 <div class="card">
 <h2>販売ペース・完売予測</h2>
+<div class="note import-helper" style="margin-top:8px">
+  <b>📥 取り込み補助</b>
+  <div style="margin-top:4px">販売結果の「販売数・単価」などを取り込んで、この販売予測へ反映できます。</div>
+  <div class="btnrow" style="margin-top:6px">
+    <button type="button" onclick="show('saleImportCard')">💰 販売結果を取り込む</button>
+    <button type="button" onclick="reflectImportToForecast()">↪ 取り込み結果を販売予測へ反映</button>
+  </div>
+</div>
+
 <div class="note">一定の販売ペースが続く場合の完売時間を計算します。</div>
 <div class="grid2"><div><label>現在の在庫数（個）</label><input id="stock" type="number" min="0" step="any"></div><div><label>売れた数（個）</label><input id="sold" type="number" min="0" step="any"></div></div>
 <label>経過時間（時間）</label><input id="hours" type="number" min="0" step="0.01">
