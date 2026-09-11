@@ -340,6 +340,16 @@ input[type="text"]{max-width:220px;}
 <div id="xp" class="section active">
 <div class="card">
 <h2>経験値計算</h2>
+<div class="note import-helper" data-import-side="xp" style="margin-top:8px">
+  <b>📥 取り込み補助</b>
+  <div style="margin-top:4px">販売結果・作業結果の取り込みデータから、この経験値計算へ入力できます。</div>
+  <div class="btnrow" style="margin-top:6px">
+    <button type="button" onclick="show('saleImportCard')">💰 販売結果を取り込む</button>
+    <button type="button" onclick="show('workImportCard');openWorkImport()">🔨 作業結果を取り込む</button>
+    <button type="button" onclick="reflectImportToXP()">↪ 取り込み結果を経験値計算へ反映</button>
+  </div>
+</div>
+
 <div class="note">🔰 <b>分かるところだけ入力してください。</b> 必須項目はありません。<br>「1回の経験値」が分かるならそれだけでOK。分からない場合は「詳細」を開いて、基礎作業時間＋作業速度から自動計算できます。</div>
 <div class="grid2"><div><label>現在Lv<span class="optional">任意</span></label><input id="level" type="number" min="1" placeholder="例：8"></div><div><label>現在の経験値（%）<span class="optional">任意</span></label><input id="current" type="number" min="0" max="99.999999" step="0.001" placeholder="例：99.92"></div></div>
 <div class="grid2"><div><label>1回で増える経験値（%）<span class="optional">任意</span></label><input id="gain" type="number" min="0" step="0.000001" placeholder="例：0.17"></div><div><label>取得回数<span class="optional">任意</span></label><input id="count" type="number" min="1" value="1"></div></div>
@@ -355,6 +365,16 @@ input[type="text"]{max-width:220px;}
 
 <div class="card feature-xp">
 <h2>次のLVアップまで</h2>
+<div class="note import-helper" data-import-side="nextlv" style="margin-top:8px">
+  <b>📥 取り込み補助</b>
+  <div style="margin-top:4px">取り込んだLv・現在経験値・増加経験値を、この「次のLVアップまで」に反映できます。</div>
+  <div class="btnrow" style="margin-top:6px">
+    <button type="button" onclick="show('saleImportCard')">💰 販売結果を取り込む</button>
+    <button type="button" onclick="show('workImportCard');openWorkImport()">🔨 作業結果を取り込む</button>
+    <button type="button" onclick="reflectImportToNextLV()">↪ 取り込み結果を次のLVアップへ反映</button>
+  </div>
+</div>
+
 <div class="note">現在のLVと経験値%、1回で増える経験値%を入力すると、<b>次のLVまであと何回か</b>を計算します。1回の作業時間を入れれば、必要時間も計算できます。</div>
 <div class="three-inputs">
 <div><label>現在Lv</label><input id="nextLv" type="number" min="1" step="1" placeholder="例：13"></div>
@@ -371,6 +391,15 @@ input[type="text"]{max-width:220px;}
 
 <div class="card">
 <h2>販売記録を保存</h2>
+<div class="note import-helper" data-import-side="salerecord" style="margin-top:8px">
+  <b>📥 取り込み補助</b>
+  <div style="margin-top:4px">販売結果を取り込んで、販売物・販売価格・販売数・Lvなどをこの保存欄へ反映できます。</div>
+  <div class="btnrow" style="margin-top:6px">
+    <button type="button" onclick="show('saleImportCard')">💰 販売結果を取り込む</button>
+    <button type="button" onclick="applyImportedSaleToRecord()">↪ 取り込み結果を販売記録へ反映</button>
+  </div>
+</div>
+
 <div class="three-inputs"><div><label>職種・職業</label><input id="sjob" placeholder="例：道具屋"></div><div><label>販売物</label><input id="sitem" placeholder="例：ポーション"></div><div><label>街名</label><input id="scity" placeholder="例：王都"></div></div>
 <div class="three-inputs"><div><label>Lv</label><input id="slv" type="number" min="1"></div></div>
 <div class="grid2"><div><label>販売価格（G/個）</label><input id="sprice" type="number" min="0" step="any"></div><div><label>販売数</label><input id="scount" type="number" min="1" step="any"></div></div>
@@ -447,6 +476,14 @@ LV 13
 </div>
 <div class="card">
 <h2>作業記録を保存</h2>
+<div class="note import-helper" style="margin-bottom:10px">
+  <b>📥 作業結果の取り込み</b>
+  <div style="margin-top:4px">ゲーム内の作業結果をコピーして、下の作業記録へ反映できます。</div>
+  <div class="btnrow" style="margin-top:6px">
+    <button type="button" onclick="show('workImportCard');openWorkImport()">🔨 作業結果を取り込む</button>
+    <button type="button" onclick="reflectWorkToWorkRecord()">↪ 取り込み結果を作業記録へ反映</button>
+  </div>
+</div>
 <div class="three-inputs"><div><label>職種・職業</label><input id="wjob" placeholder="例：木こり"></div><div><label>作業名</label><input id="wname" placeholder="例：林道を探索"></div><div><label>街名</label><input id="wcity" placeholder="例：王都"></div></div>
 <div class="three-inputs"><div><label>Lv</label><input id="wlv" type="number" min="1"></div></div>
 <div class="grid2"><div><label>座標X</label><input id="wx" type="number" step="any"></div><div><label>座標Y</label><input id="wy" type="number" step="any"></div></div>
@@ -1211,6 +1248,38 @@ function openWorkImport(){
 function parseWorkImport(){
   lastWorkImport=parseWorkImportText_(document.getElementById('workImportText').value);
   document.getElementById('workImportResult').innerHTML=renderWorkImport_(lastWorkImport);
+}
+
+
+function reflectWorkToWorkRecord(){
+  const d=lastWorkImport;
+  if(!d){
+    alert('先に「作業結果を取り込む」で取り込み結果を作成してください。');
+    return;
+  }
+
+  let changed=0;
+  if(d.level && setFirstExisting_(['wlv'],d.level)) changed++;
+  if(d.currentXp && setFirstExisting_(['wcurrent','workCurrentXp'],d.currentXp)) changed++;
+  if(d.observedXp && setFirstExisting_(['wgain'],d.observedXp)) changed++;
+  if(d.count && setFirstExisting_(['wcount'],d.count)) changed++;
+
+  // 取り込み本文から職種・作業名らしい情報を取れる場合だけ補助的に入れる。
+  const raw=d.raw||'';
+  const job=(raw.match(/(?:職種|職業)\s*[:：]\s*([^\n]+)/i)||[])[1];
+  const task=(raw.match(/(?:作業名|作業内容)\s*[:：]\s*([^\n]+)/i)||[])[1];
+  if(job && setFirstExisting_(['wjob'],job.trim())) changed++;
+  if(task && setFirstExisting_(['wname'],task.trim())) changed++;
+
+  show('work');
+  const card=document.querySelector('#work .card');
+  if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
+
+  if(changed){
+    alert('取り込み結果を「作業記録を保存」の入力欄へ反映しました。\\n\\n内容を確認してから「作業記録を保存」を押してください。');
+  }else{
+    alert('作業記録へ反映できる項目が見つかりませんでした。');
+  }
 }
 
 function reflectWorkToOutput(){
