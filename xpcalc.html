@@ -1402,24 +1402,27 @@ function renderSaleImport_(d){
   if(d.total)rows.push('売上（総額）：'+f(d.total)+' G');
   if(d.tax)rows.push('税・差額：'+f(d.tax)+' G');
   if(d.net)rows.push('差し引き：'+f(d.net)+' G');
-  return '<h3>取り込み結果</h3>'+
-    (rows.length?rows.map(x=>'<div>'+x+'</div>').join(''):'<div class="note warning">⚠️ 販売結果を読み取れませんでした。</div>')+
-    (d.total?
-      '<div class="note" style="margin-top:10px">⚠️ ここではまだ経験値を変更しません。まず取り込み内容を確認してください。</div>'+
-      '<div class="note" style="margin-top:10px"><b>📌 各項目へ反映</b><div style="margin-top:5px">取り込み内容を確認して、必要な項目だけ押してください。反映しただけでは保存・経験値確定はしません。</div></div>'+
-      '<div class="grid2" style="margin-top:8px">'+
-      '<button onclick="applyImportedSaleToRecord()">② 販売結果へ反映</button>'+
-      '<button onclick="reflectImportToXP()">経験値計算へ反映</button>'+
-      '<button onclick="reflectImportToNextLV()">次のLVアップへ反映</button>'+
-      '<button onclick="reflectImportToBalance()">収支・売上へ反映</button>'+
-      '<button onclick="reflectImportToForecast()">販売予測へ反映</button>'+
-      '<button onclick="reflectImportToAverage()">平均・50回期待値へ反映</button>'+
-      '<button onclick="reflectImportToOutput()">成果量へ反映</button>'+
-      '<button onclick="reflectImportToRecord()">記録へ反映</button>'+
-      '<button onclick="reflectImportToMemo()">備忘録へ反映</button>'+
+
+  const buttons =
+    '<div class="note" style="margin-top:10px">'+
+      '<b>📥 この販売結果を各項目へ反映</b>'+
+      '<div style="margin-top:4px">取り込んだだけでは保存・経験値確定はしません。必要な場所だけ押してください。</div>'+
+      '<div class="btnrow" style="margin-top:8px">'+
+        '<button type="button" onclick="applyImportedSaleToRecord()">💰 販売結果へ反映</button>'+
+        '<button type="button" onclick="reflectImportToXP()">⭐ 経験値計算へ反映</button>'+
+        '<button type="button" onclick="reflectImportToNextLV()">⬆ 次のLVアップへ反映</button>'+
+        '<button type="button" onclick="reflectImportToBalance()">💴 収支・売上へ反映</button>'+
+        '<button type="button" onclick="reflectImportToForecast()">📈 販売予測へ反映</button>'+
+        '<button type="button" onclick="reflectImportToAverage()">📊 平均・50回期待値へ反映</button>'+
+        '<button type="button" onclick="reflectImportToOutput()">📦 成果量へ反映</button>'+
+        '<button type="button" onclick="reflectImportToRecord()">📝 記録へ反映</button>'+
+        '<button type="button" onclick="reflectImportToMemo()">📌 備忘録へ反映</button>'+
       '</div>'+
-      '<button class="sub" onclick="judgeSaleImport()">① 販売経験値を判定</button>'
-      :'');
+    '</div>';
+
+  return '<h3>販売結果の取り込み結果</h3>'+
+    (rows.length?rows.map(x=>'<div>'+x+'</div>').join(''):'<div class="note warning">⚠️ 販売結果を読み取れませんでした。</div>')+
+    (d.total?buttons:'');
 }
 
 function importReflectButton_(label, fn){
