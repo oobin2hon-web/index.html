@@ -24,7 +24,7 @@
                 <h1 class="text-lg font-bold tracking-wider">作業系データ解析・記録管理ツール</h1>
             </div>
             <div class="text-xs text-indigo-200">
-                Revision: v1.3.0
+                Revision: v1.3.1
             </div>
         </div>
     </header>
@@ -82,23 +82,28 @@
                     <input type="number" id="form-operations" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例: 50">
                 </div>
 
-                <!-- 詳細効率・経験値計算オプション（基礎作業時間 ＋ 作業速度、未入力時速度は100%） -->
+                <!-- 詳細効率・経験値計算オプション（基礎作業時間 ＋ 作業速度） -->
                 <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100 space-y-2">
                     <div class="flex justify-between items-center">
                         <span class="text-xs font-bold text-indigo-900">詳細効率・経験値計算（端数対応）</span>
-                        <span class="text-[10px] text-indigo-600">未入力時は速度100%</span>
+                        <span class="text-[10px] text-indigo-600">速度未入力時=100%</span>
                     </div>
-                    <div class="text-[11px] text-slate-600 leading-tight">
-                        実値が0.0147の場合など0.01未満の微小な端数・差を正確に反映するため、基礎作業時間と作業速度から算出します。
+                    <!-- 注意書きの追加 -->
+                    <div class="bg-white p-2 rounded border border-indigo-200 text-[11px] text-indigo-900 leading-tight space-y-1">
+                        <p class="font-bold">【注意書き】</p>
+                        <p>・基礎作業時間は、未入力の場合は自動で <span class="underline font-semibold">1時間</span> をデフォルトとします。</p>
+                        <p>・設定値は 1, 2, 4, 8, 12, 24 時間などの段階的数値を想定しています。</p>
+                        <p>・実値が0.0147の場合など0.01未満の微小な端数を正確に反映します。</p>
                     </div>
+
                     <div class="grid grid-cols-2 gap-2 pt-1">
                         <div>
-                            <label class="block text-[11px] text-indigo-800 mb-0.5">基礎作業時間</label>
-                            <input type="number" step="0.0001" id="form-base-time" class="w-full text-xs p-1.5 bg-white border border-indigo-200 rounded focus:ring-1 focus:ring-indigo-500" placeholder="例: 10.5">
+                            <label class="block text-[11px] text-indigo-800 mb-0.5">基礎作業時間 (時間)</label>
+                            <input type="number" step="0.0001" id="form-base-time" class="w-full text-xs p-1.5 bg-white border border-indigo-200 rounded focus:ring-1 focus:ring-indigo-500" placeholder="未入力時: 1">
                         </div>
                         <div>
-                            <label class="block text-[11px] text-indigo-800 mb-0.5">作業速度 (%) [空欄=100]</label>
-                            <input type="number" step="0.0001" id="form-speed-rate" class="w-full text-xs p-1.5 bg-white border border-indigo-200 rounded focus:ring-1 focus:ring-indigo-500" placeholder="未入力時100%">
+                            <label class="block text-[11px] text-indigo-800 mb-0.5">作業速度 (%)</label>
+                            <input type="number" step="0.0001" id="form-speed-rate" class="w-full text-xs p-1.5 bg-white border border-indigo-200 rounded focus:ring-1 focus:ring-indigo-500" placeholder="未入力時: 100">
                         </div>
                     </div>
                     <div class="text-[11px] text-indigo-700 flex justify-between items-center pt-1">
@@ -152,11 +157,11 @@
         <div class="bg-white rounded-xl max-w-lg w-full p-5 space-y-3 shadow-xl">
             <h3 class="text-sm font-bold text-slate-800 border-b pb-2 flex justify-between items-center">
                 <span>元の情報（逆引きデータ）</span>
-                <button onclick="closeReverseModal()" class="text-slate-400 hover:text-slate-600 text-xs font-bold">✕ 閉じる</button>
+                <button id="modal-close-btn" type="button" class="text-slate-400 hover:text-slate-600 text-xs font-bold">✕ 閉じる</button>
             </h3>
             <pre id="reverse-modal-content" class="bg-slate-100 p-3 rounded text-xs font-mono whitespace-pre-wrap max-h-80 overflow-y-auto text-slate-700 border border-slate-200"></pre>
             <div class="flex justify-end pt-1">
-                <button onclick="closeReverseModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-4 py-2 rounded transition font-medium">
+                <button id="modal-close-btn-footer" type="button" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-4 py-2 rounded transition font-medium">
                     閉じる
                 </button>
             </div>
@@ -180,9 +185,9 @@
                 unit: "本",
                 operations: 50,
                 average: 8.72,
-                baseTime: 12.0,
+                baseTime: 1.0,
                 speedRate: 115.5,
-                efficiency: "13.8600",
+                efficiency: "1.1550",
                 rawSource: "鍛冶職人LV 7 (+1.81%)\n26.1%\n獲得したもの\n斧\n436本\n作業回数：50回",
                 createdAt: "2026-06-01 12:00:00"
             },
@@ -195,15 +200,15 @@
                 unit: "kg",
                 operations: 50,
                 average: 15.88,
-                baseTime: 8.5,
-                speedRate: 100, // 未入力時は100%デフォルト
-                efficiency: "8.5000",
+                baseTime: 1.0,
+                speedRate: 100,
+                efficiency: "1.0000",
                 rawSource: "錬金術師LV 7 (+1.04%)\n9.94%\n獲得したもの\n氷\n794kg\n作業回数：50回",
                 createdAt: "2026-06-02 14:30:00"
             }
         ];
 
-        const STORAGE_KEY = "work_tool_records_v1.3.0";
+        const STORAGE_KEY = "work_tool_records_v1.3.1";
 
         const rawInputText = document.getElementById('raw-input-text');
         const parseBtn = document.getElementById('parse-btn');
@@ -227,6 +232,8 @@
         const resetDefaultBtn = document.getElementById('reset-default-btn');
         const reverseModal = document.getElementById('reverse-modal');
         const reverseModalContent = document.getElementById('reverse-modal-content');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const modalCloseBtnFooter = document.getElementById('modal-close-btn-footer');
 
         let records = [];
 
@@ -264,21 +271,27 @@
 
             formBaseTime.addEventListener('input', updateEfficiencyPreview);
             formSpeedRate.addEventListener('input', updateEfficiencyPreview);
+
+            // モーダル閉じるボタンのイベント設定
+            modalCloseBtn.addEventListener('click', closeReverseModal);
+            modalCloseBtnFooter.addEventListener('click', closeReverseModal);
+            reverseModal.addEventListener('click', (e) => {
+                if (e.target === reverseModal) closeReverseModal();
+            });
         }
 
-        // 効率プレビュー計算 (作業速度未入力時は自動で100%を適用。端数対応)
+        // 効率プレビュー計算 (基礎時間未入力時は1.0、速度未入力時は100をデフォルト適用)
         function updateEfficiencyPreview() {
-            const base = parseFloat(formBaseTime.value);
-            if (!isNaN(base) && base > 0) {
-                const speedInput = formSpeedRate.value.trim();
-                const speed = speedInput === "" ? 100 : parseFloat(speedInput);
-                const effectiveSpeed = isNaN(speed) ? 100 : speed;
+            const baseInput = formBaseTime.value.trim();
+            const base = baseInput === "" ? 1.0 : parseFloat(baseInput);
+            const validBase = isNaN(base) ? 1.0 : base;
 
-                const calculated = base * (effectiveSpeed / 100);
-                calculatedEfficiencyPreview.textContent = calculated.toFixed(4);
-            } else {
-                calculatedEfficiencyPreview.textContent = "---";
-            }
+            const speedInput = formSpeedRate.value.trim();
+            const speed = speedInput === "" ? 100 : parseFloat(speedInput);
+            const validSpeed = isNaN(speed) ? 100 : speed;
+
+            const calculated = validBase * (validSpeed / 100);
+            calculatedEfficiencyPreview.textContent = calculated.toFixed(4);
         }
 
         function parseRawText() {
@@ -369,12 +382,15 @@
             const unit = formUnit.value.trim();
             const operations = parseInt(formOperations.value, 10);
             
+            // 基礎作業時間が未入力の場合は1.0（1時間）をデフォルト適用
             const baseTimeInput = formBaseTime.value.trim();
-            const baseTime = baseTimeInput === "" ? 0 : parseFloat(baseTimeInput);
+            const baseTime = baseTimeInput === "" ? 1.0 : parseFloat(baseTimeInput);
+            const validBaseTime = isNaN(baseTime) ? 1.0 : baseTime;
 
-            // 作業速度がブランク（未入力）の場合は一律で100%を適用
+            // 作業速度が未入力の場合は100%をデフォルト適用
             const speedInput = formSpeedRate.value.trim();
             const speedRate = speedInput === "" ? 100 : parseFloat(speedInput);
+            const validSpeedRate = isNaN(speedRate) ? 100 : speedRate;
 
             const rawSource = formRawSource.value.trim();
             const currentEditId = editId.value;
@@ -385,8 +401,7 @@
             }
 
             const average = parseFloat((quantity / operations).toFixed(4));
-            // 基礎作業時間と作業速度から高精度（端数対応）で算出
-            const efficiency = !isNaN(baseTime) && baseTime > 0 ? (baseTime * (speedRate / 100)).toFixed(4) : "---";
+            const efficiency = (validBaseTime * (validSpeedRate / 100)).toFixed(4);
 
             const now = new Date();
             const timestamp = now.getFullYear() + '-' +
@@ -395,6 +410,9 @@
                 String(now.getHours()).padStart(2, '0') + ':' +
                 String(now.getMinutes()).padStart(2, '0') + ':' +
                 String(now.getSeconds()).padStart(2, '0');
+
+            // 自動生成の元の情報テキスト（rawSourceが空の場合のフォールバック）
+            const generatedRawSource = rawSource || `${title || '作業記録'}\n${itemName} ${quantity}${unit}\n作業回数：${operations}回\n基礎時間: ${validBaseTime}h / 速度: ${validSpeedRate}%`;
 
             if (currentEditId) {
                 const idNum = parseInt(currentEditId, 10);
@@ -409,10 +427,10 @@
                             unit,
                             operations,
                             average,
-                            baseTime: isNaN(baseTime) ? 0 : baseTime,
-                            speedRate: isNaN(speedRate) ? 100 : speedRate,
+                            baseTime: validBaseTime,
+                            speedRate: validSpeedRate,
                             efficiency,
-                            rawSource: rawSource || rec.rawSource
+                            rawSource: generatedRawSource
                         };
                     }
                     return rec;
@@ -429,10 +447,10 @@
                     unit,
                     operations,
                     average,
-                    baseTime: isNaN(baseTime) ? 0 : baseTime,
-                    speedRate: isNaN(speedRate) ? 100 : speedRate,
+                    baseTime: validBaseTime,
+                    speedRate: validSpeedRate,
                     efficiency,
-                    rawSource: rawSource || `${title}\n${itemName} ${quantity}${unit}\n作業回数：${operations}回`,
+                    rawSource: generatedRawSource,
                     createdAt: timestamp
                 };
                 records.unshift(newRecord);
@@ -480,8 +498,7 @@
                 const card = document.createElement('div');
                 card.className = "bg-white border border-slate-200 rounded-lg p-3 hover:border-indigo-300 transition shadow-sm flex flex-col space-y-2";
                 
-                // 保存記録カード内の効率・基礎時間・速度表示部分
-                const baseTimeVal = rec.baseTime !== undefined && rec.baseTime !== null && rec.baseTime !== "" ? rec.baseTime : 0;
+                const baseTimeVal = rec.baseTime !== undefined && rec.baseTime !== null && rec.baseTime !== "" ? rec.baseTime : 1.0;
                 const speedVal = rec.speedRate !== undefined && rec.speedRate !== null && rec.speedRate !== "" ? rec.speedRate : 100;
 
                 card.innerHTML = `
@@ -509,7 +526,7 @@
                         </div>
                         <div>
                             <span class="text-slate-400 block text-[10px]">基礎時間 / 速度 / 効率効果</span>
-                            <span class="font-semibold text-slate-700">${baseTimeVal > 0 ? `${baseTimeVal}s / ${speedVal}%` : '未設定'} <br><span class="text-indigo-700 font-bold">(${rec.efficiency})</span></span>
+                            <span class="font-semibold text-slate-700">${baseTimeVal}h / ${speedVal}% <br><span class="text-indigo-700 font-bold">(${rec.efficiency})</span></span>
                         </div>
                     </div>
 
@@ -535,6 +552,7 @@
             });
         }
 
+        // イベントデリゲーションによる確実なアクション制御
         recordsContainer.addEventListener('click', function(e) {
             const btn = e.target.closest('button[data-action]');
             if (!btn) return;
@@ -559,8 +577,8 @@
             formQuantity.value = "";
             formUnit.value = rec.unit;
             formOperations.value = rec.operations;
-            formBaseTime.value = rec.baseTime !== undefined && rec.baseTime > 0 ? rec.baseTime : "";
-            formSpeedRate.value = rec.speedRate !== undefined && rec.speedRate !== 100 ? rec.speedRate : "";
+            formBaseTime.value = rec.baseTime !== 1.0 ? rec.baseTime : "";
+            formSpeedRate.value = rec.speedRate !== 100 ? rec.speedRate : "";
             updateEfficiencyPreview();
             formRawSource.value = rec.rawSource;
             
@@ -571,17 +589,22 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // 逆引き機能の確実に動作する実装
         function handleReverse(id) {
             const rec = records.find(r => r.id === id);
-            if (!rec) return;
+            if (!rec) {
+                alert("該当する記録が見つかりません。");
+                return;
+            }
 
-            reverseModalContent.textContent = `[記録ID: ${rec.id}] 登録日時: ${rec.createdAt}\n\n` + (rec.rawSource || "元の情報はありません。");
+            const sourceText = rec.rawSource || "元の情報はありません。";
+            reverseModalContent.textContent = `[記録ID: ${rec.id}] 登録日時: ${rec.createdAt}\n\n` + sourceText;
             reverseModal.classList.remove('hidden');
         }
 
-        window.closeReverseModal = function() {
+        function closeReverseModal() {
             reverseModal.classList.add('hidden');
-        };
+        }
 
         function handleCopy(id) {
             const rec = records.find(r => r.id === id);
@@ -608,8 +631,8 @@
             formQuantity.value = rec.quantity;
             formUnit.value = rec.unit;
             formOperations.value = rec.operations;
-            formBaseTime.value = rec.baseTime !== undefined && rec.baseTime > 0 ? rec.baseTime : "";
-            formSpeedRate.value = rec.speedRate !== undefined && rec.speedRate !== 100 ? rec.speedRate : "";
+            formBaseTime.value = rec.baseTime !== 1.0 ? rec.baseTime : "";
+            formSpeedRate.value = rec.speedRate !== 100 ? rec.speedRate : "";
             updateEfficiencyPreview();
             formRawSource.value = rec.rawSource;
             saveBtn.textContent = "変更を上書き保存";
@@ -656,4 +679,5 @@
     </script>
 </body>
 </html>
+
 
