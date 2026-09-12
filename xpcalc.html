@@ -305,11 +305,10 @@ input[type="text"]{max-width:220px;}
 /* シンプルモード：基本計算と取り込みを優先し、詳細機能は詳細モードへ */
 .simple-hidden{display:none!important}
 #tabprofit,#tablog,#tabmemo,#tabbook,#tabrecipe{display:none!important}
-#out{display:none!important}
-#log,#memo,#book,#profitTab,#recipeTab{display:none!important}
+#memo,#book,#profitTab,#recipeTab{display:none!important}
 </style>
 </head>
-<body>
+<body data-mode="simple">
 <div id="modeBar" style="position:sticky;top:0;z-index:999;background:#fff;border-bottom:1px solid #ddd;padding:8px;text-align:center;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><a href="xpcalc.html" style="text-decoration:none"><button type="button">🟢 シンプルモード</button></a><a href="xpcalc_detail.html" style="text-decoration:none"><button type="button">🔵 詳細モード</button></a></div>
 <div style="text-align:center;font-size:12px;color:#666;margin:4px 0 8px">💾 データは同じ保存領域を使うため、2つのモードで記録・入力内容を共有できます。</div>
 <button id="tabprofit" style="margin:6px" onclick="showTab('profit')">収支</button>
@@ -751,198 +750,27 @@ function formatDuration(min){
   return d+'日'+(rh?rh+'時間':'')+(m>=0.001?f(m)+'分':'');
 }
 function calcMixedXP(){
-  const getRaw=id=>(document.getElementById(id)?.value||'').trim();
-  const lvRaw=getRaw('mixLevel'), curRaw=getRaw('mixCurrent'), workRaw=getRaw('mixWorkPt'), countRaw=getRaw('mixWorkCount'), recRaw=getRaw('mixReceived'), nextRaw=getRaw('mixNext');
-  const warnings=[];
-  const lv=lvRaw?Math.max(1,Math.floor(Number(lvRaw))):null;
-  const cur=curRaw?Math.max(0,Math.min(99.999999,Number(curRaw))):0;
-  const workPt=workRaw?Math.max(0,Number(workRaw)):0;
-  const workCount=countRaw?Math.max(0,Number(countRaw)):1;
-  const received=recRaw?Math.max(0,Number(recRaw)):0;
-  const next=nextRaw?Math.max(0,Number(nextRaw)):0;
-  const hasWork=workRaw!=='';
-  const hasSale=nextRaw!=='';
-  if(workRaw==='' ) warnings.push('作業経験値は未入力のため、0%として計算しました。');
-  if(nextRaw==='' ) warnings.push('次の売上は未入力のため、販売経験値は0%として計算しました。');
-  if(lv===null || curRaw==='') warnings.push('Lv・現在経験値が未入力のため、Lvアップ予測は表示しません。');
-  let html='<h3>計算結果</h3>';
-  if(warnings.length) html+='<div class="note warning">⚠️ '+warnings.join('<br>⚠️ ')+'</div>';
-  const workAdd=workPt*workCount;
-  let saleAdd=0, saleDetail='';
-  if(hasSale){
-    saleAdd=salesXpEstimate(next);
-    saleDetail='<div>販売経験値：<b>+'+f(saleAdd)+'%</b></div>';
-  }else{
-    saleDetail='<div>販売経験値：<b>+0%</b></div>';
-  }
-  const totalAdd=workAdd+saleAdd;
-  html+='<div>作業経験値：<b>+'+f(workAdd)+'%</b></div>'+saleDetail+'<div class="big">合計：+'+f(totalAdd)+'%</div><div>合計：約 <b>'+f(totalAdd/1440)+'D</b></div>';
-  if(lv!==null && curRaw!==''){
-    const levelBase=cumulativeXP(lv);
-    const levelNext=cumulativeXP(lv+1);
-    const currentTotal=levelBase+(levelNext-levelBase)*(cur/100);
-    const afterTotal=currentTotal+totalAdd;
-    const afterLv=levelFromTotalXP(afterTotal);
-    const remain=Math.max(0,cumulativeXP(lv+1)-afterTotal);
-    html+=(afterLv>lv?'<div class="big">Lv '+lv+' → Lv '+afterLv+'</div>':'<div>次のLvまで残り：約 <b>'+f(remain)+'%</b></div>');
-  }
-  html+='<p class="note">※販売経験値の減衰は販売計算にのみ適用します。5:00以降の回収済み売上を基準にしてください。</p>';
-  document.getElementById('mixResult').innerHTML=html;
-}
-const KEY='xpcalc_all_v4';
-let records=JSON.parse(localStorage.getItem(KEY)||'[]');
-if(!records.length){const old=JSON.parse(localStorage.getItem('xpcalc_all_v3')||'[]');if(old.length)records=old}
-const MEMOKEY='xpcalc_memos_v1';
-let memos=JSON.parse(localStorage.getItem(MEMOKEY)||'[]');
-
-function val(id){return document.getElementById(id).value}
-function num(id){return Number(val(id))||0}
-function f(x){return Number(x).toLocaleString('ja-JP',{maximumFractionDigits:8})}
-function esc(x){return String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function show(id){
- document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
- document.getElementById(id).classList.add('active');
- document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
- document.getElementById('tab'+id).classList.add('active');
- if(id==='log')render();
- if(id==='memo')renderMemos();
- if(id==='book')renderBooks();
-}
-function calcXP(){
- const lvRaw=val('level').trim(), curRaw=val('current').trim(), gainRaw=val('gain').trim();
- const countRaw=val('count').trim();
- const count=countRaw===''?1:Number(countRaw);
- let gain=gainRaw===''?null:Number(gainRaw);
- const warnings=[];
- if(!Number.isFinite(count)||count<1){
-   document.getElementById('xpResult').innerHTML='<div class="note warning">⚠️ 取得回数は1以上で計算します。</div>';return;
- }
- if(gain===null){
-   const baseRaw=val('baseWorkMin').trim(), speedRaw=val('workSpeed').trim();
-   if(baseRaw!=='' && speedRaw!==''){
-     const base=Number(baseRaw), speed=Number(speedRaw);
-     if(Number.isFinite(base)&&base>0&&Number.isFinite(speed)&&speed>0) gain=base/(speed/100);
-     else warnings.push('基礎作業時間は0より大きく、作業速度は0より大きい値で入力してください。');
-   }
- }
- if(gain===null){
-   let html='<h3>入力内容の確認</h3><div class="note warning">⚠️ 1回の経験値がまだ分かりません。<br>「1回で増える経験値」を入力するか、詳細を開いて「基礎作業時間＋作業速度」を入力してください。</div>';
-   if(lvRaw!==''||curRaw!=='') html+='<div>Lv・現在経験値は入力されていますが、増加経験値がないためLvアップ予測はできません。</div>';
-   document.getElementById('xpResult').innerHTML=html;return;
- }
- if(!Number.isFinite(gain)||gain<0){
-   document.getElementById('xpResult').innerHTML='<div class="note warning">⚠️ 経験値は0以上の数値で入力してください。</div>';return;
- }
- const totalGain=gain*count;
- let html='<div class="big">'+count+'回で <b>+'+f(totalGain)+'%</b></div><div>1回あたり <b>'+f(gain)+'%</b></div>';
- if(gainRaw==='') html+='<div class="note">基礎作業時間＋作業速度から自動計算しました。</div>';
- if(lvRaw!==''&&curRaw!==''){
-   const lv=Number(lvRaw),cur=Number(curRaw);
-   if(Number.isFinite(lv)&&lv>=1&&Number.isFinite(cur)&&cur>=0){
-     let projectedLv=lv, projectedPct=cur+totalGain;
-     while(projectedPct>=100 && projectedLv<100){projectedPct-=100;projectedLv++;}
-     const nextNeed=Math.max(0,100-projectedPct);
-     html+='<hr><div>現在Lv '+lv+'・現在経験値 '+f(cur)+'%</div><div class="big">予測：Lv '+projectedLv+'</div><div>次Lvまで残り <b>'+f(nextNeed)+'%</b></div>';
-   }else warnings.push('Lvまたは現在経験値の値を確認してください。');
- }else warnings.push('Lv・現在経験値が未入力のため、Lvアップ予測は省略しました。');
- if(warnings.length) html+='<div class="note warning">⚠️ '+warnings.join('<br>⚠️ ')+'</div>';
- document.getElementById('xpResult').innerHTML=html;
-}
-function addSale(){
- const count=num('scount'),gainRaw=val('sgain').trim();
- if(!count){alert('販売数だけ入力してください。');return}
- const gain=gainRaw===''?null:Number(gainRaw);
- records.push({type:'s',date:new Date().toLocaleString('ja-JP'),job:val('sjob').trim(),name:val('sitem').trim(),city:val('scity').trim(),lv:num('slv'),price:num('sprice'),count,gain});
- saveRecords();show('log');
-}
-function addWork(){
- const count=num('wcount'),gainRaw=val('wgain').trim();
- if(!count){alert('作業回数だけ入力してください。');return}
- const gain=gainRaw===''?null:Number(gainRaw);
- records.push({type:'w',date:new Date().toLocaleString('ja-JP'),job:val('wjob').trim(),name:val('wname').trim(),city:val('wcity').trim(),x:val('wx'),y:val('wy'),lv:num('wlv'),count,gain});
- saveRecords();show('log');
+  // 旧バージョン互換：現在の経験値計算へ統一。
+  return calcXP();
 }
 
 function parseOutPaste(){
   const el=document.getElementById('outPaste');
   const s=(el?.value||'').replace(/\r?\n/g,' ').replace(/\s+/g,' ').trim();
   if(!s){alert('一行ログを貼り付けてください。');return;}
-
-  // 「名称 数量単位 回数」の並びをできるだけ柔軟に認識
-  // 単位：本/個/枚/組/塊/kg/瓶/本など。単位が無い場合も可。
-  const unitRe='(本|個|枚|組|塊|kg|瓶|袋|箱|束|匹|頭|羽|件|回)';
-  const re=new RegExp('(.+?)\\\\s*([0-9]+(?:\\\\.[0-9]+)?)\\\\s*'+unitRe+'?\\\\s*([0-9]+(?:\\\\.[0-9]+)?)\\\\s*回','g');
-
-  let m, found=0;
+  const re=/([^\s\d:：=+＋()（）]+(?:\s+[^\s\d:：=+＋()（）]+){0,2})\s+([0-9][0-9,]*(?:\.[0-9]+)?)\s*(個|本|枚|組|塊|kg|瓶|袋|箱|束|匹|頭|羽|件)?\s*([0-9][0-9,]*(?:\.[0-9]+)?)\s*回/gi;
+  let m,found=0;
   while((m=re.exec(s))!==null){
-    let name=m[1].trim();
-    // 直前に残った区切り記号などを除去
-    name=name.replace(/^[,、;；|]+/,'').trim();
-    if(!name) continue;
-
-    const qty=Number(m[2]);
-    const unit=m[3]||'個';
-    const count=Number(m[4]);
-    if(!Number.isFinite(qty)||!Number.isFinite(count)||count<=0) continue;
-
-    const nameEl=document.getElementById('outName');
-    const qtyEl=document.getElementById('outQty');
-    const countEl=document.getElementById('outCount');
-    const unitEl=document.getElementById('outUnit');
-
-    if(!nameEl||!qtyEl||!countEl||!unitEl) break;
-
-    // 最初の項目はフォームへ入れ、2件目以降は保存レコードとして直接追加
-    if(found===0){
-      nameEl.value=name;
-      qtyEl.value=qty;
-      countEl.value=count;
-      unitEl.value=unit;
-    }else{
-      const all=records;
-      all.push({
-        type:'o',
-        date:new Date().toISOString(),
-        job:(document.getElementById('outJob')?.value||''),
-        name:name,
-        city:(document.getElementById('outCity')?.value||''),
-        x:(document.getElementById('outX')?.value||''),
-        y:(document.getElementById('outY')?.value||''),
-        qty:qty,
-        count:count,
-        unit:unit
-      });
-      saveAll(all);
-    }
+    const name=m[1].trim().replace(/^[,、;；|]+/,'').trim();
+    const qty=Number(m[2].replace(/,/g,'')), unit=m[3]||'個', count=Number(m[4].replace(/,/g,''));
+    if(!name||!Number.isFinite(qty)||!Number.isFinite(count)||count<=0)continue;
+    if(found===0){setv('oitem',name);setv('oqty',qty);setv('ocount',count);setv('ounit',unit);}
+    else records.push({type:'o',date:new Date().toLocaleString('ja-JP'),job:val('ojob').trim(),name,city:val('ocity').trim(),x:val('ox'),y:val('oy'),qty,count,unit});
     found++;
   }
-
-  // 「数量/回数」の表記や、単位なしのケースにも対応
-  if(found===0){
-    const parts=s.split(/\s+/);
-    const fallback=new RegExp('^(.+?)\\\\s*([0-9]+(?:\\\\.[0-9]+)?)\\\\s*([本個枚組塊kg瓶袋箱束匹頭羽件]?)\\\\s*([0-9]+(?:\\\\.[0-9]+)?)回$');
-    for(let i=0;i<parts.length;i++){
-      const z=parts[i].match(fallback);
-      if(z){
-        document.getElementById('outName').value=z[1];
-        document.getElementById('outQty').value=z[2];
-        document.getElementById('outUnit').value=z[3]||'個';
-        document.getElementById('outCount').value=z[4];
-        found=1;
-        break;
-      }
-    }
-  }
-
-  if(found===0){
-    alert('「成果物 数量 単位 回数」の形を読み取れませんでした。');
-    return;
-  }
-
-  // 入力欄に入った最初の項目も保存できるよう、計算だけ行う
-  calcOut();
-  if(found>1) render();
-  alert(found+'件を読み取りました。複数件は自動で記録しました。');
+  if(found===0){alert('「成果物 数量 単位 回数」の形を読み取れませんでした。');return;}
+  if(found>1)saveRecords(); else calcOut();
+  alert(found+'件を読み取りました。');
 }
 
 function calcOut(){
@@ -1021,9 +849,9 @@ function calcSellRate(){
  const stock=num('stock'),sold=num('sold'),hours=num('hours'),out=document.getElementById('sellRateResult');
  if(stock<=0||sold<=0||hours<=0){out.innerHTML='在庫数・売れた数・経過時間を入力してください。';return}
  const rate=sold/hours,remaining=Math.max(0,stock-sold),remainH=remaining/rate,totalH=stock/rate;
- out.innerHTML='販売ペース：<b>'+f(rate)+'</b>個/時間<br>残り：<b>'+f(remaining)+'</b>個<br>完売まであと：<b>'+formatDuration(remainH)+'</b><br>最初から完売まで：<b>'+formatDuration(totalH)+'</b>';
+ out.innerHTML='販売ペース：<b>'+f(rate)+'</b>個/時間<br>残り：<b>'+f(remaining)+'</b>個<br>完売まであと：<b>'+formatHoursDuration(remainH)+'</b><br>最初から完売まで：<b>'+formatHoursDuration(totalH)+'</b>';
 }
-function formatDuration(h){if(h<1)return Math.round(h*60)+'分';const hh=Math.floor(h),mm=Math.round((h-hh)*60);return hh+'時間'+(mm?' '+mm+'分':'')}
+function formatHoursDuration(h){if(h<1)return Math.round(h*60)+'分';const hh=Math.floor(h),mm=Math.round((h-hh)*60);return hh+'時間'+(mm?' '+mm+'分':'')}
 
 function delRecord(i){records.splice(i,1);saveRecords()}
 function clearRecords(){if(confirm('経験値・販売・作業・成果量の記録をすべて削除しますか？')){records=[];saveRecords();}}
@@ -1068,6 +896,11 @@ function clearMemos(){if(confirm('備忘録をすべて削除しますか？')){
 
 const BOOKKEY='xpcalc_book_v1';
 let books=JSON.parse(localStorage.getItem(BOOKKEY)||'[]');
+window.addEventListener('storage',e=>{
+  if(e.key===KEY){try{records=JSON.parse(e.newValue||'[]');render();}catch(_){} }
+  if(e.key===MEMOKEY){try{memos=JSON.parse(e.newValue||'[]');renderMemos();}catch(_){} }
+  if(e.key===BOOKKEY){try{books=JSON.parse(e.newValue||'[]');renderBooks();}catch(_){} }
+});
 let bookImageData='';
 function previewBookImage(){
  const file=document.getElementById('bimage').files[0]; if(!file)return;
@@ -1321,16 +1154,32 @@ function reflectWorkToAverage(){
 function reflectWorkToRecord(){
   const d=lastWorkImport;
   if(!d){alert('先に作業結果を取り込んでください。');return;}
-  if(typeof saveWorkRecordFromImport==='function') saveWorkRecordFromImport(d);
-  else alert('作業結果を記録欄へ反映する専用機能が見つかりません。');
+  let changed=0;
+  if(d.level){setv('wlv',d.level);changed++;}
+  if(d.observedXp){setv('wgain',d.observedXp);changed++;}
+  if(d.count){setv('wcount',d.count);changed++;}
+  const raw=d.raw||'';
+  const job=(raw.match(/(?:職種|職業)\s*[:：]\s*([^\n]+)/i)||[])[1];
+  const task=(raw.match(/(?:作業名|作業内容)\s*[:：]\s*([^\n]+)/i)||[])[1];
+  if(job){setv('wjob',job.trim());changed++;}
+  if(task){setv('wname',task.trim());changed++;}
+  show('xp'); focusElement_('wjob');
+  alert(changed+'項目を「作業記録」の入力欄へ反映しました。保存する場合は「作業記録を保存」を押してください。');
 }
 
 function reflectWorkToMemo(){
   const d=lastWorkImport;
   if(!d){alert('先に作業結果を取り込んでください。');return;}
+  if(document.body?.dataset.mode==='simple'){
+    openDetailWithPending_('memo','work',d);
+    return;
+  }
   const text=d.raw||'';
-  if(setFirstExisting_(['memoText','memo','noteText'],text)) alert('備忘録欄へ反映しました。');
-  else alert('備忘録用の入力欄が見つかりません。');
+  const title=d.outputs?.[0]?.name ? '作業結果：'+d.outputs[0].name : '作業結果の取り込み';
+  setv('mtitle',title); setv('mtext',text);
+  if(d.outputs?.length) setv('mtags','作業,'+d.outputs.map(o=>o.name).join(','));
+  show('memo'); focusElement_('mtitle');
+  alert('取り込んだ作業結果を「備忘録」の入力欄へ反映しました。保存する場合は「備忘録を保存」を押してください。');
 }
 
 function parseSaleImportText_(raw){
@@ -1343,7 +1192,11 @@ function parseSaleImportText_(raw){
   const current=(clean.match(/(?:^|\s)(\d+(?:\.\d+)?)%\s*資金|資金[\s\S]{0,80}?(\d+(?:\.\d+)?)%/i)||[]);
   const currentXp=current[1]||current[2]||'';
 
-  const qty=(clean.match(/(?:販売棚|販売)[\s\S]{0,100}?([0-9][0-9,]*)\s*(?:杯|個|本|枚|瓶|塊|kg|Ｇ|G)/i)||[])[1]||'';
+  const itemMatch=clean.match(/(?:販売棚|販売)\s+([^0-9\s][^0-9]*?)(?=\s+[0-9][0-9,]*\s*(?:杯|個|本|枚|瓶|塊|kg|Ｇ|G))/i);
+  const item=itemMatch?itemMatch[1].trim():'';
+  const qtyMatch=clean.match(/(?:販売棚|販売)[\s\S]{0,100}?([0-9][0-9,]*)\s*(杯|個|本|枚|瓶|塊|kg|Ｇ|G)/i)||[];
+  const qty=qtyMatch[1]||'';
+  const qtyUnit=qtyMatch[2]||'個';
   const unit=(clean.match(/単価\s*@?\s*([0-9][0-9,]*(?:\.\d+)?)\s*G/i)||[])[1]||'';
 
   const moneyAfter=(labels)=>{
@@ -1376,6 +1229,7 @@ function parseSaleImportText_(raw){
     
     observedXp:xp,
     qty:qty?Number(qty.replace(/,/g,'')):0,
+    qtyUnit,
     unit:unit?Number(unit.replace(/,/g,'')):0,
     total,
     tax:diff&&net?Math.max(0,Number(diff.replace(/,/g,''))-Number(net.replace(/,/g,''))):0,
@@ -1406,9 +1260,10 @@ function renderSaleImport_(d){
         '<button type="button" onclick="reflectImportToDecay()">📉 減衰計算へ反映</button>'+
         '<button type="button" onclick="reflectImportToProfit()">💴 収支計算へ反映</button>'+
         '<button type="button" onclick="reflectImportToForecast()">📈 販売予測へ反映</button>'+
+        '<button type="button" onclick="reflectImportToAverage()">📊 平均・50回期待値へ反映</button>'+
         '<button type="button" onclick="reflectImportToOutput()">📦 成果量へ反映</button>'+
         '<button type="button" onclick="reflectImportToMemo()">📌 備忘録へ反映</button>'+ 
-        '<button type="button" onclick="reflectImportToRecord()">📝 記録へ保存</button>'+ 
+        '<button type="button" onclick="reflectImportToRecord()">📝 記録へ反映</button>'+ 
       '</div>'+ 
     '</div>';
   return '<h3>販売結果の取り込み結果</h3>'+
@@ -1493,6 +1348,25 @@ function saleImportGuard_(){
 function focusElement_(id){
   const e=document.getElementById(id); if(e) e.scrollIntoView({behavior:'smooth',block:'center'});
 }
+function applyImportedSaleToRecord(){
+  const d=saleImportGuard_(); if(!d)return false;
+  let changed=0;
+  if(d.item){setv('sitem',d.item);changed++;}
+  if(d.unit){setv('sprice',d.unit);changed++;}
+  if(d.qty){setv('scount',d.qty);changed++;}
+  if(d.level){setv('slv',d.level);changed++;}
+  if(d.observedXp){setv('sgain',d.observedXp);changed++;}
+  show('xp'); focusElement_('sitem');
+  return changed>0;
+}
+function reflectImportToAverage(){
+  const d=saleImportGuard_(); if(!d)return;
+  if(!d.qty){alert('販売数を読み取れていません。');return;}
+  setv('oitem',d.item||'販売物'); setv('oqty',d.qty); setv('ocount',1); setv('ounit',d.qtyUnit||'個');
+  show('out'); calcOut(); focusElement_('oqty');
+  alert('販売数を「成果量」へ反映し、1回平均・50回期待値を計算しました。');
+}
+function reflectImportToBalance(){ return reflectImportToProfit(); }
 function reflectImportToXP(){
   const d=saleImportGuard_(); if(!d)return;
   let changed=0;
@@ -1520,8 +1394,18 @@ function reflectImportToDecay(){
   show('xp'); focusElement_('decaySale');
   alert('今回回収する売上 '+f(d.total)+' G を「販売経験値・減衰計算」へ反映しました。\n「5:00以降の回収済み売上」を確認してから計算してください。');
 }
+function openDetailWithPending_(target,type,data){
+  try{
+    localStorage.setItem('xpcalc_pending_reflection',JSON.stringify({target,type,data,at:Date.now()}));
+    location.href='xpcalc_detail.html#'+target;
+  }catch(e){alert('詳細モードへの引き継ぎに失敗しました。もう一度お試しください。');}
+}
 function reflectImportToProfit(){
   const d=saleImportGuard_(); if(!d)return;
+  if(document.body?.dataset.mode==='simple'){
+    openDetailWithPending_('profit','sale',d);
+    return;
+  }
   let changed=0;
   if(d.item){setv('pfName',d.item);changed++;}
   if(d.unit){setv('pfPrice',d.unit);changed++;}
@@ -1533,7 +1417,7 @@ function reflectImportToForecast(){
   const d=saleImportGuard_(); if(!d)return;
   let changed=0;
   if(d.qty){setv('sold',d.qty);changed++;}
-  if(d.unit){setv('forecastPrice',d.unit);}
+  
   show('xp'); focusElement_('sold');
   alert((changed?'販売数を':'')+'「販売予測」へ反映しました。\n現在の在庫数と経過時間は実測値を入力してください。');
 }
@@ -1541,7 +1425,7 @@ function reflectImportToOutput(){
   const d=saleImportGuard_(); if(!d)return;
   if(!d.qty){alert('販売数を読み取れていません。');return;}
   // 販売数を成果量へ流し込むのではなく、明示的に「数量」として入力し、既存の50回計算を使える状態にする。
-  setv('oqty',d.qty); setv('ocount',1); if(d.item)setv('oitem',d.item); if(d.unit)setv('ounit','個');
+  setv('oqty',d.qty); setv('ocount',1); if(d.item)setv('oitem',d.item); if(d.qtyUnit)setv('ounit',d.qtyUnit);
   show('out'); calcOut(); focusElement_('oqty');
   alert('販売数を「成果量」へ入力しました。これは販売数を成果量として扱うため、必要なら内容を確認してから保存してください。');
 }
@@ -1552,6 +1436,10 @@ function reflectImportToRecord(){
 }
 function reflectImportToMemo(){
   const d=saleImportGuard_(); if(!d)return;
+  if(document.body?.dataset.mode==='simple'){
+    openDetailWithPending_('memo','sale',d);
+    return;
+  }
   setv('mtitle',d.item?('販売結果：'+d.item):'販売結果の取り込み');
   setv('mtext',d.raw||'');
   if(d.item)setv('mtags','販売,'+d.item);
@@ -2204,6 +2092,29 @@ function importRecipeBook(){
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply); else apply();
 })();
+
+function applyPendingReflection_(){
+  if(document.body?.dataset.mode!=='detail') return;
+  let p=null;
+  try{p=JSON.parse(localStorage.getItem('xpcalc_pending_reflection')||'null');}catch(e){p=null;}
+  if(!p||!p.target||!p.data)return;
+  try{
+    const d=p.data;
+    if(p.type==='sale' && p.target==='profit'){
+      if(d.item)setv('pfName',d.item); if(d.unit)setv('pfPrice',d.unit); if(d.qty)setv('pfQty',d.qty);
+      showTab('profit'); focusElement_('pfName');
+    }else if(p.type==='sale' && p.target==='memo'){
+      setv('mtitle',d.item?('販売結果：'+d.item):'販売結果の取り込み'); setv('mtext',d.raw||''); if(d.item)setv('mtags','販売,'+d.item);
+      show('memo'); focusElement_('mtitle');
+    }else if(p.type==='work' && p.target==='memo'){
+      const title=d.outputs?.[0]?.name ? '作業結果：'+d.outputs[0].name : '作業結果の取り込み';
+      setv('mtitle',title); setv('mtext',d.raw||''); if(d.outputs?.length)setv('mtags','作業,'+d.outputs.map(o=>o.name).join(','));
+      show('memo'); focusElement_('mtitle');
+    }
+    localStorage.removeItem('xpcalc_pending_reflection');
+  }catch(e){console.error(e);}
+}
+setTimeout(applyPendingReflection_,0);
 </script>
 </body>
 </html>
