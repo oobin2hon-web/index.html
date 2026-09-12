@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プロンプト保存ツール（自動ファイル名対応）</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        textarea {
+            height: 250px;
+            resize: vertical;
+        }
+        .hint {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 4px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>プロンプト保存ツール</h1>
+
+    <div class="form-group">
+        <label for="title">ファイル名（空欄の場合は本文から自動生成）</label>
+        <input type="text" id="title" placeholder="例: ブログ記事の構成案作成">
+        <div class="hint">※空欄のまま保存すると、プロンプトの1行目がファイル名になります。</div>
+    </div>
+
+    <div class="form-group">
+        <label for="prompt">プロンプト本文</label>
+        <textarea id="prompt" placeholder="ここにプロンプトを入力してください...（1行目に目的やタイトルを書くと自動でファイル名になります）"></textarea>
+    </div>
+
+    <button id="saveBtn">ファイルとして保存</button>
+
+    <script>
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            let titleInput = document.getElementById('title').value.trim();
+            const promptText = document.getElementById('prompt').value;
+
+            if (!promptText) {
+                alert('プロンプト本文を入力してください。');
+                return;
+            }
+
+            // ファイル名が空の場合、本文の1行目をタイトルとして採用する
+            if (!titleInput) {
+                const firstLine = promptText.trim().split('\n')[0];
+                // 長すぎる場合や、記号が多い場合は調整（最大20文字程度）
+                titleInput = firstLine.length > 20 ? firstLine.substring(0, 20) : firstLine;
+            }
+
+            // 日付を取得して「YYYYMMDD_タイトル.txt」の形式にする
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const dateStr = `${year}${month}${day}`;
+
+            // ファイル名に使えない記号をアンダーバーに置換
+            let safeTitle = titleInput.replace(/[\\/:*?"<>|]/g, '_');
+            let fileName = `${dateStr}_${safeTitle}.txt`;
+
+            // Blobを使ってテキストファイルを作成
+            const blob = new Blob([promptText], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+
+            // ダウンロード用のリンクを自動作成
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+
+            // 後片付け
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    </script>
+
+</body>
+</html>
