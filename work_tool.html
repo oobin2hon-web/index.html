@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10_作業解析ツール_rev2</title>
+    <!-- iPhone Home Screen / Webclip Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="作業解析ツール">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white' font-family='sans-serif'>🛠️</text></svg>">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-12">
+    <!-- Header -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🛠️</span>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight">作業系データ解析・記録管理ツール</h1>
+                    <p class="text-xs text-slate-400">URL安全対応ファイル: <code class="bg-slate-800 px-1.5 py-0.5 rounded text-brand-400 font-mono">10_work_tool_rev2.html</code></p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                    <span class="w-1.5 h-1.5 mr-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                    システム稼働中
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Panel: Input & Parser (5 cols) -->
+        <section class="lg:col-span-5 space-y-6">
+            
+            <!-- Parser & Raw Input Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-md font-bold text-slate-800 flex items-center gap-2">
+                        <span>📥</span> データ取り込み・手入力
+                    </h2>
+                    <button onclick="loadSampleData()" class="text-xs text-brand-600 hover:text-brand-700 font-medium underline">サンプル入力</button>
+                </div>
+                <p class="text-xs text-slate-500 mb-3">
+                    ゆらぎのあるテキストを貼り付けて「解析・抽出」するか、直接各項目を入力してください。
+                </p>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">元テキスト一括貼り付け（自動パーサー）</label>
+                        <textarea id="rawTextInput" rows="4" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 font-mono bg-slate-50" placeholder="鍛冶職人LV 7 (+1.81%)
+26.1%
+獲得したもの
+斧
+436本
+作業回数：50回"></textarea>
+                    </div>
+                    <button onclick="parseRawText()" class="w-full py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-medium rounded-lg transition-colors flex items-center justify-center gap-1">
+                        <span>⚡</span> テキストを解析してフォームに反映
+                    </button>
+                </div>
+
+                <hr class="my-4 border-slate-100">
+
+                <!-- Detailed Form Fields -->
+                <form id="recordForm" onsubmit="saveRecord(event)" class="space-y-3">
+                    <input type="hidden" id="editId" value="">
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">職業・タイトル</label>
+                            <input type="text" id="jobTitle" required class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500" placeholder="例: 鍛冶職人LV 7">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">進捗/経験値等</label>
+                            <input type="text" id="progressInfo" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500" placeholder="例: +1.81% (26.1%)">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">アイテム名（成果物）</label>
+                            <input type="text" id="itemName" required class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500" placeholder="例: 斧、氷など">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">総数量・単位</label>
+                            <div class="flex gap-1">
+                                <input type="number" id="itemQuantity" required min="1" oninput="calcAverage()" class="w-2/3 text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500" placeholder="例: 436">
+                                <input type="text" id="itemUnit" required class="w-1/3 text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500" placeholder="本/kg">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">作業回数</label>
+                        <input type="number" id="workCount" required min="1" oninput="calcAverage()" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500" placeholder="例: 50">
+                    </div>
+
+                    <!-- Realtime Average Preview Box -->
+                    <div class="bg-brand-50 border border-brand-100 rounded-lg p-3 flex justify-between items-center">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-wider text-brand-600 font-bold block">1回あたり平均成果物量</span>
+                            <span id="previewAverage" class="text-base font-bold text-brand-700">0.00</span>
+                        </div>
+                        <div id="previewUnitLabel" class="text-xs font-medium text-brand-600">-- /回</div>
+                    </div>
+
+                    <div class="flex gap-2 pt-2">
+                        <button type="submit" id="submitBtn" class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors">
+                            💾 新規保存する
+                        </button>
+                        <button type="button" id="cancelEditBtn" onclick="resetForm()" class="hidden px-3 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-medium rounded-lg">
+                            キャンセル
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Right Panel: Records List & Dashboard (7 cols) -->
+        <section class="lg:col-span-7 space-y-6">
+            
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-md font-bold text-slate-800 flex items-center gap-2">
+                            <span>📊</span> 保存記録一覧 & 解析管理
+                        </h2>
+                        <span id="recordCountBadge" class="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded-full font-semibold">0件</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="exportData()" class="text-xs px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors">JSON出力</button>
+                        <button onclick="clearAllData()" class="text-xs px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg font-medium transition-colors">全削除</button>
+                    </div>
+                </div>
+
+                <!-- Records List Container -->
+                <div id="recordsContainer" class="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Modal for Original Raw Text Reverse Lookup -->
+    <div id="rawModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl max-w-md w-full p-5 shadow-xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2"><span>🔍</span> 元の取り込み情報 (逆引き)</h3>
+                <button onclick="closeRawModal()" class="text-slate-400 hover:text-slate-600 text-sm font-bold">✕</button>
+            </div>
+            <div>
+                <textarea id="modalRawContent" rows="6" readonly class="w-full text-xs p-2.5 border border-slate-200 rounded-lg bg-slate-50 font-mono select-all"></textarea>
+            </div>
+            <div class="flex justify-end">
+                <button onclick="closeRawModal()" class="px-4 py-2 bg-slate-800 text-white text-xs font-medium rounded-lg">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let records = [];
+
+        // Initial default sample data
+        const initialSamples = [
+            {
+                id: 1,
+                jobTitle: "鍛冶職人LV 7",
+                progressInfo: "+1.81% (26.1%)",
+                itemName: "斧",
+                itemQuantity: 436,
+                itemUnit: "本",
+                workCount: 50,
+                average: 8.72,
+                rawText: "鍛冶職人LV 7 (+1.81%)\n26.1%\n獲得したもの\n斧\n436本\n作業回数：50回",
+                createdAt: "2026-03-30 12:00"
+            },
+            {
+                id: 2,
+                jobTitle: "錬金術師LV 7",
+                progressInfo: "+1.04% (9.94%)",
+                itemName: "氷",
+                itemQuantity: 794,
+                itemUnit: "kg",
+                workCount: 50,
+                average: 15.88,
+                rawText: "錬金術師LV 7 (+1.04%)\n9.94%\n獲得したもの\n氷\n794kg\n作業回数：50回",
+                createdAt: "2026-03-30 12:05"
+            }
+        ];
+
+        // Load data on startup
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('work_tool_records_v2');
+            if (saved) {
+                try {
+                    records = JSON.parse(saved);
+                } catch (e) {
+                    records = initialSamples;
+                }
+            } else {
+                records = initialSamples;
+                saveToLocalStorage();
+            }
+            renderRecords();
+        });
+
+        function saveToLocalStorage() {
+            localStorage.setItem('work_tool_records_v2', JSON.stringify(records));
+        }
+
+        // Realtime average calculator
+        function calcAverage() {
+            const q = parseFloat(document.getElementById('itemQuantity').value) || 0;
+            const w = parseFloat(document.getElementById('workCount').value) || 0;
+            const unit = document.getElementById('itemUnit').value.trim() || '--';
+            
+            const avg = w > 0 ? (q / w).toFixed(2) : '0.00';
+            document.getElementById('previewAverage').innerText = avg;
+            document.getElementById('previewUnitLabel').innerText = `${unit}/回`;
+        }
+
+        // Load sample into raw textarea
+        function loadSampleData() {
+            const sample = `鍛冶職人LV 8 (+2.15%)
+34.5%
+獲得したもの
+高級鋼剣
+250本
+作業回数：40回`;
+            document.getElementById('rawTextInput').value = sample;
+            parseRawText();
+        }
+
+        // Highly robust parser for fluctuation
+        function parseRawText() {
+            const text = document.getElementById('rawTextInput').value;
+            if (!text.trim()) return;
+
+            const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+            
+            let job = "";
+            let progress = "";
+            let item = "";
+            let quantity = "";
+            let unit = "";
+            let count = "";
+
+            let capturingItem = false;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+
+                // Detect job title (contains LV or 職人など)
+                if ((line.includes("LV") || line.includes("Lv") || line.includes("職人") || line.includes("師")) && !job) {
+                    job = line;
+                    // Check if next line is progress e.g. (+1.81%) or percentage
+                    if (i + 1 < lines.length && (lines[i+1].includes("%") || lines[i+1].startsWith("+"))) {
+                        progress = lines[i+1];
+                        i++;
+                    }
+                    continue;
+                }
+
+                // Detect standalone percentage if progress not set yet
+                if ((line.includes("%") || line.startsWith("+")) && !progress) {
+                    progress = line;
+                    continue;
+                }
+
+                // Detect "獲得したもの" header marker
+                if (line.includes("獲得したもの") || line.includes("アイテム") || line.includes("成果物")) {
+                    capturingItem = true;
+                    continue;
+                }
+
+                // Detect work count
+                const countMatch = line.match(/(?:作業回数|回数|回)[:：]?\s*([0-9,]+)/);
+                if (countMatch) {
+                    count = countMatch[1].replace(/,/g, '');
+                    continue;
+                }
+                // Standalone number with 回
+                const countMatch2 = line.match(/^([0-9,]+)\s*回$/);
+                if (countMatch2) {
+                    count = countMatch2[1].replace(/,/g, '');
+                    continue;
+                }
+
+                // Detect quantity and unit e.g. "436本", "794kg", or just numbers
+                const qtyUnitMatch = line.match(/^([0-9,]+)\s*([a-zA-Zあ-んア-ン一-龥]+)?$/);
+                if (qtyUnitMatch && capturingItem && !quantity) {
+                    quantity = qtyUnitMatch[1].replace(/,/g, '');
+                    unit = qtyUnitMatch[2] || '';
+                    capturingItem = false;
+                    continue;
+                }
+
+                // If capturing item name next
+                if (capturingItem && !item) {
+                    item = line;
+                    continue;
+                }
+
+                // Fallback heuristic if item not set yet
+                if (!item && !line.includes("回") && !line.includes("%") && !line.includes("LV")) {
+                    item = line;
+                }
+            }
+
+            // Fallback numeric search if items are still blank
+            if (!quantity) {
+                const numbers = text.match(/([0-9,]+)\s*([本個kgg個台枚本箱箱バッグタスク]+)/);
+                if (numbers) {
+                    quantity = numbers[1].replace(/,/g, '');
+                    unit = numbers[2];
+                }
+            }
+            if (!count) {
+                const counts = text.match(/(?:回数|回)[:：]?\s*([0-9,]+)/);
+                if (counts) count = counts[1].replace(/,/g, '');
+            }
+
+            // Populate form fields if parsed
+            if (job) document.getElementById('jobTitle').value = job;
+            if (progress) document.getElementById('progressInfo').value = progress;
+            if (item) document.getElementById('itemName').value = item;
+            if (quantity) document.getElementById('itemQuantity').value = quantity;
+            if (unit) document.getElementById('itemUnit').value = unit;
+            if (count) document.getElementById('workCount').value = count;
+
+            calcAverage();
+        }
+
+        // Save or Update Record
+        function saveRecord(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editId').value;
+            
+            const jobTitle = document.getElementById('jobTitle').value;
+            const progressInfo = document.getElementById('progressInfo').value;
+            const itemName = document.getElementById('itemName').value;
+            const itemQuantity = parseFloat(document.getElementById('itemQuantity').value);
+            const itemUnit = document.getElementById('itemUnit').value;
+            const workCount = parseFloat(document.getElementById('workCount').value);
+            const rawText = document.getElementById('rawTextInput').value || `${jobTitle}\n${itemName} ${itemQuantity}${itemUnit}\n作業回数：${workCount}回`;
+
+            const average = (itemQuantity / workCount).toFixed(2);
+
+            if (editId) {
+                // Edit existing
+                const idNum = parseInt(editId);
+                records = records.map(r => r.id === idNum ? {
+                    ...r,
+                    jobTitle, progressInfo, itemName, itemQuantity, itemUnit, workCount, average: parseFloat(average), rawText
+                } : r);
+            } else {
+                // New record
+                const newId = records.length > 0 ? Math.max(...records.map(r => r.id)) + 1 : 1;
+                const now = new Date();
+                const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                
+                const newRecord = {
+                    id: newId,
+                    jobTitle, progressInfo, itemName, itemQuantity, itemUnit, workCount, average: parseFloat(average), rawText,
+                    createdAt: dateStr
+                };
+                records.unshift(newRecord);
+            }
+
+            saveToLocalStorage();
+            renderRecords();
+            resetForm();
+        }
+
+        // Reset form state
+        function resetForm() {
+            document.getElementById('recordForm').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('submitBtn').innerText = '💾 新規保存する';
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+            document.getElementById('previewAverage').innerText = '0.00';
+            document.getElementById('previewUnitLabel').innerText = '-- /回';
+        }
+
+        // Render records list
+        function renderRecords() {
+            const container = document.getElementById('recordsContainer');
+            document.getElementById('recordCountBadge').innerText = `${records.length}件`;
+
+            if (records.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 text-slate-400 text-xs">
+                        保存された記録はまだありません。左側から入力・取り込みを行ってください。
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = records.map(r => `
+                <div class="bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 rounded-xl p-3.5 transition-all flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-400">#${r.id}</span>
+                            <span class="text-xs font-bold text-slate-800 bg-white px-2 py-0.5 rounded border border-slate-200">${r.jobTitle}</span>
+                            ${r.progressInfo ? `<span class="text-[11px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-medium">${r.progressInfo}</span>` : ''}
+                        </div>
+                        <div class="text-xs text-slate-700 flex items-center gap-3 flex-wrap">
+                            <span>📦 <b>${r.itemName}</b>: <span class="font-mono font-bold text-brand-600">${r.itemQuantity.toLocaleString()} ${r.itemUnit}</span></span>
+                            <span>🔄 作業回数: <span class="font-mono font-bold">${r.workCount.toLocaleString()}回</span></span>
+                            <span class="bg-brand-50 text-brand-700 font-bold px-2 py-0.5 rounded border border-brand-100">平均: ${r.average.toFixed(2)} ${r.itemUnit}/回</span>
+                        </div>
+                        <div class="text-[10px] text-slate-400">${r.createdAt}</div>
+                    </div>
+
+                    <div class="flex items-center gap-1.5 w-full sm:w-auto justify-end flex-wrap">
+                        <button onclick="applySameWork(${r.id})" title="同じ作業をする（再利用）" class="px-2.5 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-medium rounded-lg border border-brand-200 transition-colors flex items-center gap-1">
+                            <span>⚡</span> 同じ作業
+                        </button>
+                        <button onclick="openRawModal(${r.id})" title="逆引き（元の情報）" class="px-2 py-1.5 bg-white hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg border border-slate-200 transition-colors">
+                            🔍 逆引き
+                        </button>
+                        <button onclick="copyRecord(${r.id})" title="コピー" class="px-2 py-1.5 bg-white hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg border border-slate-200 transition-colors">
+                            📋
+                        </button>
+                        <button onclick="editRecord(${r.id})" title="編集" class="px-2 py-1.5 bg-white hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg border border-slate-200 transition-colors">
+                            ✏️
+                        </button>
+                        <button onclick="deleteRecord(${r.id})" title="削除" class="px-2 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-medium rounded-lg border border-rose-200 transition-colors">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Apply "Same Work" button action
+        function applySameWork(id) {
+            const r = records.find(item => item.id === id);
+            if (!r) return;
+
+            document.getElementById('jobTitle').value = r.jobTitle;
+            document.getElementById('progressInfo').value = r.progressInfo;
+            document.getElementById('itemName').value = r.itemName;
+            document.getElementById('itemQuantity').value = r.itemQuantity;
+            document.getElementById('itemUnit').value = r.itemUnit;
+            document.getElementById('workCount').value = r.workCount;
+            document.getElementById('rawTextInput').value = r.rawText;
+            
+            calcAverage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Edit record
+        function editRecord(id) {
+            const r = records.find(item => item.id === id);
+            if (!r) return;
+
+            document.getElementById('editId').value = r.id;
+            document.getElementById('jobTitle').value = r.jobTitle;
+            document.getElementById('progressInfo').value = r.progressInfo;
+            document.getElementById('itemName').value = r.itemName;
+            document.getElementById('itemQuantity').value = r.itemQuantity;
+            document.getElementById('itemUnit').value = r.itemUnit;
+            document.getElementById('workCount').value = r.workCount;
+            document.getElementById('rawTextInput').value = r.rawText;
+
+            document.getElementById('submitBtn').innerText = '🔄 変更を更新する';
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+            calcAverage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Delete record
+        function deleteRecord(id) {
+            if (confirm(`記録 #${id} を削除しますか？`)) {
+                records = records.filter(r => r.id !== id);
+                saveToLocalStorage();
+                renderRecords();
+            }
+        }
+
+        // Clear all
+        function clearAllData() {
+            if (confirm("すべての保存記録を削除しますか？")) {
+                records = [];
+                saveToLocalStorage();
+                renderRecords();
+            }
+        }
+
+        // Copy record text to clipboard
+        function copyRecord(id) {
+            const r = records.find(item => item.id === id);
+            if (!r) return;
+            const text = `【${r.jobTitle}】 ${r.itemName}: ${r.itemQuantity}${r.itemUnit} (作業回数: ${r.workCount}回 / 平均: ${r.average.toFixed(2)} ${r.itemUnit}/回)`;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("クリップボードにコピーしました！");
+            });
+        }
+
+        // Reverse Lookup Modal
+        function openRawModal(id) {
+            const r = records.find(item => item.id === id);
+            if (!r) return;
+            document.getElementById('modalRawContent').value = r.rawText || "元の取り込みテキストはありません。";
+            document.getElementById('rawModal').classList.remove('hidden');
+            document.getElementById('rawModal').classList.add('flex');
+        }
+
+        function closeRawModal() {
+            document.getElementById('rawModal').classList.remove('flex');
+            document.getElementById('rawModal').classList.add('hidden');
+        }
+
+        // Export JSON
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(records, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "work_tool_records.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+    </script>
+</body>
+</html>
