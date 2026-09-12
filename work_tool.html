@@ -24,7 +24,7 @@
                 <h1 class="text-lg font-bold tracking-wider">作業系データ解析・記録管理ツール</h1>
             </div>
             <div class="text-xs text-indigo-200">
-                Revision: v1.2.2
+                Revision: v1.3.0
             </div>
         </div>
     </header>
@@ -82,24 +82,27 @@
                     <input type="number" id="form-operations" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例: 50">
                 </div>
 
-                <!-- 任意：詳細効率・経験値計算オプション（未入力時は速度100%デフォルト） -->
+                <!-- 詳細効率・経験値計算オプション（基礎作業時間 ＋ 作業速度、未入力時速度は100%） -->
                 <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100 space-y-2">
                     <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-indigo-900">詳細効率オプション（端数対応）</span>
+                        <span class="text-xs font-bold text-indigo-900">詳細効率・経験値計算（端数対応）</span>
                         <span class="text-[10px] text-indigo-600">未入力時は速度100%</span>
                     </div>
-                    <div class="grid grid-cols-2 gap-2">
+                    <div class="text-[11px] text-slate-600 leading-tight">
+                        実値が0.0147の場合など0.01未満の微小な端数・差を正確に反映するため、基礎作業時間と作業速度から算出します。
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pt-1">
                         <div>
-                            <label class="block text-[11px] text-indigo-800 mb-0.5">基礎作業時間 (秒)</label>
+                            <label class="block text-[11px] text-indigo-800 mb-0.5">基礎作業時間</label>
                             <input type="number" step="0.0001" id="form-base-time" class="w-full text-xs p-1.5 bg-white border border-indigo-200 rounded focus:ring-1 focus:ring-indigo-500" placeholder="例: 10.5">
                         </div>
                         <div>
                             <label class="block text-[11px] text-indigo-800 mb-0.5">作業速度 (%) [空欄=100]</label>
-                            <input type="number" step="0.0001" id="form-speed-rate" class="w-full text-xs p-1.5 bg-white border border-indigo-200 rounded focus:ring-1 focus:ring-indigo-500" placeholder="未入力時は100%">
+                            <input type="number" step="0.0001" id="form-speed-rate" class="w-full text-xs p-1.5 bg-white border border-indigo-200 rounded focus:ring-1 focus:ring-indigo-500" placeholder="未入力時100%">
                         </div>
                     </div>
                     <div class="text-[11px] text-indigo-700 flex justify-between items-center pt-1">
-                        <span>算出した実効増加効率:</span>
+                        <span>算出された効率値 (端数対応):</span>
                         <span id="calculated-efficiency-preview" class="font-bold text-indigo-900">---</span>
                     </div>
                 </div>
@@ -179,7 +182,7 @@
                 average: 8.72,
                 baseTime: 12.0,
                 speedRate: 115.5,
-                efficiency: "13.86",
+                efficiency: "13.8600",
                 rawSource: "鍛冶職人LV 7 (+1.81%)\n26.1%\n獲得したもの\n斧\n436本\n作業回数：50回",
                 createdAt: "2026-06-01 12:00:00"
             },
@@ -193,14 +196,14 @@
                 operations: 50,
                 average: 15.88,
                 baseTime: 8.5,
-                speedRate: 102.2,
-                efficiency: "8.69",
+                speedRate: 100, // 未入力時は100%デフォルト
+                efficiency: "8.5000",
                 rawSource: "錬金術師LV 7 (+1.04%)\n9.94%\n獲得したもの\n氷\n794kg\n作業回数：50回",
                 createdAt: "2026-06-02 14:30:00"
             }
         ];
 
-        const STORAGE_KEY = "work_tool_records_v1.2.2";
+        const STORAGE_KEY = "work_tool_records_v1.3.0";
 
         const rawInputText = document.getElementById('raw-input-text');
         const parseBtn = document.getElementById('parse-btn');
@@ -263,12 +266,12 @@
             formSpeedRate.addEventListener('input', updateEfficiencyPreview);
         }
 
-        // 効率プレビュー計算 (作業速度未入力時は自動で100%をデフォルト適用)
+        // 効率プレビュー計算 (作業速度未入力時は自動で100%を適用。端数対応)
         function updateEfficiencyPreview() {
             const base = parseFloat(formBaseTime.value);
             if (!isNaN(base) && base > 0) {
-                // 速度が空欄・未入力ならデフォルトで100%を使用
-                const speed = formSpeedRate.value.trim() === "" ? 100 : parseFloat(formSpeedRate.value);
+                const speedInput = formSpeedRate.value.trim();
+                const speed = speedInput === "" ? 100 : parseFloat(speedInput);
                 const effectiveSpeed = isNaN(speed) ? 100 : speed;
 
                 const calculated = base * (effectiveSpeed / 100);
@@ -366,10 +369,12 @@
             const unit = formUnit.value.trim();
             const operations = parseInt(formOperations.value, 10);
             
-            const baseTime = parseFloat(formBaseTime.value) || 0;
-            // 作業速度が未入力の場合は100%をデフォルト採用
+            const baseTimeInput = formBaseTime.value.trim();
+            const baseTime = baseTimeInput === "" ? 0 : parseFloat(baseTimeInput);
+
+            // 作業速度がブランク（未入力）の場合は一律で100%を適用
             const speedInput = formSpeedRate.value.trim();
-            const speedRate = speedInput === "" ? 100 : (parseFloat(speedInput) || 100);
+            const speedRate = speedInput === "" ? 100 : parseFloat(speedInput);
 
             const rawSource = formRawSource.value.trim();
             const currentEditId = editId.value;
@@ -380,7 +385,8 @@
             }
 
             const average = parseFloat((quantity / operations).toFixed(4));
-            const efficiency = baseTime > 0 ? (baseTime * (speedRate / 100)).toFixed(4) : "---";
+            // 基礎作業時間と作業速度から高精度（端数対応）で算出
+            const efficiency = !isNaN(baseTime) && baseTime > 0 ? (baseTime * (speedRate / 100)).toFixed(4) : "---";
 
             const now = new Date();
             const timestamp = now.getFullYear() + '-' +
@@ -403,15 +409,15 @@
                             unit,
                             operations,
                             average,
-                            baseTime,
-                            speedRate,
+                            baseTime: isNaN(baseTime) ? 0 : baseTime,
+                            speedRate: isNaN(speedRate) ? 100 : speedRate,
                             efficiency,
                             rawSource: rawSource || rec.rawSource
                         };
                     }
                     return rec;
                 });
-                alert("記録を更新しました！");
+                alert("記録を更新・上書きしました！");
             } else {
                 const newId = records.length > 0 ? Math.max(...records.map(r => r.id)) + 1 : 1;
                 const newRecord = {
@@ -423,8 +429,8 @@
                     unit,
                     operations,
                     average,
-                    baseTime,
-                    speedRate,
+                    baseTime: isNaN(baseTime) ? 0 : baseTime,
+                    speedRate: isNaN(speedRate) ? 100 : speedRate,
                     efficiency,
                     rawSource: rawSource || `${title}\n${itemName} ${quantity}${unit}\n作業回数：${operations}回`,
                     createdAt: timestamp
@@ -474,6 +480,10 @@
                 const card = document.createElement('div');
                 card.className = "bg-white border border-slate-200 rounded-lg p-3 hover:border-indigo-300 transition shadow-sm flex flex-col space-y-2";
                 
+                // 保存記録カード内の効率・基礎時間・速度表示部分
+                const baseTimeVal = rec.baseTime !== undefined && rec.baseTime !== null && rec.baseTime !== "" ? rec.baseTime : 0;
+                const speedVal = rec.speedRate !== undefined && rec.speedRate !== null && rec.speedRate !== "" ? rec.speedRate : 100;
+
                 card.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div class="flex items-center space-x-2">
@@ -498,8 +508,8 @@
                             <span class="font-bold text-indigo-600">${rec.average} ${escapeHtml(rec.unit || '')}/回</span>
                         </div>
                         <div>
-                            <span class="text-slate-400 block text-[10px]">効率・端数効果 (速度:${rec.speedRate || 100}%)</span>
-                            <span class="font-semibold text-slate-600">${rec.efficiency !== 'undefined' ? rec.efficiency : '---'}</span>
+                            <span class="text-slate-400 block text-[10px]">基礎時間 / 速度 / 効率効果</span>
+                            <span class="font-semibold text-slate-700">${baseTimeVal > 0 ? `${baseTimeVal}s / ${speedVal}%` : '未設定'} <br><span class="text-indigo-700 font-bold">(${rec.efficiency})</span></span>
                         </div>
                     </div>
 
@@ -549,8 +559,8 @@
             formQuantity.value = "";
             formUnit.value = rec.unit;
             formOperations.value = rec.operations;
-            formBaseTime.value = rec.baseTime || "";
-            formSpeedRate.value = rec.speedRate || "";
+            formBaseTime.value = rec.baseTime !== undefined && rec.baseTime > 0 ? rec.baseTime : "";
+            formSpeedRate.value = rec.speedRate !== undefined && rec.speedRate !== 100 ? rec.speedRate : "";
             updateEfficiencyPreview();
             formRawSource.value = rec.rawSource;
             
@@ -577,7 +587,7 @@
             const rec = records.find(r => r.id === id);
             if (!rec) return;
 
-            const textToCopy = `作業名: ${rec.title}\n成果物: ${rec.itemName} ${rec.quantity}${rec.unit} (${rec.operations}回)\nアベレージ: ${rec.average} ${rec.unit}/回\n進捗: ${rec.percentage}`;
+            const textToCopy = `作業名: ${rec.title}\n成果物: ${rec.itemName} ${rec.quantity}${rec.unit} (${rec.operations}回)\nアベレージ: ${rec.average} ${rec.unit}/回\n効率効果: ${rec.efficiency}\n進捗: ${rec.percentage}`;
             
             navigator.clipboard.writeText(textToCopy).then(() => {
                 alert("クリップボードにコピーしました！");
@@ -598,8 +608,8 @@
             formQuantity.value = rec.quantity;
             formUnit.value = rec.unit;
             formOperations.value = rec.operations;
-            formBaseTime.value = rec.baseTime || "";
-            formSpeedRate.value = rec.speedRate || "";
+            formBaseTime.value = rec.baseTime !== undefined && rec.baseTime > 0 ? rec.baseTime : "";
+            formSpeedRate.value = rec.speedRate !== undefined && rec.speedRate !== 100 ? rec.speedRate : "";
             updateEfficiencyPreview();
             formRawSource.value = rec.rawSource;
             saveBtn.textContent = "変更を上書き保存";
@@ -646,3 +656,4 @@
     </script>
 </body>
 </html>
+
