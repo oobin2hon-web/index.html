@@ -1,705 +1,272 @@
-    materials.html 
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>SOLDOUT2 必要材料計算</title>
-
+<title>SOLDOUT2 素材管理ツール</title>
 <style>
-
-* {
-    box-sizing: border-box;
-}
-
+* { box-sizing: border-box; }
 body {
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 12px;
     background: #f5f5f5;
     color: #222;
-
-    font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Helvetica Neue",
-        "Hiragino Kaku Gothic ProN",
-        "Yu Gothic",
-        sans-serif;
 }
-
-.container {
-    max-width: 700px;
-    margin: auto;
+.container { max-width: 700px; margin: auto; }
+.header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
 }
-
-h1 {
-    font-size: 24px;
-    margin-bottom: 8px;
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    background: #e0e0e0;
+    color: #333;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: bold;
 }
-
-.description {
-    color: #666;
-    margin-bottom: 20px;
-}
-
+h1 { font-size: 20px; margin: 0; text-align: center; flex-grow: 1; }
 .card {
     background: white;
-    border-radius: 14px;
-    padding: 18px;
-    margin-bottom: 16px;
-
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
-
-input {
+h2 { font-size: 15px; margin-top: 0; margin-bottom: 8px; color: #1976d2; }
+.help-text { font-size: 11px; color: #666; margin-bottom: 8px; line-height: 1.4; }
+textarea, input {
     width: 100%;
-
-    padding: 12px;
-
+    padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 8px;
-
-    font-size: 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 8px;
 }
-
-.product-box {
-    display: grid;
-
-    grid-template-columns:
-        1.5fr
-        1fr
-        1fr;
-
+textarea { height: 110px; font-family: monospace; resize: vertical; }
+.form-row {
+    display: flex;
     gap: 8px;
-
-    margin-bottom: 15px;
+    margin-bottom: 8px;
 }
-
-.material-row {
-    display: grid;
-
-    grid-template-columns:
-        1.5fr
-        1fr
-        auto;
-
-    gap: 8px;
-
-    margin-bottom: 10px;
-}
-
+.form-row input { margin-bottom: 0; }
 button {
     border: none;
-
-    border-radius: 8px;
-
-    padding: 10px 14px;
-
-    font-size: 15px;
-
-    cursor: pointer;
-}
-
-.add {
-    background: #e8f3ff;
-
-    color: #1769aa;
-
-    width: 100%;
-
-    margin-top: 5px;
-}
-
-.delete {
-    background: #eee;
-
-    color: #555;
-}
-
-.calculate {
-    background: #388e3c;
-
-    color: white;
-
-    width: 100%;
-
-    font-size: 18px;
-
-    padding: 14px;
-
-    margin-top: 8px;
-}
-
-.clear {
-    background: #eee;
-
-    width: 100%;
-
-    margin-top: 8px;
-}
-
-.result {
-    font-size: 17px;
-
-    line-height: 1.9;
-}
-
-.result strong {
-    font-size: 24px;
-}
-
-.highlight {
-    padding: 12px;
-
-    background: #f0f7ff;
-
-    border-radius: 10px;
-
-    margin-top: 10px;
-}
-
-.material-result {
-    padding: 12px;
-
-    background: #f7f7f7;
-
-    border-radius: 10px;
-
-    margin-top: 10px;
-}
-
-.material-result strong {
-    font-size: 22px;
-}
-
-.note {
+    border-radius: 6px;
+    padding: 10px;
     font-size: 14px;
-
-    color: #777;
-
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+}
+.primary-btn { background: #1976d2; color: white; }
+.secondary-btn { background: #4caf50; color: white; margin-top: 6px; }
+.clear-btn { background: #eee; color: #333; margin-top: 6px; }
+.danger-btn { background: #e53935; color: white; margin-top: 8px; font-size: 12px; padding: 6px; }
+table {
+    width: 100%;
+    border-collapse: collapse;
     margin-top: 8px;
+    font-size: 13px;
 }
-
-@media (max-width: 550px) {
-
-    .product-box {
-        grid-template-columns: 1fr;
-    }
-
-    .material-row {
-        grid-template-columns:
-            1.5fr
-            1fr
-            auto;
-    }
-
-    input {
-        padding: 10px 8px;
-
-        font-size: 14px;
-    }
-
-    .delete {
-        padding: 8px;
-    }
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
 }
-
+th { background: #f0f0f0; }
+.del-btn {
+    background: #e53935;
+    color: white;
+    padding: 4px 8px;
+    font-size: 11px;
+    width: auto;
+    border-radius: 4px;
+}
 </style>
-
 </head>
-
-
 <body>
-
 
 <div class="container">
 
+    <div class="header-bar">
+        <a href="index.html" class="back-btn">← 戻る</a>
+        <h1>素材管理</h1>
+        <div style="width: 60px;"></div>
+    </div>
 
-<h1>必要材料計算</h1>
+    <!-- ゲーム内テキスト一括取り込み -->
+    <div class="card">
+        <h2>📋 ゲーム内テキストから自動読み込み</h2>
+        <div class="help-text">
+            SOLDOUT2の「作業成果」「レシピ」「棚・倉庫」「注文」「取引ログ」などのテキストをそのまま貼り付けて読み込めます。
+        </div>
+        <textarea id="logInput" placeholder="ここにゲーム内のログやテキストを貼り付け...
+例：
+薬草 x10
+木材 5個 100G
+石ころ 100G x 5"></textarea>
+        <button class="primary-btn" onclick="parseGameText()">テキストから抽出して登録</button>
+    </div>
 
+    <!-- 手動入力 -->
+    <div class="card">
+        <h2>✏️ 手動入力</h2>
+        <input type="text" id="itemName" placeholder="素材・アイテム名 (例: 薬草)">
+        <div class="form-row">
+            <input type="number" id="itemCount" placeholder="個数" min="1">
+            <input type="number" id="itemPrice" placeholder="単価(G)" min="0">
+        </div>
+        <button class="secondary-btn" onclick="addManualItem()">リストに追加</button>
+    </div>
 
-<div class="description">
-
-SOLDOUT2などの生産に必要な材料数を計算します。
-
-</div>
-
-
-<!-- 完成品設定 -->
-
-<div class="card">
-
-<h2>完成品</h2>
-
-
-<div class="product-box">
-
-<input
-    type="text"
-    id="productName"
-    placeholder="完成品名"
->
-
-
-<input
-    type="number"
-    id="targetCount"
-    placeholder="作りたい数"
-    min="1"
->
-
-
-<input
-    type="number"
-    id="outputPerWork"
-    placeholder="1回でできる数"
-    min="1"
->
-
-</div>
-
-
-<div class="note">
-
-例：ハイポーションを100個作りたい。
-1回の作業で8個できる場合は「100」「8」と入力。
-
-</div>
-
-</div>
-
-
-<!-- 材料 -->
-
-<div class="card">
-
-<h2>必要材料</h2>
-
-
-<div id="materialRows">
-
-
-<div class="material-row">
-
-<input
-    type="text"
-    placeholder="材料名"
->
-
-
-<input
-    type="number"
-    placeholder="1回に必要な数"
-    min="0"
->
-
-
-<button
-    class="delete"
-    onclick="deleteMaterialRow(this)"
->
-削除
-</button>
+    <!-- 登録素材一覧 -->
+    <div class="card">
+        <h2>📦 登録素材一覧</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>素材名</th>
+                    <th>個数</th>
+                    <th>単価</th>
+                    <th>合計</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="materialsTable">
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #888;">データが登録されていません</td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="danger-btn" onclick="clearAllItems()">一覧をすべてクリア</button>
+    </div>
 
 </div>
-
-
-</div>
-
-
-<button
-    class="add"
-    onclick="addMaterialRow()"
->
-＋ 材料を追加
-</button>
-
-
-<button
-    class="calculate"
-    onclick="calculateMaterials()"
->
-必要材料を計算
-</button>
-
-
-<button
-    class="clear"
-    onclick="clearAll()"
->
-すべてクリア
-</button>
-
-
-</div>
-
-
-<!-- 結果 -->
-
-<div class="card">
-
-<h2>計算結果</h2>
-
-
-<div
-    id="result"
-    class="result"
->
-
-作りたい数と材料を入力して
-「必要材料を計算」を押してください。
-
-</div>
-
-
-</div>
-
-
-</div>
-
 
 <script>
+let items = [];
 
-
-/* =========================
-   材料行追加
-========================= */
-
-function addMaterialRow() {
-
-    const rows =
-        document.getElementById("materialRows");
-
-
-    const row =
-        document.createElement("div");
-
-
-    row.className =
-        "material-row";
-
-
-    row.innerHTML = `
-
-        <input
-            type="text"
-            placeholder="材料名"
-        >
-
-        <input
-            type="number"
-            placeholder="1回に必要な数"
-            min="0"
-        >
-
-        <button
-            class="delete"
-            onclick="deleteMaterialRow(this)"
-        >
-            削除
-        </button>
-
-    `;
-
-
-    rows.appendChild(row);
-
-}
-
-
-/* =========================
-   材料行削除
-========================= */
-
-function deleteMaterialRow(button) {
-
-    const rows =
-        document.getElementById("materialRows");
-
-
-    if (rows.children.length > 1) {
-
-        button.parentElement.remove();
-
-    }
-
-}
-
-
-/* =========================
-   材料計算
-========================= */
-
-function calculateMaterials() {
-
-
-    const productName =
-        document.getElementById("productName")
-        .value
-        .trim();
-
-
-    const targetCount =
-        Number(
-            document.getElementById("targetCount").value
-        );
-
-
-    const outputPerWork =
-        Number(
-            document.getElementById("outputPerWork").value
-        );
-
-
-    /* 入力チェック */
-
-    if (
-        targetCount <= 0 ||
-        outputPerWork <= 0
-    ) {
-
-        document.getElementById("result").innerHTML =
-            "「作りたい数」と「1回でできる数」を入力してください。";
-
+function parseGameText() {
+    const text = document.getElementById("logInput").value;
+    if (!text.trim()) {
+        alert("テキストを入力してください。");
         return;
-
     }
 
+    const lines = text.split("\n");
+    let addedCount = 0;
 
-    /* 必要作業回数 */
+    lines.forEach(line => {
+        let cleanLine = line.replace(/\[.*?\]/g, '').replace(/[\r\n]/g, '').trim();
+        if (!cleanLine) return;
 
-    const workCount =
-        Math.ceil(
-            targetCount / outputPerWork
-        );
+        let name = "";
+        let count = 0;
+        let price = 0;
 
+        // パターン1: 「アイテム名 100G x 5」や「アイテム名 100G 5個」
+        let m1 = cleanLine.match(/^(.+?)\s+(\d+)G\s*(?:x|×|個|\s)\s*(\d+)個?$/i);
+        // パターン2: 「アイテム名 x10」や「アイテム名 10個」や「アイテム名×10」
+        let m2 = cleanLine.match(/^(.+?)\s*(?:x|×|\s)\s*(\d+)個?$/i);
+        // パターン3: 「アイテム名 10個 100G」
+        let m3 = cleanLine.match(/^(.+?)\s+(\d+)個?\s+(\d+)G$/i);
 
-    /* 実際にできる完成品数 */
-
-    const actualOutput =
-        workCount * outputPerWork;
-
-
-    const rows =
-        document.querySelectorAll(".material-row");
-
-
-    let resultHTML = "";
-
-    let hasMaterial = false;
-
-
-    rows.forEach(row => {
-
-
-        const inputs =
-            row.querySelectorAll("input");
-
-
-        const name =
-            inputs[0].value.trim();
-
-
-        const quantity =
-            Number(inputs[1].value);
-
-
-        if (
-            name &&
-            quantity > 0
-        ) {
-
-
-            hasMaterial = true;
-
-
-            const total =
-                workCount * quantity;
-
-
-            resultHTML += `
-
-                <div class="material-result">
-
-                    <strong>
-                        ${escapeHTML(name)}
-                    </strong>
-
-                    <br>
-
-                    1回あたり：
-                    ${formatNumber(quantity)} 個
-
-                    <br>
-
-                    必要数：
-                    <strong>
-                        ${formatNumber(total)} 個
-                    </strong>
-
-                </div>
-
-            `;
-
+        if (m1) {
+            name = m1[1].trim();
+            price = parseInt(m1[2]);
+            count = parseInt(m1[3]);
+        } else if (m3) {
+            name = m3[1].trim();
+            count = parseInt(m3[2]);
+            price = parseInt(m3[3]);
+        } else if (m2) {
+            name = m2[1].trim();
+            count = parseInt(m2[2]);
+            price = 0;
         }
 
+        if (name && count > 0) {
+            // 同名素材があれば個数を合算、なければ新規追加
+            let existing = items.find(i => i.name === name && i.price === price);
+            if (existing) {
+                existing.count += count;
+            } else {
+                items.push({ name, count, price });
+            }
+            addedCount++;
+        }
     });
 
+    if (addedCount > 0) {
+        renderTable();
+        document.getElementById("logInput").value = "";
+    } else {
+        alert("有効な素材情報が見つかりませんでした。");
+    }
+}
 
-    if (!hasMaterial) {
+function addManualItem() {
+    const name = document.getElementById("itemName").value.trim();
+    const count = parseInt(document.getElementById("itemCount").value) || 0;
+    const price = parseInt(document.getElementById("itemPrice").value) || 0;
 
-        document.getElementById("result").innerHTML =
-            "材料名と「1回に必要な数」を入力してください。";
-
+    if (!name || count <= 0) {
+        alert("素材名と正しい個数を入力してください。");
         return;
-
     }
 
-
-    /* 結果表示 */
-
-    document.getElementById("result").innerHTML = `
-
-        <div class="highlight">
-
-            完成品：
-            <strong>
-                ${escapeHTML(productName || "－")}
-            </strong>
-
-            <br>
-
-            作りたい数：
-            <strong>
-                ${formatNumber(targetCount)}
-            </strong>
-            個
-
-        </div>
-
-
-        <div class="highlight">
-
-            必要作業回数：
-            <strong>
-                ${formatNumber(workCount)}
-            </strong>
-            回
-
-            <br>
-
-            実際にできる数：
-            <strong>
-                ${formatNumber(actualOutput)}
-            </strong>
-            個
-
-        </div>
-
-
-        <h3>
-            必要材料
-        </h3>
-
-
-        ${resultHTML}
-
-    `;
-
-}
-
-
-/* =========================
-   数字表示
-========================= */
-
-function formatNumber(number) {
-
-    if (Number.isInteger(number)) {
-
-        return number.toLocaleString("ja-JP");
-
+    let existing = items.find(i => i.name === name && i.price === price);
+    if (existing) {
+        existing.count += count;
+    } else {
+        items.push({ name, count, price });
     }
 
-
-    return number.toLocaleString(
-        "ja-JP",
-        {
-            maximumFractionDigits: 4
-        }
-    );
-
+    renderTable();
+    document.getElementById("itemName").value = "";
+    document.getElementById("itemCount").value = "";
+    document.getElementById("itemPrice").value = "";
 }
 
-
-/* =========================
-   HTML安全処理
-========================= */
-
-function escapeHTML(text) {
-
-    return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
+function deleteItem(index) {
+    items.splice(index, 1);
+    renderTable();
 }
 
-
-/* =========================
-   クリア
-========================= */
-
-function clearAll() {
-
-
-    document.getElementById("productName").value = "";
-
-
-    document.getElementById("targetCount").value = "";
-
-
-    document.getElementById("outputPerWork").value = "";
-
-
-    document.getElementById("materialRows").innerHTML = `
-
-        <div class="material-row">
-
-            <input
-                type="text"
-                placeholder="材料名"
-            >
-
-            <input
-                type="number"
-                placeholder="1回に必要な数"
-                min="0"
-            >
-
-            <button
-                class="delete"
-                onclick="deleteMaterialRow(this)"
-            >
-                削除
-            </button>
-
-        </div>
-
-    `;
-
-
-    document.getElementById("result").innerHTML =
-        "作りたい数と材料を入力して「必要材料を計算」を押してください。";
-
+function clearAllItems() {
+    if (items.length === 0) return;
+    if (confirm("登録された素材をすべて削除しますか？")) {
+        items = [];
+        renderTable();
+    }
 }
 
+function renderTable() {
+    const tbody = document.getElementById("materialsTable");
+    if (items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #888;">データが登録されていません</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = items.map((item, index) => `
+        <tr>
+            <td><strong>${item.name}</strong></td>
+            <td>${item.count.toLocaleString()}</td>
+            <td>${item.price > 0 ? item.price.toLocaleString() + ' G' : '-'}</td>
+            <td>${(item.count * item.price).toLocaleString()} G</td>
+            <td><button class="del-btn" onclick="deleteItem(${index})">削除</button></td>
+        </tr>
+    `).join("");
+}
 </script>
 
-
 </body>
-
 </html>
+
