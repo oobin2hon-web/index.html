@@ -1,0 +1,847 @@
+sales.html 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SOLDOUT2 販売速度・完売予想</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    background: #f5f5f5;
+    color: #222;
+
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Helvetica Neue",
+        "Hiragino Kaku Gothic ProN",
+        "Yu Gothic",
+        sans-serif;
+}
+
+.container {
+    max-width: 700px;
+    margin: auto;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.description {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+
+    border: 1px solid #ccc;
+    border-radius: 8px;
+
+    font-size: 16px;
+}
+
+.basic-row {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.sale-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+button {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.add {
+    background: #e8f3ff;
+    color: #1769aa;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.delete {
+    background: #eee;
+    color: #555;
+}
+
+.calculate {
+    background: #1976d2;
+    color: white;
+    width: 100%;
+    font-size: 18px;
+    padding: 14px;
+    margin-top: 8px;
+}
+
+.clear {
+    background: #eee;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.result {
+    font-size: 17px;
+    line-height: 1.9;
+}
+
+.result strong {
+    font-size: 24px;
+}
+
+.highlight {
+    padding: 12px;
+    background: #f0f7ff;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.money {
+    padding: 12px;
+    background: #f0fff2;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.note {
+    font-size: 14px;
+    color: #777;
+    margin-top: 8px;
+}
+
+@media (max-width: 550px) {
+
+    .basic-row {
+        grid-template-columns: 1fr;
+    }
+
+    .sale-row {
+        grid-template-columns: 1fr 1fr auto;
+    }
+
+    input {
+        padding: 10px 8px;
+        font-size: 14px;
+    }
+
+    .delete {
+        padding: 8px;
+    }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<h1>販売速度・完売予想</h1>
+
+
+<div class="description">
+
+販売実績から1時間あたりの販売数を計算し、
+現在の在庫が全部売れるまでの時間を予想します。
+
+</div>
+
+
+<!-- 商品情報 -->
+
+<div class="card">
+
+<h2>商品情報</h2>
+
+
+<div class="basic-row">
+
+<input
+    type="text"
+    id="productName"
+    placeholder="商品名"
+>
+
+<input
+    type="number"
+    id="stock"
+    placeholder="現在の在庫"
+    min="0"
+>
+
+<input
+    type="number"
+    id="price"
+    placeholder="販売価格"
+    min="0"
+>
+
+</div>
+
+
+<div class="note">
+
+例：ビン・在庫1000個・販売価格50G
+
+</div>
+
+</div>
+
+
+<!-- 販売実績 -->
+
+<div class="card">
+
+<h2>販売実績</h2>
+
+
+<div class="description">
+
+「何個売れたか」と「何時間かかったか」を入力してください。
+
+</div>
+
+
+<div id="saleRows">
+
+
+<div class="sale-row">
+
+<input
+    type="number"
+    placeholder="販売数"
+    min="0"
+>
+
+<input
+    type="number"
+    placeholder="販売時間（時間）"
+    min="0"
+    step="0.01"
+>
+
+<button
+    class="delete"
+    onclick="deleteSaleRow(this)"
+>
+削除
+</button>
+
+</div>
+
+
+</div>
+
+
+<button
+    class="add"
+    onclick="addSaleRow()"
+>
+＋ 販売実績を追加
+</button>
+
+
+<button
+    class="calculate"
+    onclick="calculateSales()"
+>
+販売速度を計算
+</button>
+
+
+<button
+    class="clear"
+    onclick="clearAll()"
+>
+すべてクリア
+</button>
+
+
+</div>
+
+
+<!-- 結果 -->
+
+<div class="card">
+
+<h2>計算結果</h2>
+
+
+<div
+    id="result"
+    class="result"
+>
+
+商品情報と販売実績を入力して
+「販売速度を計算」を押してください。
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+<script>
+
+
+/* =========================
+   販売実績追加
+========================= */
+
+function addSaleRow() {
+
+    const rows =
+        document.getElementById("saleRows");
+
+
+    const row =
+        document.createElement("div");
+
+
+    row.className = "sale-row";
+
+
+    row.innerHTML = `
+
+        <input
+            type="number"
+            placeholder="販売数"
+            min="0"
+        >
+
+        <input
+            type="number"
+            placeholder="販売時間（時間）"
+            min="0"
+            step="0.01"
+        >
+
+        <button
+            class="delete"
+            onclick="deleteSaleRow(this)"
+        >
+            削除
+        </button>
+
+    `;
+
+
+    rows.appendChild(row);
+
+}
+
+
+/* =========================
+   販売実績削除
+========================= */
+
+function deleteSaleRow(button) {
+
+    const rows =
+        document.getElementById("saleRows");
+
+
+    if (rows.children.length > 1) {
+
+        button.parentElement.remove();
+
+    }
+
+}
+
+
+/* =========================
+   販売速度計算
+========================= */
+
+function calculateSales() {
+
+
+    const productName =
+        document
+        .getElementById("productName")
+        .value
+        .trim();
+
+
+    const stock =
+        Number(
+            document.getElementById("stock").value
+        );
+
+
+    const price =
+        Number(
+            document.getElementById("price").value
+        );
+
+
+    if (stock < 0 || price < 0) {
+
+        document.getElementById("result").innerHTML =
+            "在庫と販売価格を正しく入力してください。";
+
+        return;
+
+    }
+
+
+    const rows =
+        document.querySelectorAll(".sale-row");
+
+
+    let totalSales = 0;
+
+    let totalHours = 0;
+
+
+    rows.forEach(row => {
+
+        const inputs =
+            row.querySelectorAll("input");
+
+
+        const sales =
+            Number(inputs[0].value);
+
+
+        const hours =
+            Number(inputs[1].value);
+
+
+        if (
+            sales > 0 &&
+            hours > 0
+        ) {
+
+            totalSales += sales;
+
+            totalHours += hours;
+
+        }
+
+    });
+
+
+    if (
+        totalSales <= 0 ||
+        totalHours <= 0
+    ) {
+
+        document.getElementById("result").innerHTML =
+            "販売数と販売時間を入力してください。";
+
+        return;
+
+    }
+
+
+    /* 1時間あたり販売数 */
+
+    const salesPerHour =
+        totalSales / totalHours;
+
+
+    /* 1時間あたり売上 */
+
+    const revenuePerHour =
+        salesPerHour * price;
+
+
+    /* 完売予想時間 */
+
+    let selloutHours = 0;
+
+    if (stock > 0) {
+
+        selloutHours =
+            stock / salesPerHour;
+
+    }
+
+
+    /* 完売時の売上 */
+
+    const totalRevenue =
+        stock * price;
+
+
+    /* 完売時刻 */
+
+    let selloutTimeText = "－";
+
+
+    if (stock > 0) {
+
+        const now = new Date();
+
+
+        const selloutTime =
+            new Date(
+                now.getTime()
+                +
+                selloutHours * 60 * 60 * 1000
+            );
+
+
+        selloutTimeText =
+            formatDateTime(selloutTime);
+
+    }
+
+
+    document.getElementById("result").innerHTML = `
+
+
+        <div class="highlight">
+
+            商品：
+            <strong>
+                ${escapeHTML(productName || "－")}
+            </strong>
+
+            <br>
+
+            現在の在庫：
+            <strong>
+                ${formatNumber(stock)}
+            </strong>
+            個
+
+            <br>
+
+            販売価格：
+            <strong>
+                ${formatNumber(price)}
+            </strong>
+            G
+
+        </div>
+
+
+        <div class="highlight">
+
+            合計販売数：
+            <strong>
+                ${formatNumber(totalSales)}
+            </strong>
+            個
+
+            <br>
+
+            合計販売時間：
+            <strong>
+                ${formatNumber(totalHours)}
+            </strong>
+            時間
+
+        </div>
+
+
+        <div class="highlight">
+
+            1時間あたり販売数
+
+            <br>
+
+            <strong>
+                ${formatNumber(salesPerHour)}
+            </strong>
+            個 / 時間
+
+        </div>
+
+
+        <div class="money">
+
+            1時間あたり売上
+
+            <br>
+
+            <strong>
+                ${formatNumber(revenuePerHour)}
+            </strong>
+            G / 時間
+
+        </div>
+
+
+        <div class="highlight">
+
+            完売予想
+
+            <br>
+
+            <strong>
+                ${formatDuration(selloutHours)}
+            </strong>
+
+        </div>
+
+
+        <div class="highlight">
+
+            完売予想時刻
+
+            <br>
+
+            <strong>
+                ${selloutTimeText}
+            </strong>
+
+        </div>
+
+
+        <div class="money">
+
+            在庫を全部売った場合の売上
+
+            <br>
+
+            <strong>
+                ${formatNumber(totalRevenue)}
+            </strong>
+            G
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================
+   時間表示
+========================= */
+
+function formatDuration(hours) {
+
+    if (hours <= 0) {
+
+        return "0時間";
+
+    }
+
+
+    const totalMinutes =
+        Math.round(hours * 60);
+
+
+    const days =
+        Math.floor(
+            totalMinutes / 1440
+        );
+
+
+    const remainingMinutes =
+        totalMinutes % 1440;
+
+
+    const h =
+        Math.floor(
+            remainingMinutes / 60
+        );
+
+
+    const m =
+        remainingMinutes % 60;
+
+
+    let result = "";
+
+
+    if (days > 0) {
+
+        result += days + "日 ";
+
+    }
+
+
+    if (h > 0) {
+
+        result += h + "時間 ";
+
+    }
+
+
+    if (m > 0) {
+
+        result += m + "分";
+
+    }
+
+
+    if (result === "") {
+
+        result = "1分未満";
+
+    }
+
+
+    return result.trim();
+
+}
+
+
+/* =========================
+   日時表示
+========================= */
+
+function formatDateTime(date) {
+
+    const month =
+        date.getMonth() + 1;
+
+
+    const day =
+        date.getDate();
+
+
+    const hours =
+        String(
+            date.getHours()
+        ).padStart(2, "0");
+
+
+    const minutes =
+        String(
+            date.getMinutes()
+        ).padStart(2, "0");
+
+
+    return `${month}月${day}日 ${hours}:${minutes}`;
+
+}
+
+
+/* =========================
+   数字表示
+========================= */
+
+function formatNumber(number) {
+
+    if (Number.isInteger(number)) {
+
+        return number.toLocaleString("ja-JP");
+
+    }
+
+
+    return number.toLocaleString(
+        "ja-JP",
+        {
+            maximumFractionDigits: 2
+        }
+    );
+
+}
+
+
+/* =========================
+   HTML安全処理
+========================= */
+
+function escapeHTML(text) {
+
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/* =========================
+   クリア
+========================= */
+
+function clearAll() {
+
+
+    document.getElementById("productName").value = "";
+
+
+    document.getElementById("stock").value = "";
+
+
+    document.getElementById("price").value = "";
+
+
+    document.getElementById("saleRows").innerHTML = `
+
+        <div class="sale-row">
+
+            <input
+                type="number"
+                placeholder="販売数"
+                min="0"
+            >
+
+            <input
+                type="number"
+                placeholder="販売時間（時間）"
+                min="0"
+                step="0.01"
+            >
+
+            <button
+                class="delete"
+                onclick="deleteSaleRow(this)"
+            >
+                削除
+            </button>
+
+        </div>
+
+    `;
+
+
+    document.getElementById("result").innerHTML =
+        "商品情報と販売実績を入力して「販売速度を計算」を押してください。";
+
+}
+
+</script>
+
+
+</body>
+</html>
