@@ -21,6 +21,17 @@
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
+        .nav-link {
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+        .nav-link a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        .nav-link a:hover {
+            text-decoration: underline;
+        }
         h1 {
             font-size: 20px;
             margin-top: 0;
@@ -150,6 +161,9 @@
 <body>
 
 <div class="container">
+    <div class="nav-link">
+        <a href="index.html">← ツール一覧（ホーム）に戻る</a>
+    </div>
     <h1>作業結果取り込みツール</h1>
     <div class="subtitle">SOLD OUT 2のコピーテキストをそのまま貼り付けて記録・比較</div>
 
@@ -181,7 +195,6 @@
 </div>
 
 <script>
-// Load history on startup
 document.addEventListener('DOMContentLoaded', renderHistory);
 
 function parseAndSave() {
@@ -191,69 +204,49 @@ function parseAndSave() {
         return;
     }
 
-    // Parse text using regex
-    // Level & Exp
-    let levelMatch = text.match(/([^
-]+職人LV\s*[\d\.\+\(\)]+)/i) || text.match(/([^
-]+LV\s*[\d\.\+\(\)]+)/i);
-    let levelStr = levelMatch ? levelMatch[1].trim() : "職人作業";
-
-    // Gauge/Progress
-    let gaugeMatch = text.match(/([\d\.]+%)?/);
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l);
     
-    // Item name and count
-    // Looking for lines after "獲得したもの" or similar structures
-    let lines = text.split('\n').map(l => l.trim()).filter(l => l);
-    let itemName = "アイテム";
+    let levelStr = "職人作業";
+    let itemName = "不明";
     let acquiredCount = "0";
     let workCount = "0";
 
-    // Simple heuristic parser for SOLD OUT 2 layout
     for (let i = 0; i < lines.length; i++) {
         let line = lines[i];
+        if (line.includes('LV') || line.includes('職人')) {
+            levelStr = line;
+        }
         if (line.includes('作業回数')) {
-            let m = line.match(/作業回数[：:]\s*([0-9]+)/);
+            let m = line.match(/([0-9]+)/);
             if (m) workCount = m[1];
         }
-        if (line.endsWith('本') || line.endsWith('個') || line.endsWith('枚') || line.endsWith('個') || line.endsWith('つ')) {
-            // Might be count or item depending on line
-        }
     }
 
-    // Look for lines containing numbers like "436本"
     for (let i = 0; i < lines.length; i++) {
         let line = lines[i];
-        let countMatch = line.match(/^([0-9]+)\s*(本|個|枚|冊|着|基|台)$/);
-        if (countMatch) {
-            acquiredCount = countMatch[1];
+        let m = line.match(/^([0-9]+)\s*(本|個|枚|冊|着|基|台)$/);
+        if (m) {
+            acquiredCount = m[1];
             if (i > 0) {
-                itemName = lines[i - 1]; // Previous line is usually the item name
+                itemName = lines[i - 1];
             }
         }
-        // Alternative format check: "斧 436本"
-        let combinedMatch = line.match(/(.+?)\s+([0-9]+)\s*(本|個|枚|冊|着|基|台)/);
-        if (combinedMatch) {
-            itemName = combinedMatch[1];
-            acquiredCount = combinedMatch[2];
+        let mc = line.match(/(.+?)\s+([0-9]+)\s*(本|個|枚|冊|着|基|台)/);
+        if (mc) {
+            itemName = mc[1].trim();
+            acquiredCount = mc[2];
         }
     }
 
-    // If specific "斧
-436本" structure
-    for (let i = 0; i < lines.length - 1; i++) {
-        if (lines[i+1].match(/^[0-9]+本$/)) {
-            itemName = lines[i];
-            acquiredCount = lines[i+1].replace('本', '');
+    if (acquiredCount === "0") {
+        for (let i = 0; i < lines.length - 1; i++) {
+            if (/^[0-9]+本$/.test(lines[i+1])) {
+                itemName = lines[i];
+                acquiredCount = lines[i+1].replace('本', '');
+            }
         }
     }
 
-    // Work count check
-    lines.forEach(line => {
-        let wc = line.match(/作業回数[：:\s]*([0-9]+)/);
-        if (wc) workCount = wc[1];
-    });
-
-    // Calculate efficiency if possible
     let efficiency = "-";
     let acNum = parseInt(acquiredCount);
     let wcNum = parseInt(workCount);
