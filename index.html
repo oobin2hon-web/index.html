@@ -1,98 +1,161 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOLD OUT 2 ツールハブ</title>
-    <style>
-        body {
-            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
-            color: #2c3e50;
-            margin: 0;
-            padding: 20px;
-            background-color: #f7f9fa;
-            line-height: 1.6;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        h1 {
-            font-size: 20px;
-            margin-top: 0;
-            color: #2c3e50;
-        }
-        .subtitle {
-            font-size: 13px;
-            color: #7f8c8d;
-            margin-bottom: 20px;
-        }
-        .tool-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .tool-card {
-            display: block;
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-left: 4px solid #3b82f6;
-            padding: 15px;
-            border-radius: 6px;
-            text-decoration: none;
-            color: inherit;
-            transition: transform 0.1s, background 0.1s;
-        }
-        .tool-card:hover {
-            background: #f1f5f9;
-            transform: translateY(-1px);
-        }
-        .tool-title {
-            font-size: 15px;
-            font-weight: bold;
-            color: #1e293b;
-            margin-bottom: 4px;
-        }
-        .tool-desc {
-            font-size: 12px;
-            color: #64748b;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOLDOUT2 ツール集ポータル</title>
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 16px;
+    background: #f5f5f5;
+    color: #222;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Helvetica Neue",
+        "Hiragino Kaku Gothic ProN",
+        "Yu Gothic",
+        sans-serif;
+}
+
+.container {
+    max-width: 700px;
+    margin: auto;
+}
+
+h1 {
+    font-size: 22px;
+    text-align: center;
+    margin-bottom: 6px;
+}
+
+.description {
+    color: #666;
+    font-size: 13px;
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.section-title {
+    font-size: 15px;
+    font-weight: bold;
+    margin: 16px 0 8px 4px;
+    color: #444;
+}
+
+.tool-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tool-card {
+    background: white;
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    display: block;
+}
+
+.tool-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+.tool-title {
+    font-size: 15px;
+    font-weight: bold;
+    color: #1976d2;
+    margin-bottom: 4px;
+}
+
+.tool-desc {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.4;
+}
+</style>
 </head>
 <body>
 
 <div class="container">
-    <h1>SOLD OUT 2 ツールハブ</h1>
-    <div class="subtitle">GitHubで管理している各種ツールへのリンク集</div>
+    <h1>SOLDOUT2 ツール集</h1>
+    <div class="description">利用するツールを選択してください。</div>
 
+    <div class="section-title">📊 計算・シミュレータ</div>
     <div class="tool-list">
-        <a href="soldout2_parser.html" class="tool-card">
-            <div class="tool-title">📋 作業結果取り込みツール</div>
-            <div class="tool-desc">SOLD OUT 2のテキストを貼り付けて自動で記録・比較するツール</div>
-        </a>
         <a href="level.html" class="tool-card">
-            <div class="tool-title">📊 レベル関連ツール (level.html)</div>
-            <div class="tool-desc">レベル確認や経験値管理を行うページ</div>
+            <div class="tool-title">レベルアップ予想 (level.html)</div>
+            <div class="tool-desc">作業や売上回収から次のレベル到達までの時間・回数を予想します。</div>
         </a>
-        <a href="materials.html" class="tool-card">
-            <div class="tool-title">📦 素材関連ツール (materials.html)</div>
-            <div class="tool-desc">素材の管理や計算などを行うツール</div>
-        </a>
+
         <a href="sales.html" class="tool-card">
-            <div class="tool-title">💰 販売・売上ツール (sales.html)</div>
-            <div class="tool-desc">売上や販売の管理に関するツール</div>
+            <div class="tool-title">販売速度・完売予想 (sales.html)</div>
+            <div class="tool-desc">販売実績から1時間あたりの売上速度や完売時刻を計算します。</div>
         </a>
-        <a href="trade.html" class="tool-card">
-            <div class="tool-title">🤝 取引ツール (trade.html)</div>
-            <div class="tool-desc">取引・トレード関連の補助ツール</div>
-        </a>
+
         <a href="xpcalc.html" class="tool-card">
-            <div class="tool-title">🧮 経験値計算ツール (xpcalc.html)</div>
-            <div class="tool-desc">獲得経験値や必要数などを計算するツール</div>
+            <div class="tool-title">経験値計算 (xpcalc.html)</div>
+            <div class="tool-desc">経験値計算ツール</div>
+        </a>
+
+        <a href="xpcalc_detail.html" class="tool-card">
+            <div class="tool-title">経験値計算 詳細 (xpcalc_detail.html)</div>
+            <div class="tool-desc">詳細な経験値計算ツール</div>
+        </a>
+
+        <a href="xpcalc_work.html" class="tool-card">
+            <div class="tool-title">作業経験値計算 (xpcalc_work.html)</div>
+            <div class="tool-desc">作業による経験値計算ツール</div>
+        </a>
+
+        <a href="経験値取得シミュレーション.html" class="tool-card">
+            <div class="tool-title">経験値取得シミュレータ (経験値取得シミュレーション.html)</div>
+            <div class="tool-desc">経験値の取得状況をシミュレーションします。</div>
+        </a>
+    </div>
+
+    <div class="section-title">🔄 変換・解析ツール</div>
+    <div class="tool-list">
+        <a href="average-converter.html" class="tool-card">
+            <div class="tool-title">アベレージ自動変換 (average-converter.html)</div>
+            <div class="tool-desc">アベレージ表記やテキストログを整形・変換します。</div>
+        </a>
+
+        <a href="コンバータ.html" class="tool-card">
+            <div class="tool-title">コンバータ (コンバータ.html)</div>
+            <div class="tool-desc">各種データ変換ツール</div>
+        </a>
+
+        <a href="soldout2_parser.html" class="tool-card">
+            <div class="tool-title">SOLDOUT2 Parser (soldout2_parser.html)</div>
+            <div class="tool-desc">データ解析用ツール</div>
+        </a>
+
+        <a href="soldout2_blacksmith.html" class="tool-card">
+            <div class="tool-title">SOLDOUT2 鍛冶ツール (soldout2_blacksmith.html)</div>
+            <div class="tool-desc">鍛冶関連データツール</div>
+        </a>
+    </div>
+
+    <div class="section-title">📦 素材・取引</div>
+    <div class="tool-list">
+        <a href="materials.html" class="tool-card">
+            <div class="tool-title">素材管理 (materials.html)</div>
+            <div class="tool-desc">素材データ管理ツール</div>
+        </a>
+
+        <a href="trade.html" class="tool-card">
+            <div class="tool-title">取引管理 (trade.html)</div>
+            <div class="tool-desc">取引計算・管理ツール</div>
         </a>
     </div>
 </div>
