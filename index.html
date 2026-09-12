@@ -1,144 +1,108 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SOLDOUT2 ツール集ポータル</title>
-<style>
-* {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    padding: 16px;
-    background: #f5f5f5;
-    color: #222;
-    font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Helvetica Neue",
-        "Hiragino Kaku Gothic ProN",
-        "Yu Gothic",
-        sans-serif;
-}
-
-.container {
-    max-width: 700px;
-    margin: auto;
-}
-
-h1 {
-    font-size: 22px;
-    text-align: center;
-    margin-bottom: 6px;
-}
-
-.description {
-    color: #666;
-    font-size: 13px;
-    text-align: center;
-    margin-bottom: 18px;
-}
-
-.section-title {
-    font-size: 15px;
-    font-weight: bold;
-    margin: 16px 0 8px 4px;
-    color: #444;
-}
-
-.tool-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.tool-card {
-    background: white;
-    border-radius: 8px;
-    padding: 14px 16px;
-    text-decoration: none;
-    color: inherit;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
-    display: block;
-}
-
-.tool-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-}
-
-.tool-title {
-    font-size: 15px;
-    font-weight: bold;
-    color: #1976d2;
-    margin-bottom: 4px;
-}
-
-.tool-desc {
-    font-size: 12px;
-    color: #666;
-    line-height: 1.4;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>oobin2hon-web 目次</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f6f8fa;
+            color: #24292e;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            border-bottom: 1px solid #eaecef;
+            padding-bottom: 10px;
+            font-size: 1.8rem;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        a {
+            display: block;
+            padding: 12px 16px;
+            background-color: #ffffff;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #0366d6;
+            font-weight: bold;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        a:hover {
+            background-color: #f1f8ff;
+            border-color: #0366d6;
+        }
+        .description {
+            font-size: 0.85rem;
+            color: #586069;
+            font-weight: normal;
+            margin-top: 4px;
+        }
+    </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>SOLDOUT2 ツール集</h1>
-    <div class="description">利用するツールを選択してください。</div>
+    <h1>📋 oobin2hon-web 目次ページ</h1>
+    <p>公開されているツールやページのリンク集です。</p>
 
-    <div class="section-title">📊 計算・シミュレータ</div>
-    <div class="tool-list">
-        <a href="level.html" class="tool-card">
-            <div class="tool-title">レベルアップ予想</div>
-            <div class="tool-desc">作業や売上回収から次のレベル到達までの時間・回数を予想します。</div>
-        </a>
-
-        <a href="sales.html" class="tool-card">
-            <div class="tool-title">販売速度・完売予想</div>
-            <div class="tool-desc">販売実績から1時間あたりの売上速度や完売時刻を計算します。</div>
-        </a>
-
-        <a href="xpcalc.html" class="tool-card">
-            <div class="tool-title">経験値計算</div>
-            <div class="tool-desc">経験値計算ツール</div>
-        </a>
-
-        <a href="xpcalc_detail.html" class="tool-card">
-            <div class="tool-title">経験値計算 詳細</div>
-            <div class="tool-desc">詳細な経験値計算ツール</div>
-        </a>
-
-        <a href="xpcalc_work.html" class="tool-card">
-            <div class="tool-title">作業経験値計算</div>
-            <div class="tool-desc">作業による経験値計算ツール</div>
-        </a>
-    </div>
-
-    <div class="section-title">🔄 解析・データ</div>
-    <div class="tool-list">
-        <a href="soldout2_parser.html" class="tool-card">
-            <div class="tool-title">SOLDOUT2 Parser</div>
-            <div class="tool-desc">データ解析・パースツール</div>
-        </a>
-    </div>
-
-    <div class="section-title">📦 素材・取引</div>
-    <div class="tool-list">
-        <a href="materials.html" class="tool-card">
-            <div class="tool-title">素材管理</div>
-            <div class="tool-desc">素材データ管理ツール</div>
-        </a>
-
-        <a href="trade.html" class="tool-card">
-            <div class="tool-title">取引管理</div>
-            <div class="tool-desc">取引計算・管理ツール</div>
-        </a>
-    </div>
-</div>
+    <ul>
+        <li>
+            <a href="level.html">
+                level.html
+                <div class="description">レベル関連のページ</div>
+            </a>
+        </li>
+        <li>
+            <a href="materials.html">
+                materials.html
+                <div class="description">素材関連のページ</div>
+            </a>
+        </li>
+        <li>
+            <a href="sales.html">
+                sales.html
+                <div class="description">売上・セールス関連のページ</div>
+            </a>
+        </li>
+        <li>
+            <a href="soldout2_parser.html">
+                soldout2_parser.html
+                <div class="description">パーサーツール</div>
+            </a>
+        </li>
+        <li>
+            <a href="trade.html">
+                trade.html
+                <div class="description">トレード関連のページ</div>
+            </a>
+        </li>
+        <li>
+            <a href="xpcalc.html">
+                xpcalc.html
+                <div class="description">XP計算ツール</div>
+            </a>
+        </li>
+        <li>
+            <a href="xpcalc_detail.html">
+                xpcalc_detail.html
+                <div class="description">XP計算詳細ページ</div>
+            </a>
+        </li>
+        <li>
+            <a href="xpcalc_work.html">
+                xpcalc_work.html
+                <div class="description">XP計算作業用ページ</div>
+            </a>
+        </li>
+    </ul>
 
 </body>
 </html>
