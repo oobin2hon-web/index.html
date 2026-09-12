@@ -24,7 +24,7 @@
                 <h1 class="text-lg font-bold tracking-wider">作業系データ解析・記録管理ツール</h1>
             </div>
             <div class="text-xs text-indigo-200">
-                Revision: v1.3.5
+                Revision: v1.5.0
             </div>
         </div>
     </header>
@@ -40,15 +40,15 @@
             </h2>
             <input type="hidden" id="edit-id" value="">
 
-            <!-- 自由入力テキスト（パーサー対応） -->
+            <!-- 自由入力テキスト（複数成果物・ゆらぎ対応パーサー） -->
             <div>
                 <div class="flex justify-between items-center mb-1">
-                    <label class="block text-xs font-semibold text-slate-600">一括テキスト取り込み（ゆらぎ対応パーサー）</label>
+                    <label class="block text-xs font-semibold text-slate-600">一括テキスト取り込み（複数成果物対応）</label>
                     <button type="button" id="raw-clear-btn" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-0.5 rounded transition font-medium">
                         ✕ 文章をクリア
                     </button>
                 </div>
-                <textarea id="raw-input-text" rows="4" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none font-mono" placeholder="ここにログやテキストを貼り付け..."></textarea>
+                <textarea id="raw-input-text" rows="5" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none font-mono" placeholder="ここに単数または複数のログを貼り付け..."></textarea>
                 <button type="button" id="parse-btn" class="mt-1.5 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2 rounded-lg transition border border-slate-300">
                     テキストを自動解析してフォームに反映
                 </button>
@@ -60,45 +60,42 @@
             <div class="space-y-3">
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">作業名 / 職人・レベル</label>
-                    <input type="text" id="form-title" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例: 鍛冶職人LV 7 (+1.81%)">
+                    <input type="text" id="form-title" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例: 肉屋LV 9 (+0.22%)">
                 </div>
+                
                 <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">成果物名 <span class="text-rose-500">*必須</span></label>
-                        <input type="text" id="form-item-name" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例: 斧 / 氷">
-                    </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">進捗パーセンテージ</label>
-                        <input type="text" id="form-percentage" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例: 26.1%">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">数量（総量） <span class="text-slate-400 font-normal">※省略可</span></label>
-                        <input type="number" id="form-quantity" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="未入力可">
+                        <input type="text" id="form-percentage" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例: 3.8%">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">単位</label>
-                        <input type="text" id="form-unit" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例: 本 / kg">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">作業回数 <span class="text-slate-400 font-normal">※省略可</span></label>
+                        <input type="number" id="form-operations" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例: 20">
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">作業回数 <span class="text-slate-400 font-normal">※省略可</span></label>
-                    <input type="number" id="form-operations" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例: 50">
+
+                <!-- 成果物一覧（複数対応） -->
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="block text-xs font-bold text-slate-700">成果物・獲得アイテム一覧 <span class="text-rose-500">*必須</span></label>
+                        <button type="button" id="add-item-row-btn" class="text-[10px] bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded transition font-medium">
+                            ＋ アイテム追加
+                        </button>
+                    </div>
+                    
+                    <div id="items-container" class="space-y-2 max-h-44 overflow-y-auto pr-1">
+                        <!-- 動的にアイテム入力行が生成されます -->
+                    </div>
                 </div>
 
                 <!-- 詳細効率・経験値計算オプション -->
                 <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100 space-y-2">
                     <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-indigo-900">詳細効率・経験値計算（端数対応）</span>
+                        <span class="text-xs font-bold text-indigo-900">詳細効率・経験値計算（微小端数対応）</span>
                         <span class="text-[10px] text-indigo-600">速度未入力時=100%</span>
                     </div>
-                    <!-- 注意書き -->
-                    <div class="bg-white p-2 rounded border border-indigo-200 text-[11px] text-indigo-900 leading-tight space-y-1">
-                        <p class="font-bold">【注意書き】</p>
-                        <p>・基礎作業時間は、未入力の場合は自動で <span class="underline font-semibold">1時間</span> をデフォルトとします。</p>
-                        <p>・設定値は 1, 2, 4, 8, 12, 24 時間などの段階的数値を想定しています。</p>
-                        <p>・実値が0.0147の場合など0.01未満の微小な端数を正確に反映します。</p>
+                    <div class="bg-white p-2 rounded border border-indigo-200 text-[11px] text-indigo-900 leading-tight">
+                        <p>※1時間がデフォルトです（1, 2, 4, 8, 12, 24時間などの段階的な設定を想定）</p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 pt-1">
@@ -112,13 +109,19 @@
                         </div>
                     </div>
                     <div class="text-[11px] text-indigo-700 flex justify-between items-center pt-1">
-                        <span>算出された効率値 (端数対応):</span>
+                        <span>算出された効率効果 (端数対応):</span>
                         <span id="calculated-efficiency-preview" class="font-bold text-indigo-900">---</span>
                     </div>
                 </div>
 
+                <!-- プロンプト / 元の情報テキストエリア -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">元の情報（逆引き用テキスト記録）</label>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs font-semibold text-slate-600">元の情報（逆引き用テキスト記録）</label>
+                        <button type="button" id="source-clear-btn" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-0.5 rounded transition font-medium">
+                            ✕ プロンプトをクリア
+                        </button>
+                    </div>
                     <textarea id="form-raw-source" rows="2" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none font-mono text-slate-500" placeholder="取り込み元のテキストがここに保持されます"></textarea>
                 </div>
             </div>
@@ -146,7 +149,7 @@
 
             <!-- 検索・フィルター -->
             <div>
-                <input type="text" id="search-box" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="記録内をキーワード検索（作業名、成果物など）...">
+                <input type="text" id="search-box" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="記録内をキーワード検索（作業名、成果物名など）...">
             </div>
 
             <!-- 記録リストコンテナ -->
@@ -183,51 +186,51 @@
         const INITIAL_RECORDS = [
             {
                 id: 1,
-                title: "鍛冶職人LV 7 (+1.81%)",
-                itemName: "斧",
-                percentage: "26.1%",
-                quantity: 436,
-                unit: "本",
-                operations: 50,
-                average: 8.72,
-                baseTime: 1.0,
-                speedRate: 115.5,
-                efficiency: "1.1550",
-                rawSource: "鍛冶職人LV 7 (+1.81%)\n26.1%\n獲得したもの\n斧\n436本\n作業回数：50回",
-                createdAt: "2026-06-01 12:00:00"
-            },
-            {
-                id: 2,
-                title: "錬金術師LV 7 (+1.04%)",
-                itemName: "氷",
-                percentage: "9.94%",
-                quantity: null,
-                unit: "kg",
-                operations: 50,
-                average: null,
+                title: "肉屋LV 9 (+0.22%)",
+                percentage: "3.8%",
+                operations: 20,
                 baseTime: 1.0,
                 speedRate: 100,
                 efficiency: "1.0000",
-                rawSource: "錬金術師LV 7 (+1.04%)\n9.94%\n獲得したもの\n氷\n作業回数：50回",
-                createdAt: "2026-06-02 14:30:00"
+                items: [
+                    { name: "獣の肉", quantity: 200, unit: "塊", average: 10.0 },
+                    { name: "獣の皮", quantity: 178, unit: "枚", average: 8.9 },
+                    { name: "獣の骨", quantity: 149, unit: "個", average: 7.45 }
+                ],
+                rawSource: "肉屋LV 9 (+0.22%)\n3.8%\n獲得したもの\n獣の肉\n200塊\n獣の皮\n178枚\n獣の骨\n149個\n作業回数：20回",
+                createdAt: "2026-06-03 10:00:00"
+            },
+            {
+                id: 2,
+                title: "鍛冶職人LV 7 (+1.81%)",
+                percentage: "26.1%",
+                operations: 50,
+                baseTime: 1.0,
+                speedRate: 115.5,
+                efficiency: "1.1550",
+                items: [
+                    { name: "斧", quantity: 436, unit: "本", average: 8.72 }
+                ],
+                rawSource: "鍛冶職人LV 7 (+1.81%)\n26.1%\n獲得したもの\n斧\n436本\n作業回数：50回",
+                createdAt: "2026-06-01 12:00:00"
             }
         ];
 
-        const STORAGE_KEY = "work_tool_records_v1.3.5";
+        const STORAGE_KEY = "work_tool_records_v1.5.0";
 
         const rawInputText = document.getElementById('raw-input-text');
         const rawClearBtn = document.getElementById('raw-clear-btn');
         const parseBtn = document.getElementById('parse-btn');
         const formTitle = document.getElementById('form-title');
-        const formItemName = document.getElementById('form-item-name');
         const formPercentage = document.getElementById('form-percentage');
-        const formQuantity = document.getElementById('form-quantity');
-        const formUnit = document.getElementById('form-unit');
         const formOperations = document.getElementById('form-operations');
+        const itemsContainer = document.getElementById('items-container');
+        const addItemRowBtn = document.getElementById('add-item-row-btn');
         const formBaseTime = document.getElementById('form-base-time');
         const formSpeedRate = document.getElementById('form-speed-rate');
         const calculatedEfficiencyPreview = document.getElementById('calculated-efficiency-preview');
         const formRawSource = document.getElementById('form-raw-source');
+        const sourceClearBtn = document.getElementById('source-clear-btn');
         const editId = document.getElementById('edit-id');
         const editModeBadge = document.getElementById('edit-mode-badge');
         const saveBtn = document.getElementById('save-btn');
@@ -247,6 +250,9 @@
             loadRecords();
             setupEventListeners();
             renderRecords();
+            if (itemsContainer.children.length === 0) {
+                addItemRow();
+            }
         }
 
         function loadRecords() {
@@ -255,7 +261,13 @@
                 try {
                     const parsed = JSON.parse(data);
                     if (Array.isArray(parsed)) {
-                        records = parsed;
+                        records = parsed.map(r => {
+                            // 旧データの移行互換性確保
+                            if (!r.items && r.itemName) {
+                                r.items = [{ name: r.itemName, quantity: r.quantity, unit: r.unit, average: r.average }];
+                            }
+                            return r;
+                        });
                     } else {
                         records = INITIAL_RECORDS;
                     }
@@ -282,6 +294,12 @@
                 rawInputText.focus();
             });
 
+            sourceClearBtn.addEventListener('click', () => {
+                formRawSource.value = "";
+                formRawSource.focus();
+            });
+
+            addItemRowBtn.addEventListener('click', () => addItemRow());
             parseBtn.addEventListener('click', parseRawText);
             saveBtn.addEventListener('click', saveRecord);
             clearBtn.addEventListener('click', clearForm);
@@ -297,6 +315,27 @@
             reverseModal.addEventListener('click', (e) => {
                 if (e.target === reverseModal) closeReverseModal();
             });
+        }
+
+        function addItemRow(name = "", quantity = "", unit = "") {
+            const row = document.createElement('div');
+            row.className = "flex items-center space-x-1.5 bg-white p-2 rounded border border-slate-200 item-row";
+            row.innerHTML = `
+                <input type="text" class="flex-1 text-xs p-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 item-name" placeholder="成果物名 (例: 獣の肉)" value="${escapeHtml(name)}">
+                <input type="number" class="w-20 text-xs p-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 item-qty" placeholder="数量" value="${quantity !== null && quantity !== undefined ? quantity : ""}">
+                <input type="text" class="w-16 text-xs p-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 item-unit" placeholder="単位" value="${escapeHtml(unit)}">
+                <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-1.5 py-1 remove-item-btn" title="削除">✕</button>
+            `;
+            row.querySelector('.remove-item-btn').addEventListener('click', () => {
+                if (itemsContainer.children.length > 1) {
+                    row.remove();
+                } else {
+                    row.querySelector('.item-name').value = "";
+                    row.querySelector('.item-qty').value = "";
+                    row.querySelector('.item-unit').value = "";
+                }
+            });
+            itemsContainer.appendChild(row);
         }
 
         function updateEfficiencyPreview() {
@@ -324,10 +363,10 @@
 
             let titleVal = "";
             let percentageVal = "";
-            let itemNameVal = "";
-            let quantityVal = "";
-            let unitVal = "";
             let operationsVal = "";
+            const parsedItems = [];
+
+            let isAcquiredSection = false;
 
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i];
@@ -342,48 +381,63 @@
                     continue;
                 }
 
-                const qtyUnitMatch = line.match(/^([\d,]+)([^\d\s]+)?$/);
-                if (qtyUnitMatch) {
-                    const num = parseInt(qtyUnitMatch[1].replace(/,/g, ''), 10);
-                    const unitStr = qtyUnitMatch[2] || "";
-
-                    if (unitStr.includes("回")) {
-                        operationsVal = num;
-                    } else if (!quantityVal && unitStr && !unitStr.includes("%")) {
-                        quantityVal = num;
-                        unitVal = unitStr.replace("回", "");
-                    } else if (!quantityVal && !unitStr) {
-                        quantityVal = num;
-                    }
-                }
-
                 if (line.includes("作業回数") || line.includes("回数")) {
                     const opMatch = line.match(/(\d+)/g);
                     if (opMatch) {
                         operationsVal = opMatch[opMatch.length - 1];
                     }
+                    continue;
                 }
 
-                if (line === "獲得したもの" && i + 1 < lines.length) {
-                    itemNameVal = lines[i + 1];
+                if (line === "獲得したもの") {
+                    isAcquiredSection = true;
+                    continue;
+                }
+
+                if (isAcquiredSection) {
+                    // 次の行が数量＋単位、またはこの行が成果物名で次が数量の場合
+                    const qtyUnitMatch = line.match(/^([\d,]+)([^\d\s]+)?([\d\s\S]*)$/);
+                    if (qtyUnitMatch && parsedItems.length > 0 && !parsedItems[parsedItems.length - 1].quantity) {
+                        const lastItem = parsedItems[parsedItems.length - 1];
+                        lastItem.quantity = parseInt(qtyUnitMatch[1].replace(/,/g, ''), 10);
+                        lastItem.unit = qtyUnitMatch[2] || "";
+                    } else {
+                        // アイテム名と判定
+                        if (!line.includes("回数") && !line.match(/^\d+$/)) {
+                            parsedItems.push({ name: line, quantity: null, unit: "" });
+                        }
+                    }
                 }
             }
 
-            if (!itemNameVal) {
-                for (const line of lines) {
-                    if (!line.includes("LV") && !line.includes("%") && !line.includes("回数") && !line.match(/^[\d,]+/) && line.length < 10) {
-                        itemNameVal = line;
-                        break;
+            // 獲得したものセクションが明示されていない、またはアイテムが取れなかった場合のフォールバック解析
+            if (parsedItems.length === 0) {
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    const qtyUnitMatch = line.match(/^([\d,]+)([^\d\s]+)?$/);
+                    if (qtyUnitMatch && i > 0) {
+                        const nameCandidate = lines[i - 1];
+                        if (!nameCandidate.includes("LV") && !nameCandidate.includes("%")) {
+                            const num = parseInt(qtyUnitMatch[1].replace(/,/g, ''), 10);
+                            const unitStr = qtyUnitMatch[2] || "";
+                            if (!unitStr.includes("回")) {
+                                parsedItems.push({ name: nameCandidate, quantity: num, unit: unitStr });
+                            }
+                        }
                     }
                 }
             }
 
             if (titleVal) formTitle.value = titleVal;
             if (percentageVal) formPercentage.value = percentageVal;
-            if (itemNameVal) formItemName.value = itemNameVal;
-            if (quantityVal !== "") formQuantity.value = quantityVal;
-            if (unitVal) formUnit.value = unitVal;
             if (operationsVal !== "") formOperations.value = operationsVal;
+
+            if (parsedItems.length > 0) {
+                itemsContainer.innerHTML = "";
+                parsedItems.forEach(item => {
+                    addItemRow(item.name, item.quantity, item.unit);
+                });
+            }
 
             if (!formTitle.value && lines.length > 0) {
                 formTitle.value = lines[0];
@@ -394,14 +448,7 @@
 
         function saveRecord() {
             const title = formTitle.value.trim();
-            const itemName = formItemName.value.trim();
             const percentage = formPercentage.value.trim();
-            
-            const quantityInput = formQuantity.value.trim();
-            const quantity = quantityInput === "" ? null : parseInt(quantityInput, 10);
-            
-            const unit = formUnit.value.trim();
-            
             const operationsInput = formOperations.value.trim();
             const operations = operationsInput === "" ? null : parseInt(operationsInput, 10);
             
@@ -416,15 +463,27 @@
             const rawSource = formRawSource.value.trim();
             const currentEditId = editId.value.trim();
 
-            if (!itemName) {
-                alert("「成果物名」は必須です。入力してください。");
-                formItemName.focus();
-                return;
-            }
+            // アイテム行の収集
+            const itemRows = itemsContainer.querySelectorAll('.item-row');
+            const items = [];
+            itemRows.forEach(row => {
+                const name = row.querySelector('.item-name').value.trim();
+                const qtyInput = row.querySelector('.item-qty').value.trim();
+                const unit = row.querySelector('.item-unit').value.trim();
+                
+                if (name) {
+                    const quantity = qtyInput === "" ? null : parseInt(qtyInput, 10);
+                    let average = null;
+                    if (quantity !== null && operations !== null && !isNaN(quantity) && !isNaN(operations) && operations > 0) {
+                        average = parseFloat((quantity / operations).toFixed(4));
+                    }
+                    items.push({ name, quantity: isNaN(quantity) ? null : quantity, unit, average });
+                }
+            });
 
-            let average = null;
-            if (quantity !== null && operations !== null && !isNaN(quantity) && !isNaN(operations) && operations > 0) {
-                average = parseFloat((quantity / operations).toFixed(4));
+            if (items.length === 0) {
+                alert("少なくとも1つの「成果物名」を入力してください。");
+                return;
             }
 
             const efficiency = (validBaseTime * (validSpeedRate / 100)).toFixed(4);
@@ -437,7 +496,7 @@
                 String(now.getMinutes()).padStart(2, '0') + ':' +
                 String(now.getSeconds()).padStart(2, '0');
 
-            const generatedRawSource = rawSource || `${title || '作業記録'}\n${itemName} ${quantity !== null ? quantity + unit : '(数量未入力)'}\n作業回数：${operations !== null ? operations + '回' : '未入力'}\n基礎時間: ${validBaseTime}h / 速度: ${validSpeedRate}%`;
+            const generatedRawSource = rawSource || `${title || '作業記録'}\n獲得したもの\n` + items.map(i => `${i.name}\n${i.quantity !== null ? i.quantity + i.unit : ''}`).join('\n') + `\n作業回数：${operations !== null ? operations + '回' : '未入力'}`;
 
             if (currentEditId !== "") {
                 const idNum = parseInt(currentEditId, 10);
@@ -447,23 +506,20 @@
                     records[index] = {
                         ...records[index],
                         title: title || records[index].title,
-                        itemName,
                         percentage,
-                        quantity: (quantity !== null && !isNaN(quantity)) ? quantity : null,
-                        unit,
                         operations: (operations !== null && !isNaN(operations)) ? operations : null,
-                        average,
                         baseTime: validBaseTime,
                         speedRate: validSpeedRate,
                         efficiency,
+                        items,
                         rawSource: generatedRawSource
                     };
                     alert("記録を正常に上書き更新しました！");
                 } else {
-                    addNewRecord(title, itemName, percentage, quantity, unit, operations, average, validBaseTime, validSpeedRate, efficiency, generatedRawSource, timestamp);
+                    addNewRecord(title, percentage, operations, validBaseTime, validSpeedRate, efficiency, items, generatedRawSource, timestamp);
                 }
             } else {
-                addNewRecord(title, itemName, percentage, quantity, unit, operations, average, validBaseTime, validSpeedRate, efficiency, generatedRawSource, timestamp);
+                addNewRecord(title, percentage, operations, validBaseTime, validSpeedRate, efficiency, items, generatedRawSource, timestamp);
                 alert("新規記録を保存しました！");
             }
 
@@ -472,20 +528,17 @@
             renderRecords();
         }
 
-        function addNewRecord(title, itemName, percentage, quantity, unit, operations, average, baseTime, speedRate, efficiency, rawSource, timestamp) {
+        function addNewRecord(title, percentage, operations, baseTime, speedRate, efficiency, items, rawSource, timestamp) {
             const newId = records.length > 0 ? Math.max(...records.map(r => r.id || 0)) + 1 : 1;
             const newRecord = {
                 id: newId,
                 title: title || ("作業記録 #" + newId),
-                itemName,
                 percentage,
-                quantity: (quantity !== null && !isNaN(quantity)) ? quantity : null,
-                unit,
                 operations: (operations !== null && !isNaN(operations)) ? operations : null,
-                average,
                 baseTime,
                 speedRate,
                 efficiency,
+                items,
                 rawSource,
                 createdAt: timestamp
             };
@@ -497,11 +550,10 @@
             editModeBadge.classList.add('hidden');
             rawInputText.value = "";
             formTitle.value = "";
-            formItemName.value = "";
             formPercentage.value = "";
-            formQuantity.value = "";
-            formUnit.value = "";
             formOperations.value = "";
+            itemsContainer.innerHTML = "";
+            addItemRow();
             formBaseTime.value = "";
             formSpeedRate.value = "";
             calculatedEfficiencyPreview.textContent = "---";
@@ -518,9 +570,8 @@
             const filtered = records.filter(rec => {
                 if (!rec) return false;
                 const t = (rec.title || "").toLowerCase();
-                const i = (rec.itemName || "").toLowerCase();
-                const u = (rec.unit || "").toLowerCase();
-                return t.includes(keyword) || i.includes(keyword) || u.includes(keyword);
+                const matchItem = rec.items && rec.items.some(i => (i.name || "").toLowerCase().includes(keyword) || (i.unit || "").toLowerCase().includes(keyword));
+                return t.includes(keyword) || matchItem;
             });
 
             if (filtered.length === 0) {
@@ -534,10 +585,27 @@
                 
                 const baseTimeVal = (rec.baseTime !== undefined && rec.baseTime !== null && rec.baseTime !== "") ? rec.baseTime : 1.0;
                 const speedVal = (rec.speedRate !== undefined && rec.speedRate !== null && rec.speedRate !== "") ? rec.speedRate : 100;
-                
-                const qtyDisplay = (rec.quantity !== null && rec.quantity !== undefined && !isNaN(rec.quantity)) ? `${Number(rec.quantity).toLocaleString()} ${escapeHtml(rec.unit || '')}` : '未入力';
                 const opDisplay = (rec.operations !== null && rec.operations !== undefined && !isNaN(rec.operations)) ? `${rec.operations}回` : '未入力';
-                const avgDisplay = (rec.average !== null && rec.average !== undefined && !isNaN(rec.average)) ? `${rec.average} ${escapeHtml(rec.unit || '')}/回` : '---';
+
+                let itemsHtml = "";
+                if (rec.items && rec.items.length > 0) {
+                    itemsHtml = rec.items.map(i => {
+                        const qStr = (i.quantity !== null && i.quantity !== undefined && !isNaN(i.quantity)) ? `${Number(i.quantity).toLocaleString()} ${escapeHtml(i.unit || '')}` : '未入力';
+                        const aStr = (i.average !== null && i.average !== undefined && !isNaN(i.average)) ? `${i.average} ${escapeHtml(i.unit || '')}/回` : '---';
+                        return `
+                            <div class="bg-slate-50 p-2 rounded border border-slate-100 flex justify-between items-center text-xs">
+                                <div>
+                                    <strong class="text-slate-700">${escapeHtml(i.name)}</strong>
+                                    <span class="text-slate-500 ml-2">数量: ${qStr}</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-slate-400 text-[10px] block">平均 (アベレージ)</span>
+                                    <span class="font-bold text-indigo-600">${aStr}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
 
                 card.innerHTML = `
                     <div class="flex justify-between items-start">
@@ -549,22 +617,13 @@
                         <span class="text-[10px] text-slate-400">${escapeHtml(rec.createdAt || '')}</span>
                     </div>
 
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50 p-2 rounded text-xs">
-                        <div>
-                            <span class="text-slate-400 block text-[10px]">成果物</span>
-                            <strong class="text-slate-700">${escapeHtml(rec.itemName || '---')}</strong>
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center text-xs bg-indigo-50/50 px-2 py-1 rounded">
+                            <span class="text-slate-600">作業回数: <strong class="text-slate-800">${opDisplay}</strong></span>
+                            <span class="text-slate-600">基礎時間/速度: <strong class="text-slate-800">${baseTimeVal}h / ${speedVal}%</strong> <span class="text-indigo-700 font-bold">(${escapeHtml(rec.efficiency || '---')})</span></span>
                         </div>
-                        <div>
-                            <span class="text-slate-400 block text-[10px]">数量 / 回数</span>
-                            <span class="font-semibold text-slate-700">${qtyDisplay} / ${opDisplay}</span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400 block text-[10px]">1回あたり平均 (アベレージ)</span>
-                            <span class="font-bold text-indigo-600">${avgDisplay}</span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400 block text-[10px]">基礎時間 / 速度 / 効率効果</span>
-                            <span class="font-semibold text-slate-700">${baseTimeVal}h / ${speedVal}% <br><span class="text-indigo-700 font-bold">(${escapeHtml(rec.efficiency || '---')})</span></span>
+                        <div class="space-y-1">
+                            ${itemsHtml}
                         </div>
                     </div>
 
@@ -611,16 +670,20 @@
             if (!rec) return;
 
             formTitle.value = rec.title || "";
-            formItemName.value = rec.itemName || "";
             formPercentage.value = rec.percentage || "";
-            formQuantity.value = (rec.quantity !== null && rec.quantity !== undefined && !isNaN(rec.quantity)) ? rec.quantity : "";
-            formUnit.value = rec.unit || "";
             formOperations.value = (rec.operations !== null && rec.operations !== undefined && !isNaN(rec.operations)) ? rec.operations : "";
             formBaseTime.value = (rec.baseTime !== undefined && rec.baseTime !== null && rec.baseTime !== 1.0) ? rec.baseTime : "";
             formSpeedRate.value = (rec.speedRate !== undefined && rec.speedRate !== null && rec.speedRate !== 100) ? rec.speedRate : "";
             updateEfficiencyPreview();
             formRawSource.value = rec.rawSource || "";
             
+            itemsContainer.innerHTML = "";
+            if (rec.items && rec.items.length > 0) {
+                rec.items.forEach(i => addItemRow(i.name, i.quantity, i.unit));
+            } else {
+                addItemRow();
+            }
+
             editId.value = "";
             editModeBadge.classList.add('hidden');
             saveBtn.textContent = "保存 / 更新";
@@ -645,11 +708,10 @@
             const rec = records.find(r => r.id === id);
             if (!rec) return;
 
-            const qtyStr = (rec.quantity !== null && rec.quantity !== undefined && !isNaN(rec.quantity)) ? `${rec.quantity}${rec.unit || ''}` : '数量未入力';
             const opStr = (rec.operations !== null && rec.operations !== undefined && !isNaN(rec.operations)) ? `${rec.operations}回` : '回数未入力';
-            const avgStr = (rec.average !== null && rec.average !== undefined && !isNaN(rec.average)) ? `アベレージ: ${rec.average} ${rec.unit || ''}/回` : '';
+            const itemsStr = rec.items ? rec.items.map(i => `${i.name}: ${i.quantity !== null ? i.quantity + (i.unit || '') : '数量未入力'}`).join(', ') : '';
 
-            const textToCopy = `作業名: ${rec.title || '無題'}\n成果物: ${rec.itemName || '---'} (${qtyStr} / ${opStr})\n${avgStr}\n効率効果: ${rec.efficiency || '---'}\n進捗: ${rec.percentage || '---'}`;
+            const textToCopy = `作業名: ${rec.title || '無題'}\n成果物: ${itemsStr} (${opStr})\n効率効果: ${rec.efficiency || '---'}\n進捗: ${rec.percentage || '---'}`;
             
             navigator.clipboard.writeText(textToCopy).then(() => {
                 alert("クリップボードにコピーしました！");
@@ -665,15 +727,20 @@
             editId.value = rec.id;
             editModeBadge.classList.remove('hidden');
             formTitle.value = rec.title || "";
-            formItemName.value = rec.itemName || "";
             formPercentage.value = rec.percentage || "";
-            formQuantity.value = (rec.quantity !== null && rec.quantity !== undefined && !isNaN(rec.quantity)) ? rec.quantity : "";
-            formUnit.value = rec.unit || "";
             formOperations.value = (rec.operations !== null && rec.operations !== undefined && !isNaN(rec.operations)) ? rec.operations : "";
             formBaseTime.value = (rec.baseTime !== undefined && rec.baseTime !== null && rec.baseTime !== 1.0) ? rec.baseTime : "";
             formSpeedRate.value = (rec.speedRate !== undefined && rec.speedRate !== null && rec.speedRate !== 100) ? rec.speedRate : "";
             updateEfficiencyPreview();
             formRawSource.value = rec.rawSource || "";
+
+            itemsContainer.innerHTML = "";
+            if (rec.items && rec.items.length > 0) {
+                rec.items.forEach(i => addItemRow(i.name, i.quantity, i.unit));
+            } else {
+                addItemRow();
+            }
+
             saveBtn.textContent = "変更を上書き保存";
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -718,6 +785,7 @@
     </script>
 </body>
 </html>
+
 
 
 
