@@ -1,192 +1,70 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOLD OUT 2 ツール集</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'media',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOLDOUT2 管理ツール ポータル</title>
+<style>
+body {
+    margin: 0;
+    padding: 20px;
+    background: #f5f5f5;
+    color: #222;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+}
+.container { max-width: 600px; margin: auto; }
+h1 { font-size: 24px; margin-bottom: 8px; text-align: center; }
+.description { color: #666; margin-bottom: 24px; font-size: 14px; text-align: center; }
+.menu-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-decoration: none;
+    color: #222;
+    transition: transform 0.2s, background 0.2s;
+}
+.menu-card:hover {
+    background: #e8f3ff;
+    transform: translateY(-2px);
+}
+.menu-title { font-size: 18px; font-weight: bold; color: #1976d2; }
+.menu-desc { font-size: 13px; color: #666; margin-top: 4px; }
+.arrow { font-size: 20px; color: #1976d2; font-weight: bold; }
+</style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen py-6 px-3 transition-colors">
-    <div class="max-w-3xl mx-auto space-y-4">
-        
-        <!-- Header -->
-        <header class="text-center space-y-1">
-            <div class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-brand-600 text-white text-xl shadow-md mb-1">
-                📦
-            </div>
-            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">SOLD OUT 2 ツール集</h1>
-            <p class="text-xs text-slate-500 dark:text-slate-400">
-                ゲーム内データ解析・効率化ツールのポータルページ
-            </p>
-        </header>
+<body>
 
-        <!-- Accordion Sections -->
-        <main class="space-y-3">
-            
-            <!-- カテゴリ1: 解析・データ -->
-            <details class="group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl overflow-hidden shadow-sm transition-all" open>
-                <summary class="flex items-center justify-between p-3.5 cursor-pointer select-none font-bold text-sm bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100/50 dark:hover:bg-slate-700/50 transition-colors">
-                    <span class="flex items-center gap-2">
-                        <span>⚡</span>
-                        <span>解析・データ抽出ツール</span>
-                    </span>
-                    <span class="transition-transform group-open:rotate-180 text-slate-400 text-xs">
-                        ▼
-                    </span>
-                </summary>
-                <div class="p-3 pt-0 grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3 border-t border-slate-100 dark:border-slate-700/50">
-                    
-                    <a href="work_tool.html" class="group/card bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/80 rounded-lg p-3 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-sm transition-all flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="text-sm font-bold text-slate-900 dark:text-white group-hover/card:text-brand-600 dark:group-hover/card:text-brand-400 transition-colors">作業系データ解析・記録管理</span>
-                                <span class="text-[9px] font-mono text-slate-400 bg-slate-200/60 dark:bg-slate-800 px-1.5 py-0.5 rounded">work_tool.html</span>
-                            </div>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">作業ログや成果物を取り込み、平均量を自動計算・管理。</p>
-                        </div>
-                    </a>
+<div class="container">
+    <h1>SOLDOUT2 管理ツール</h1>
+    <div class="description">目的に応じたツールを選択してください。</div>
 
-                    <a href="soldout2_parser.html" class="group/card bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/80 rounded-lg p-3 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-sm transition-all flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="text-sm font-bold text-slate-900 dark:text-white group-hover/card:text-brand-600 dark:group-hover/card:text-brand-400 transition-colors">データパーサー</span>
-                                <span class="text-[9px] font-mono text-slate-400 bg-slate-200/60 dark:bg-slate-800 px-1.5 py-0.5 rounded">soldout2_parser.html</span>
-                            </div>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">テキストデータを解析し、必要な情報を素早く抽出。</p>
-                        </div>
-                    </a>
+    <!-- 販売管理ツールへのリンク -->
+    <a href="sales.html" class="menu-card">
+        <div>
+            <div class="menu-title">販売・作業管理ツール</div>
+            <div class="menu-desc">在庫・価格・販売実績から完売予想や売上を計算・保存します。</div>
+        </div>
+        <div class="arrow">→</div>
+    </a>
 
-                </div>
-            </details>
+    <!-- 作業ツールへのリンク -->
+    <a href="work.html" class="menu-card">
+        <div>
+            <div class="menu-title">作業データ解析ツール (Work Tool)</div>
+            <div class="menu-desc">作業ログの解析や効率の計算を行います。</div>
+        </div>
+        <div class="arrow">→</div>
+    </a>
 
-            <!-- カテゴリ2: 経験値計算 -->
-            <details class="group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl overflow-hidden shadow-sm transition-all" open>
-                <summary class="flex items-center justify-between p-3.5 cursor-pointer select-none font-bold text-sm bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100/50 dark:hover:bg-slate-700/50 transition-colors">
-                    <span class="flex items-center gap-2">
-                        <span>📈</span>
-                        <span>経験値・レベル計算ツール</span>
-                    </span>
-                    <span class="transition-transform group-open:rotate-180 text-slate-400 text-xs">
-                        ▼
-                    </span>
-                </summary>
-                <div class="p-3 pt-0 grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3 border-t border-slate-100 dark:border-slate-700/50">
-                    
-                    <a href="xpcalc.html" class="group/card bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/80 rounded-lg p-3 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-sm transition-all flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="text-sm font-bold text-slate-900 dark:text-white group-hover/card:text-brand-600 dark:group-hover/card:text-brand-400 transition-colors">経験値計算ツール</span>
-                                <span class="text-[9px] font-mono text-slate-400 bg-slate-200/60 dark:bg-slate-800 px-1.5 py-0.5 rounded">xpcalc.html</span>
-                            </div>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">レベルアップに必要な経験値や目標までの効率を計算。</p>
-                        </div>
-                    </a>
+    <!-- 必要に応じてツールを追加できます -->
+</div>
 
-                    <a href="xpcalc_detail.html" class="group/card bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/80 rounded-lg p-3 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-sm transition-all flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="text-sm font-bold text-slate-900 dark:text-white group-hover/card:text-brand-600 dark:group-hover/card:text-brand-400 transition-colors">経験値計算（詳細版）</span>
-                                <span class="text-[9px] font-mono text-slate-400 bg-slate-200/60 dark:bg-slate-800 px-1.5 py-0.5 rounded">xpcalc_detail.html</span>
-                            </div>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">詳細な内訳や細かい条件を指定してシミュレーション。</p>
-                        </div>
-                    </a>
-
-                    <a href="xpcalc_work.html" class="group/card bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/80 rounded-lg p-3 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-sm transition-all flex flex-col justify-between sm:col-span-2">
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="text-sm font-bold text-slate-900 dark:text-white group-hover/card:text-brand-600 dark:group-hover/card:text-brand-400 transition-colors">作業連動・経験値計算</span>
-                                <span class="text-[9px] font-mono text-slate-400 bg-slate-200/60 dark:bg-slate-800 px-1.5 py-0.5 rounded">xpcalc_work.html</span>
-                            </div>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">作業データと経験値計算を紐づけて効率を確認。</p>
-                        </div>
-                    </a>
-
-                </div>
-            </details>
-
-            <!-- カテゴリ3: 経営・管理 -->
-            <details class="group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl overflow-hidden shadow-sm transition-all" open>
-                <summary class="flex items-center justify-between p-3.5 cursor-pointer select-none font-bold text-sm bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100/50 dark:hover:bg-slate-700/50 transition-colors">
-                    <span class="flex items-center gap-2">
-                        <span>💰</span>
-                        <span>経営・アイテム・レベル管理</span>
-                    </span>
-                    <span class="transition-transform group-open:rotate-180 text-slate-400 text-xs">
-                        ▼
-                    </span>
-                </summary>
-                <div class="p-3 pt-0 grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3 border-t border-slate-100 dark:border-slate-700/50">
-                    
-                    <a href="level.html" class="group/card bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/80 rounded-lg p-3 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-sm transition-all flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="text-sm font-bold text-slate-900 dark:text-white group-hover/card:text-brand-600 dark:group-hover/card:text-brand-400 transition-colors">レベル管理ツール</span>
-                                <span class="text-[9px] font-mono text-slate-400 bg-slate-200/60 dark:bg-slate-800 px-1.5 py-0.5 rounded">level.html</span>
-                            </div>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">キャラクターのレベルやスキル状況を管理・確認。</p>
-                        </div>
-                    </a>
-
-                    <a href="materials.html" class="group/card bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/80 rounded-lg p-3 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-sm transition-all flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="text-sm font-bold text-slate-900 dark:text-white group/card:text-brand-600 dark:group-hover/card:text-brand-400 transition-colors">素材・アイテム管理</span>
-                                <span class="text-[9px] font-mono text-slate-400 bg-slate-200/60 dark:bg-slate-800 px-1.5 py-0.5 rounded">materials.html</span>
-                            </div>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">ゲーム内の素材やアイテムの在庫・必要数を管理。</p>
-                        </div>
-                    </a>
-
-                    <a href="sales.html" class="group/card bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/80 rounded-lg p-3 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-sm transition-all flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="text-sm font-bold text-slate-900 dark:text-white group/card:text-brand-600 dark:group-hover/card:text-brand-400 transition-colors">売上・収支管理</span>
-                                <span class="text-[9px] font-mono text-slate-400 bg-slate-200/60 dark:bg-slate-800 px-1.5 py-0.5 rounded">sales.html</span>
-                            </div>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">店舗の売上や利益、コストなどの収支を計算・記録。</p>
-                        </div>
-                    </a>
-
-                    <a href="trade.html" class="group/card bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/80 rounded-lg p-3 hover:border-brand-500 dark:hover:border-brand-500 hover:shadow-sm transition-all flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="text-sm font-bold text-slate-900 dark:text-white group/card:text-brand-600 dark:group-hover/card:text-brand-400 transition-colors">取引・相場管理</span>
-                                <span class="text-[9px] font-mono text-slate-400 bg-slate-200/60 dark:bg-slate-800 px-1.5 py-0.5 rounded">trade.html</span>
-                            </div>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">市場の取引履歴や相場の変動をチェック・管理。</p>
-                        </div>
-                    </a>
-
-                </div>
-            </details>
-
-        </main>
-
-        <!-- Footer -->
-        <footer class="text-center text-[11px] text-slate-400 dark:text-slate-500 pt-3 border-t border-slate-200 dark:border-slate-800">
-            SOLD OUT 2 ツール集 &bull; Hosted on GitHub Pages
-        </footer>
-
-    </div>
 </body>
 </html>
+
+
