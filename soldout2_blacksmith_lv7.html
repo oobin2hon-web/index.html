@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>SOLD OUT 2 - 鍛冶職人 生産データ記録 (LV7)</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+            color: #2c3e50;
+            margin: 0;
+            padding: 30px;
+            background-color: #f7f9fa;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-top: 5px solid #2980b9;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 15px;
+        }
+        .header h1 {
+            margin: 0 0 8px 0;
+            font-size: 22px;
+            color: #2c3e50;
+        }
+        .header .subtitle {
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+        .badge {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .stats-grid {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .stats-card {
+            flex: 1;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 15px;
+            border-radius: 6px;
+        }
+        .card-title {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .card-value {
+            font-size: 20px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        th {
+            background-color: #f1f4f6;
+            color: #34495e;
+            font-weight: bold;
+        }
+        .memo-box {
+            background-color: #eef7fc;
+            border-left: 4px solid #3498db;
+            padding: 12px;
+            border-radius: 0 6px 6px 0;
+            font-size: 12px;
+            color: #34495e;
+            margin-bottom: 20px;
+        }
+        .download-btn-area {
+            text-align: center;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #27ae60;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .btn:hover {
+            background-color: #219653;
+        }
+        .footer {
+            margin-top: 25px;
+            text-align: center;
+            font-size: 11px;
+            color: #95a5a6;
+            border-top: 1px solid #ecf0f1;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>SOLD OUT 2 鍛冶職人 生産データ記録</h1>
+        <div class="subtitle">目標比較用ログ：LV7 到達時</div>
+        <div class="badge">LV 7 (+1.81%)</div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stats-card">
+            <div class="card-title">対象アイテム</div>
+            <div class="card-value">斧</div>
+        </div>
+        <div class="stats-card">
+            <div class="card-title">1回あたりの平均</div>
+            <div class="card-value">約 8.72 本</div>
+        </div>
+    </div>
+
+    <table>
+        <tr>
+            <th>項目</th>
+            <th>記録値</th>
+            <th>備考</th>
+        </tr>
+        <tr>
+            <td>職人レベル</td>
+            <td>LV 7 (+1.81%)</td>
+            <td>残りゲージ: 26.1%</td>
+        </tr>
+        <tr>
+            <td>作業回数</td>
+            <td>50 回</td>
+            <td>一括生産等</td>
+        </tr>
+        <tr>
+            <td>総獲得数</td>
+            <td>436 本</td>
+            <td>50回分の総成果量</td>
+        </tr>
+        <tr>
+            <td>生産効率</td>
+            <td>8.72 本/回</td>
+            <td>(総獲得数 ÷ 作業回数)</td>
+        </tr>
+    </table>
+
+    <div class="memo-box">
+        <strong>💡 メモ：</strong><br>
+        レベル8到達時の比較用ベースラインデータです。
+    </div>
+
+    <div class="download-btn-area">
+        <a href="#" class="btn" id="downloadBtn" onclick="downloadSelf(event)">このデータをHTMLとして保存する</a>
+    </div>
+
+    <div class="footer">
+        SOLD OUT 2 Production Log &copy; Comparison Tool
+    </div>
+</div>
+
+<script>
+function downloadSelf(e) {
+    e.preventDefault();
+    const htmlContent = document.documentElement.outerHTML;
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'soldout2_blacksmith_lv7.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+</script>
+
+</body>
+</html>
