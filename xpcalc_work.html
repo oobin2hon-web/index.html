@@ -49,12 +49,16 @@ textarea, input {
     font-size: 13px;
     margin-bottom: 8px;
 }
-textarea { height: 100px; font-family: monospace; resize: vertical; }
-.form-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
+textarea { height: 110px; font-family: monospace; resize: vertical; }
+.form-group { margin-bottom: 10px; }
+.form-group label {
+    font-size: 12px;
+    font-weight: bold;
+    color: #444;
+    display: block;
+    margin-bottom: 4px;
 }
+.form-row { display: flex; gap: 8px; }
 .form-row input { margin-bottom: 0; }
 button {
     border: none;
@@ -67,10 +71,7 @@ button {
 }
 .primary-btn { background: #1976d2; color: white; margin-bottom: 6px; }
 .secondary-btn { background: #4caf50; color: white; }
-.action-btn-group {
-    display: flex;
-    gap: 8px;
-}
+.action-btn-group { display: flex; gap: 8px; }
 .merge-btn { background: #ff9800; color: white; font-size: 12px; padding: 6px 10px; width: auto; }
 .clear-all-btn { background: #e53935; color: white; font-size: 12px; padding: 6px 10px; width: auto; }
 table {
@@ -105,31 +106,43 @@ th { background: #f0f0f0; }
         <div style="width: 60px;"></div>
     </div>
 
-    <!-- 1. ゲーム内テキスト貼り付け解析機能 -->
+    <!-- 1. 共通設定（題目） -->
+    <div class="card" style="border-left: 5px solid #1976d2;">
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="commonWorkName">📌 対象の作業名（任意）</label>
+            <input type="text" id="commonWorkName" placeholder="例: 斧作成（ログから取れない場合に適用されます）">
+        </div>
+    </div>
+
+    <!-- 2. ログ柔軟解析 -->
     <div class="card">
         <h2>📋 ゲーム内ログから自動解析</h2>
         <div class="help-text">
-            作業ログや成果テキストをそのまま貼り付けて解析ボタンを押すと、作業名・回数・獲得経験値を自動抽出して保存します。
+            ゲーム内の画面テキストをそのまま丸ごと貼り付けてOKです。
         </div>
-        <textarea id="logInput" placeholder="ここに作業ログを貼り付けてください...
-例：
-[作業] 薬草調合 を 5回 実行し、150XP 獲得しました
-薬草調合 (5回) +150XP"></textarea>
-        <button class="primary-btn" onclick="parseGameText()">ログを解析して記録追加</button>
+        <textarea id="logInput" placeholder="貼り付け例：
+46.93%
+鍛冶職人LV 7 (+1.81%)
+26.1%
+獲得したもの
+斧
+436本
+作業回数：50回"></textarea>
+        <button class="primary-btn" onclick="parseGameText()">ログを解析して追加</button>
     </div>
 
-    <!-- 2. 手動入力 -->
+    <!-- 3. 柔軟手入力 -->
     <div class="card">
         <h2>✏️ 手動入力</h2>
-        <input type="text" id="workName" placeholder="作業名・レシピ名 (例: 薬草調合)">
+        <div class="help-text">「50回」「1.81%」など、単位付きで入力しても自動修正されます。</div>
         <div class="form-row">
-            <input type="number" id="workCount" placeholder="作業回数" min="1">
-            <input type="number" id="workXp" placeholder="獲得経験値(XP)" min="0">
+            <input type="text" id="workCount" placeholder="作業回数 (例: 50 または 50回)">
+            <input type="text" id="workXp" placeholder="獲得XP / % (例: 1.81% や 150)">
         </div>
-        <button class="secondary-btn" onclick="addManualRecord()">記録を手動追加</button>
+        <button class="secondary-btn" onclick="addManualRecord()" style="margin-top: 8px;">手動追加</button>
     </div>
 
-    <!-- 3. 保存記録一覧 (統合・削除機能付き) -->
+    <!-- 4. 保存記録一覧 -->
     <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <h2 style="margin: 0;">📜 保存された作業記録</h2>
@@ -143,8 +156,8 @@ th { background: #f0f0f0; }
                 <tr>
                     <th>作業名</th>
                     <th>回数</th>
-                    <th>獲得XP</th>
-                    <th>1回平均XP</th>
+                    <th>獲得(XP / %)</th>
+                    <th>1回平均</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -162,90 +175,118 @@ th { background: #f0f0f0; }
 let records = JSON.parse(localStorage.getItem("xp_work_records") || "[]");
 renderTable();
 
-// ゲーム内ログの自動解析・抽出
+// 数字（整数・小数）だけを強力に抽出する関数
+function extractNumber(val) {
+    if (!val) return 0;
+    const match = String(val).match(/\d+(?:\.\d+)?/);
+    return match ? parseFloat(match[0]) : 0;
+}
+
+// ログ全体を柔軟にブロック・解析する処理
 function parseGameText() {
-    const text = document.getElementById("logInput").value;
-    if (!text.trim()) {
+    const rawText = document.getElementById("logInput").value;
+    const defaultName = document.getElementById("commonWorkName").value.trim();
+
+    if (!rawText.trim()) {
         alert("テキストを入力してください。");
         return;
     }
 
-    const lines = text.split("\n");
-    let addedCount = 0;
+    let count = 0;
+    let xp = 0;
+    let name = defaultName;
 
-    lines.forEach(line => {
-        let cleanLine = line.replace(/\[.*?\]/g, '').trim();
-        if (!cleanLine) return;
+    const lines = rawText.split("\n").map(l => l.trim()).filter(l => l);
 
-        // パターン1: 「作業名 を 5回 実行し、150XP 獲得」などの形式
-        let m1 = cleanLine.match(/^(.+?)\s*(?:を|\s)\s*(\d+)回.*?(?:で|\s|し、)?\s*(\d+)(?:XP|exp)/i);
-        // パターン2: 「作業名 (5回) +150XP」などの形式
-        let m2 = cleanLine.match(/^(.+?)\s*\(\s*(\d+)回\s*\)\s*\+?(\d+)(?:XP|exp)/i);
-        // パターン3: 「作業名 5回 150XP」などのシンプルな形式
-        let m3 = cleanLine.match(/^(.+?)\s+(\d+)回\s+(\d+)(?:XP|exp)?$/i);
-
-        let name = "", count = 0, xp = 0;
-
-        if (m1) {
-            name = m1[1].trim();
-            count = parseInt(m1[2]);
-            xp = parseInt(m1[3]);
-        } else if (m2) {
-            name = m2[1].trim();
-            count = parseInt(m2[2]);
-            xp = parseInt(m2[3]);
-        } else if (m3) {
-            name = m3[1].trim();
-            count = parseInt(m3[2]);
-            xp = parseInt(m3[3]);
+    // 1. 作業回数の抽出 ("作業回数：50回" や "50回" など)
+    for (let line of lines) {
+        if (line.includes("作業回数") || line.includes("回")) {
+            let num = extractNumber(line);
+            if (num > 0) {
+                count = num;
+                break;
+            }
         }
+    }
 
-        if (name && count > 0) {
-            records.push({ id: Date.now() + Math.random(), name, count, xp });
-            addedCount++;
+    // 2. 経験値/% の抽出 ("+1.81%" や "150XP" など)
+    for (let line of lines) {
+        if (line.includes("%") || line.includes("XP") || line.includes("exp")) {
+            let num = extractNumber(line);
+            if (num > 0) {
+                xp = num;
+                break;
+            }
         }
-    });
+    }
 
-    if (addedCount > 0) {
+    // 3. アイテム名・作業名の抽出 ("獲得したもの" の直後の行など)
+    for (let i = 0; i < lines.length; i++) {
+        if (lines[i].includes("獲得したもの") && lines[i + 1]) {
+            if (!lines[i + 1].includes("回") && !lines[i + 1].includes("%")) {
+                name = lines[i + 1];
+                break;
+            }
+        }
+    }
+
+    // 万が一「回数」がまだ取れていない場合のフォールバック（行内の数値を探す）
+    if (count === 0) {
+        for (let line of lines) {
+            if (/^\d+回?$/.test(line)) {
+                count = extractNumber(line);
+                break;
+            }
+        }
+    }
+
+    if (count > 0) {
+        records.push({
+            id: Date.now() + Math.random(),
+            name: name || "作業",
+            count: count,
+            xp: xp
+        });
         saveAndRender();
         document.getElementById("logInput").value = "";
-        alert(`${addedCount} 件の作業記録を自動抽出しました！`);
+        alert(`解析成功: 【${name || "作業"}】 ${count}回 / 獲得: ${xp}`);
     } else {
-        alert("有効な作業ログが抽出できませんでした。手動入力をご利用ください。");
+        alert("作業回数を読み取れませんでした。手動入力でお試しください。");
     }
 }
 
-// 手動追加
+// 手動追加（文字列が入っても数字のみ抽出して受容）
 function addManualRecord() {
-    const name = document.getElementById("workName").value.trim() || "未設定作業";
-    const count = parseInt(document.getElementById("workCount").value) || 0;
-    const xp = parseInt(document.getElementById("workXp").value) || 0;
+    const defaultName = document.getElementById("commonWorkName").value.trim();
+    const name = defaultName || "作業";
+    
+    const countRaw = document.getElementById("workCount").value;
+    const xpRaw = document.getElementById("workXp").value;
+
+    const count = extractNumber(countRaw);
+    const xp = extractNumber(xpRaw);
 
     if (count <= 0) {
-        alert("作業回数を入力してください。");
+        alert("作業回数を正しく入力してください（例: 50 または 50回）。");
         return;
     }
 
     records.push({ id: Date.now(), name, count, xp });
     saveAndRender();
 
-    document.getElementById("workName").value = "";
     document.getElementById("workCount").value = "";
     document.getElementById("workXp").value = "";
 }
 
-// 個別削除
 function deleteRecord(index) {
     records.splice(index, 1);
     saveAndRender();
 }
 
-// 同名データの統合
 function mergeRecords() {
     if (records.length === 0) return;
 
     const mergedMap = new Map();
-
     records.forEach(item => {
         if (mergedMap.has(item.name)) {
             const target = mergedMap.get(item.name);
@@ -258,10 +299,9 @@ function mergeRecords() {
 
     records = Array.from(mergedMap.values());
     saveAndRender();
-    alert("同名の作業記録をまとめました！");
+    alert("同名の作業記録を統合しました！");
 }
 
-// 全削除
 function clearAllRecords() {
     if (records.length === 0) return;
     if (confirm("すべての保存記録を削除しますか？")) {
@@ -283,13 +323,13 @@ function renderTable() {
     }
 
     tbody.innerHTML = records.map((item, index) => {
-        const avgXp = item.count > 0 ? (item.xp / item.count).toFixed(1) : 0;
+        const avgXp = item.count > 0 ? (item.xp / item.count).toFixed(3) : 0;
         return `
             <tr>
                 <td><strong>${item.name}</strong></td>
                 <td>${item.count.toLocaleString()} 回</td>
-                <td>${item.xp.toLocaleString()} XP</td>
-                <td>${avgXp} XP</td>
+                <td>${item.xp}</td>
+                <td>${avgXp}</td>
                 <td><button class="del-btn" onclick="deleteRecord(${index})">削除</button></td>
             </tr>
         `;
