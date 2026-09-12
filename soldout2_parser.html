@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOLD OUT 2 - 作業結果取り込みツール</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+            color: #2c3e50;
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f9fa;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            font-size: 20px;
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .subtitle {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        .section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #34495e;
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+            resize: vertical;
+            font-family: inherit;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .btn-group {
+            margin-top: 12px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-primary {
+            background-color: #1e293b;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #334155;
+        }
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #475569;
+        }
+        .btn-secondary:hover {
+            background-color: #cbd5e1;
+        }
+        .results-container {
+            margin-top: 20px;
+        }
+        .result-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .result-time {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+        .result-summary {
+            font-size: 15px;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        .result-details {
+            font-size: 13px;
+            color: #475569;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+        .empty-msg {
+            color: #94a3b8;
+            font-size: 13px;
+            text-align: center;
+            padding: 20px;
+        }
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .btn-danger-text {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 0;
+        }
+        .btn-danger-text:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>作業結果取り込みツール</h1>
+    <div class="subtitle">SOLD OUT 2のコピーテキストをそのまま貼り付けて記録・比較</div>
+
+    <div class="section">
+        <div class="section-title">① 作業結果を貼り付け</div>
+        <textarea id="inputText" placeholder="例：
+鍛冶職人LV 7 (+1.81%)
+26.1%
+獲得したもの
+
+斧
+436本
+作業回数：50回"></textarea>
+        <div class="btn-group">
+            <button class="btn-primary" onclick="parseAndSave()">解析して保存する</button>
+            <button class="btn-secondary" onclick="clearInput()">クリア</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="actions-bar">
+            <div class="section-title" style="margin-bottom: 0;">保存した結果一覧</div>
+            <button class="btn-danger-text" onclick="clearAllHistory()">全履歴を削除</button>
+        </div>
+        <div id="resultsList" class="results-container">
+            <div class="empty-msg">まだ保存されたデータはありません。</div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load history on startup
+document.addEventListener('DOMContentLoaded', renderHistory);
+
+function parseAndSave() {
+    const text = document.getElementById('inputText').value.trim();
+    if (!text) {
+        alert('テキストが入力されていません。');
+        return;
+    }
+
+    // Parse text using regex
+    // Level & Exp
+    let levelMatch = text.match(/([^
+]+職人LV\s*[\d\.\+\(\)]+)/i) || text.match(/([^
+]+LV\s*[\d\.\+\(\)]+)/i);
+    let levelStr = levelMatch ? levelMatch[1].trim() : "職人作業";
+
+    // Gauge/Progress
+    let gaugeMatch = text.match(/([\d\.]+%)?/);
+    
+    // Item name and count
+    // Looking for lines after "獲得したもの" or similar structures
+    let lines = text.split('\n').map(l => l.trim()).filter(l => l);
+    let itemName = "アイテム";
+    let acquiredCount = "0";
+    let workCount = "0";
+
+    // Simple heuristic parser for SOLD OUT 2 layout
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        if (line.includes('作業回数')) {
+            let m = line.match(/作業回数[：:]\s*([0-9]+)/);
+            if (m) workCount = m[1];
+        }
+        if (line.endsWith('本') || line.endsWith('個') || line.endsWith('枚') || line.endsWith('個') || line.endsWith('つ')) {
+            // Might be count or item depending on line
+        }
+    }
+
+    // Look for lines containing numbers like "436本"
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        let countMatch = line.match(/^([0-9]+)\s*(本|個|枚|冊|着|基|台)$/);
+        if (countMatch) {
+            acquiredCount = countMatch[1];
+            if (i > 0) {
+                itemName = lines[i - 1]; // Previous line is usually the item name
+            }
+        }
+        // Alternative format check: "斧 436本"
+        let combinedMatch = line.match(/(.+?)\s+([0-9]+)\s*(本|個|枚|冊|着|基|台)/);
+        if (combinedMatch) {
+            itemName = combinedMatch[1];
+            acquiredCount = combinedMatch[2];
+        }
+    }
+
+    // If specific "斧
+436本" structure
+    for (let i = 0; i < lines.length - 1; i++) {
+        if (lines[i+1].match(/^[0-9]+本$/)) {
+            itemName = lines[i];
+            acquiredCount = lines[i+1].replace('本', '');
+        }
+    }
+
+    // Work count check
+    lines.forEach(line => {
+        let wc = line.match(/作業回数[：:\s]*([0-9]+)/);
+        if (wc) workCount = wc[1];
+    });
+
+    // Calculate efficiency if possible
+    let efficiency = "-";
+    let acNum = parseInt(acquiredCount);
+    let wcNum = parseInt(workCount);
+    if (!isNaN(acNum) && !isNaN(wcNum) && wcNum > 0) {
+        efficiency = (acNum / wcNum).toFixed(2) + " 本/回";
+    }
+
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    const record = {
+        id: Date.now(),
+        date: dateStr,
+        level: levelStr,
+        item: itemName,
+        acquired: acquiredCount,
+        work: workCount,
+        efficiency: efficiency,
+        rawText: text
+    };
+
+    let history = JSON.parse(localStorage.getItem('soldout2_history') || '[]');
+    history.unshift(record);
+    localStorage.setItem('soldout2_history', JSON.stringify(history));
+
+    document.getElementById('inputText').value = '';
+    renderHistory();
+}
+
+function clearInput() {
+    document.getElementById('inputText').value = '';
+}
+
+function renderHistory() {
+    const listEl = document.getElementById('resultsList');
+    let history = JSON.parse(localStorage.getItem('soldout2_history') || '[]');
+
+    if (history.length === 0) {
+        listEl.innerHTML = '<div class="empty-msg">まだ保存されたデータはありません。</div>';
+        return;
+    }
+
+    let html = '';
+    history.forEach(item => {
+        html += `
+            <div class="result-card">
+                <div class="result-time">${item.date}</div>
+                <div class="result-summary">${item.level} ｜ ${item.item}：${item.acquired}本</div>
+                <div class="result-details">
+                    <div>作業回数: <strong>${item.work}回</strong></div>
+                    <div>効率: <strong>${item.efficiency}</strong></div>
+                </div>
+                <div style="text-align: right; margin-top: 6px;">
+                    <button class="btn-danger-text" onclick="deleteItem(${item.id})">削除</button>
+                </div>
+            </div>
+        `;
+    });
+    listEl.innerHTML = html;
+}
+
+function deleteItem(id) {
+    let history = JSON.parse(localStorage.getItem('soldout2_history') || '[]');
+    history = history.filter(item => item.id !== id);
+    localStorage.setItem('soldout2_history', JSON.stringify(history));
+    renderHistory();
+}
+
+function clearAllHistory() {
+    if (confirm('保存されたすべての履歴を削除しますか？')) {
+        localStorage.removeItem('soldout2_history');
+        renderHistory();
+    }
+}
+</script>
+
+</body>
+</html>
