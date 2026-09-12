@@ -1,1 +1,240 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SOLDOUT2 作業結果取り込み</title><style>body{font-family:-apple-system,sans-serif;background:#f5f5f5;margin:0;color:#222}header{background:#222;color:white;padding:18px}main{max-width:700px;margin:auto;padding:14px}.card{background:white;padding:16px;border-radius:14px;margin-bottom:14px}h1{font-size:20px;margin:0 0 5px}h2{font-size:17px}textarea{width:100%;height:190px;box-sizing:border-box;padding:10px;border:1px solid #ccc;border-radius:9px;font:inherit}button{padding:11px 15px;border:0;border-radius:9px;background:#222;color:white;font-weight:bold;margin:8px 5px 0 0}.sub{background:#eee;color:#222}.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd}.msg{font-size:13px}.ok{color:#176b2c}.err{color:#b00020}.small{font-size:12px;color:#666}</style></head><body><header><h1>作業結果取り込み</h1><div class="small" style="color:#ccc">まずは作業結果の取り込みだけに特化したシンプル版</div></header><main><section class="card"><h2>① 作業結果を貼り付け</h2><p class="small">SOLDOUT2からコピーした結果を、そのまま貼り付けてください。</p><textarea id="raw" placeholder="ここに作業結果を貼り付け"></textarea><br><button onclick="parse()">解析する</button><button class="sub" onclick="clearAll()">クリア</button><div id="msg" class="msg"></div></section><section id="resultCard" class="card" style="display:none"><h2>② 解析結果</h2><div id="result"></div><button onclick="copyOutputs()">成果物をコピー</button><button onclick="saveResult()">保存する</button></section><section class="card"><h2>保存した結果</h2><div id="saved" class="small">まだありません。</div></section></main><script>let data=null;const KEY='so2_work_import_simple_v1';const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));function parse(){const raw=document.getElementById('raw').value.trim();if(!raw){msg('作業結果を貼り付けてください。','err');return}const lines=raw.replace(/\r/g,'').split('\n').map(x=>x.trim()).filter(Boolean);data={raw,job:'',level:'',xpGain:'',count:'',outputs:[]};for(const l of lines){let m=l.match(/^LV\s*(\d+)/i);if(m)data.level=m[1];m=l.match(/(?:作業回数|回数)\s*[：:]?\s*(\d+)\s*回?/);if(m)data.count=m[1];m=l.match(/^\+?\s*([0-9]+(?:\.[0-9]+)?)\s*%/);if(m&&!data.xpGain)data.xpGain=m[1];m=l.match(/^(.+?)\s+([0-9][0-9,]*(?:\.[0-9]+)?)\s*(本|個|枚|組|kg|瓶|塊|束|袋)?$/);if(m&&!/^LV/i.test(l)&&!/^(作業回数|回数)/.test(l))data.outputs.push({name:m[1].trim(),qty:m[2].replace(/,/g,''),unit:m[3]||''})}if(lines[0]&&!/^LV\b/i.test(lines[0])&&!/^(作業回数|回数)/.test(lines[0]))data.job=lines[0];render();msg('解析しました。内容を確認してください。','ok')}function render(){let h='';[['作業名',data.job||'—'],['LV',data.level||'—'],['獲得経験値',data.xpGain?'+'+data.xpGain+'%':'—'],['作業回数',data.count?data.count+'回':'—']].forEach(x=>h+='<div class="row"><b>'+esc(x[0])+'</b><span>'+esc(x[1])+'</span></div>');h+='<h3>成果物</h3>';h+=data.outputs.length?data.outputs.map(o=>'<div class="row"><span>'+esc(o.name)+'</span><b>'+esc(o.qty)+esc(o.unit)+'</b></div>').join(''):'<div class="small">自動判定できる成果物がありません。</div>';document.getElementById('result').innerHTML=h;document.getElementById('resultCard').style.display='block'}function copyOutputs(){if(!data)return;navigator.clipboard?.writeText(data.outputs.map(o=>o.name+' '+o.qty+o.unit).join('\n'));msg('成果物をコピーしました。','ok')}function saveResult(){if(!data)return;let a=JSON.parse(localStorage.getItem(KEY)||'[]');a.unshift({...data,savedAt:new Date().toLocaleString('ja-JP')});localStorage.setItem(KEY,JSON.stringify(a.slice(0,100)));renderSaved();msg('保存しました。','ok')}function renderSaved(){let a=JSON.parse(localStorage.getItem(KEY)||'[]');document.getElementById('saved').innerHTML=a.length?a.map(x=>'<div class="card"><b>'+esc(x.savedAt)+'</b><br>'+esc(x.job||'作業結果')+' '+esc(x.count||'')+'回<br>'+x.outputs.map(o=>esc(o.name)+' '+esc(o.qty)+esc(o.unit)).join(' / ')+'</div>').join(''):'まだありません。'}function clearAll(){document.getElementById('raw').value='';data=null;document.getElementById('resultCard').style.display='none';msg('','')}function msg(t,c){document.getElementById('msg').innerHTML=t?'<span class="'+c+'">'+esc(t)+'</span>':''}renderSaved();</script></body></html>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>作業経験値計算 - SOLDOUT2</title>
+<style>
+* { box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    margin: 0;
+    padding: 12px;
+    background: #f5f5f5;
+    color: #222;
+}
+.container { max-width: 700px; margin: auto; }
+.header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    background: #e0e0e0;
+    color: #333;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: bold;
+}
+h1 { font-size: 20px; margin: 0; text-align: center; flex-grow: 1; }
+.card {
+    background: white;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+h2 { font-size: 15px; margin-top: 0; margin-bottom: 8px; color: #1976d2; }
+.help-text { font-size: 11px; color: #666; margin-bottom: 8px; }
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+textarea { height: 80px; font-family: monospace; }
+.form-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.form-row input { margin-bottom: 0; }
+button {
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+}
+.primary-btn { background: #1976d2; color: white; margin-bottom: 6px; }
+.action-btn-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.merge-btn { background: #ff9800; color: white; font-size: 12px; padding: 6px 10px; width: auto; }
+.clear-all-btn { background: #e53935; color: white; font-size: 12px; padding: 6px 10px; width: auto; }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 13px;
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+th { background: #f0f0f0; }
+.del-btn {
+    background: #e53935;
+    color: white;
+    padding: 4px 8px;
+    font-size: 11px;
+    width: auto;
+    border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header-bar">
+        <a href="index.html" class="back-btn">← 戻る</a>
+        <h1>作業経験値計算</h1>
+        <div style="width: 60px;"></div>
+    </div>
+
+    <!-- 記録入力フォーム -->
+    <div class="card">
+        <h2>✏️ 作業記録の入力</h2>
+        <input type="text" id="workName" placeholder="作業名・レシピ名 (例: 薬草調合)">
+        <div class="form-row">
+            <input type="number" id="workCount" placeholder="作業回数" min="1">
+            <input type="number" id="workXp" placeholder="獲得経験値" min="0">
+        </div>
+        <button class="primary-btn" onclick="addRecord()">記録を保存</button>
+    </div>
+
+    <!-- 保存記録テーブル -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h2 style="margin: 0;">📜 保存された作業記録</h2>
+            <div class="action-btn-group" style="margin: 0;">
+                <button class="merge-btn" onclick="mergeRecords()">同名を統合</button>
+                <button class="clear-all-btn" onclick="clearAllRecords()">全削除</button>
+            </div>
+        </div>
+        <div class="help-text">「同名を統合」を押すと、同じ作業名の回数と経験値を自動で合算します。</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>作業名</th>
+                    <th>回数</th>
+                    <th>獲得XP</th>
+                    <th>1回平均XP</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="recordsTable">
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #888;">保存された記録はありません</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+let records = JSON.parse(localStorage.getItem("xp_work_records") || "[]");
+
+// 初期表示時に描画
+renderTable();
+
+// 記録の保存
+function addRecord() {
+    const name = document.getElementById("workName").value.trim() || "未設定作業";
+    const count = parseInt(document.getElementById("workCount").value) || 0;
+    const xp = parseInt(document.getElementById("workXp").value) || 0;
+
+    if (count <= 0) {
+        alert("作業回数を入力してください。");
+        return;
+    }
+
+    records.push({ id: Date.now(), name, count, xp });
+    saveAndRender();
+
+    document.getElementById("workName").value = "";
+    document.getElementById("workCount").value = "";
+    document.getElementById("workXp").value = "";
+}
+
+// 個別削除
+function deleteRecord(index) {
+    records.splice(index, 1);
+    saveAndRender();
+}
+
+// 同名データの統合（まとめ機能）
+function mergeRecords() {
+    if (records.length === 0) return;
+
+    const mergedMap = new Map();
+
+    records.forEach(item => {
+        if (mergedMap.has(item.name)) {
+            const target = mergedMap.get(item.name);
+            target.count += item.count;
+            target.xp += item.xp;
+        } else {
+            mergedMap.set(item.name, { ...item });
+        }
+    });
+
+    records = Array.from(mergedMap.values());
+    saveAndRender();
+    alert("同名の作業記録を統合しました！");
+}
+
+// 全削除
+function clearAllRecords() {
+    if (records.length === 0) return;
+    if (confirm("すべての保存記録を削除しますか？")) {
+        records = [];
+        saveAndRender();
+    }
+}
+
+// ローカルストレージ保存 & テーブル再描画
+function saveAndRender() {
+    localStorage.setItem("xp_work_records", JSON.stringify(records));
+    renderTable();
+}
+
+// テーブル描画
+function renderTable() {
+    const tbody = document.getElementById("recordsTable");
+    if (records.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #888;">保存された記録はありません</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = records.map((item, index) => {
+        const avgXp = item.count > 0 ? (item.xp / item.count).toFixed(1) : 0;
+        return `
+            <tr>
+                <td><strong>${item.name}</strong></td>
+                <td>${item.count.toLocaleString()} 回</td>
+                <td>${item.xp.toLocaleString()} XP</td>
+                <td>${avgXp} XP</td>
+                <td><button class="del-btn" onclick="deleteRecord(${index})">削除</button></td>
+            </tr>
+        `;
+    }).join("");
+}
+</script>
+
+</body>
+</html>
