@@ -34,6 +34,8 @@
         button.restore { background: #ffc107; border: none; font-weight: bold; }
         button.test { background: #17a2b8; color: white; border: none; font-weight: bold; }
         button.test:hover { background: #138496; }
+        button.clear-btn { background: #e74c3c; color: white; border: none; font-weight: bold; }
+        button.clear-btn:hover { background: #c0392b; }
         .history-area { margin-top: 8px; display: flex; gap: 8px; align-items: center; font-size: 13px; }
     </style>
 </head>
@@ -108,6 +110,7 @@
                 <button class="save" onclick="saveHtmlData('${tabId}')">💾 HTML保存（テンポラリー）</button>
                 <button class="restore" onclick="restorePrevious('${tabId}')">↩️ 直前に戻す</button>
                 <button class="test" onclick="runTest('${tabId}')">▶️ 動作テスト（プレビュー）</button>
+                <button class="clear-btn" onclick="clearTabCode('${tabId}')">🗑️ すべて消去</button>
                 <a id="download_${tabId}" style="font-size:13px; color:#007bff; text-decoration:none; font-weight:bold; margin-left:auto;" download="${defaultName}">⬇️ ファイル出力</a>
             </div>
 
@@ -170,7 +173,7 @@
         alert(`「${filename}」をテンポラリーに保存しました！`);
     }
 
-    // ★追加：書いたHTMLをその場で別タブに開いて動作テストする機能
+    // 動作テスト機能
     function runTest(tabId) {
         const textarea = document.getElementById(`text_${tabId}`);
         const htmlContent = textarea.value;
@@ -180,10 +183,19 @@
             return;
         }
 
-        // 仮想的なページ（Blob）を作成して別タブで開く
         const blob = new Blob([htmlContent], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
         window.open(url, '_blank');
+    }
+
+    // ★追加：指定したタブのコードとファイル名入力を一発で全消去する機能
+    function clearTabCode(tabId) {
+        if (confirm('このタブに入力されているコードと内容をすべて消去しますか？')) {
+            document.getElementById(`text_${tabId}`).value = '';
+            const filename = document.getElementById(`filename_${tabId}`).value;
+            updateDownloadLink(tabId, filename, '');
+            alert('コードを消去しました。');
+        }
     }
 
     function updateDownloadLink(tabId, filename, text) {
@@ -224,7 +236,7 @@
         const textarea = document.getElementById(`text_${tabId}`);
         const prevText = textarea.getAttribute('data-previous');
         if (prevText !== null && prevText !== undefined) {
-            textarea.value = prevTest;
+            textarea.value = prevText;
             const filename = document.getElementById(`filename_${tabId}`).value;
             updateDownloadLink(tabId, filename, prevText);
             alert('直前の状態に戻しました。');
