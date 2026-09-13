@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Web Page Studio & Hub</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; background: #f4f4f9; color: #333; }
+        .header { background: #007bff; color: white; padding: 15px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 20px; }
+        .container { max-width: 950px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        h2 { border-bottom: 2px solid #007bff; padding-bottom: 5px; color: #007bff; font-size: 18px; margin-top: 30px; }
+        
+        /* リンクカード一覧 */
+        .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-top: 15px; }
+        .link-card { background: #f9f9f9; border: 1px solid #ddd; padding: 10px; border-radius: 6px; text-decoration: none; color: #333; font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .link-card:hover { background: #e7f3fe; border-color: #007bff; color: #007bff; }
+
+        /* 9個のタブスタイル */
+        .tab-buttons { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; border-bottom: 2px solid #ddd; padding-bottom: 8px; }
+        .tab-btn { padding: 6px 12px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 4px; font-size: 13px; font-weight: bold; }
+        .tab-btn.active { background: #28a745; color: #fff; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* 編集エリアのパーツ */
+        .file-name-input { width: 100%; padding: 8px; box-sizing: border-box; font-size: 14px; font-weight: bold; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; background: #fffdf0; }
+        textarea { width: 100%; height: 250px; padding: 10px; box-sizing: border-box; font-family: monospace; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; }
+        
+        .toolbar { margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: #f9f9f9; padding: 10px; border-radius: 4px; border: 1px solid #ddd; }
+        button, select { padding: 6px 10px; font-size: 13px; cursor: pointer; border-radius: 4px; }
+        button.save { background: #28a745; color: white; border: none; font-weight: bold; }
+        button.restore { background: #ffc107; border: none; font-weight: bold; }
+        .history-area { margin-top: 8px; display: flex; gap: 8px; align-items: center; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🚀 9タブ ファイル管理＆HTMLエディター Hub</h1>
+</div>
+
+<div class="container">
+
+    <!-- 既存ページの閲覧リンク -->
+    <h2>📂 公開中ページ一覧（クイックリンク）</h2>
+    <div class="link-grid">
+        <a href="index.html" class="link-card"><span>index.html</span> <span>🔗</span></a>
+        <a href="PRO.html" class="link-card"><span>PRO.html</span> <span>🔗</span></a>
+        <a href="level.html" class="link-card"><span>level.html</span> <span>🔗</span></a>
+        <a href="materials.html" class="link-card"><span>materials.html</span> <span>🔗</span></a>
+        <a href="sales.html" class="link-card"><span>sales.html</span> <span>🔗</span></a>
+        <a href="soldout2_parser.html" class="link-card"><span>soldout2_parser.html</span> <span>🔗</span></a>
+        <a href="trade.html" class="link-card"><span>trade.html</span> <span>🔗</span></a>
+        <a href="work_tool.html" class="link-card"><span>work_tool.html</span> <span>🔗</span></a>
+        <a href="xpcalc.html" class="link-card"><span>xpcalc.html</span> <span>🔗</span></a>
+    </div>
+
+    <!-- 9個のタブ作業スペース -->
+    <h2>✍️ 9タブ HTML編集・テンポラリー管理</h2>
+    <div class="tab-buttons" id="tabButtons"></div>
+    <div id="tabContents"></div>
+
+</div>
+
+<script>
+    // 画像にあった実際のファイル名をデフォルトとして定義
+    const defaultFileNames = [
+        "PRO.html",
+        "level.html",
+        "materials.html",
+        "sales.html",
+        "soldout2_parser.html",
+        "trade.html",
+        "work_tool.html",
+        "xpcalc.html",
+        "xpcalc_detail.html"
+    ];
+
+    const tabCount = defaultFileNames.length;
+    const tabButtonsContainer = document.getElementById('tabButtons');
+    const tabContentsContainer = document.getElementById('tabContents');
+
+    for (let i = 0; i < tabCount; i++) {
+        const tabId = `tab${i + 1}`;
+        const defaultName = defaultFileNames[i];
+
+        // タブボタン生成（ボタンの文字もファイル名にする）
+        const btn = document.createElement('button');
+        btn.className = `tab-btn ${i === 0 ? 'active' : ''}`;
+        btn.innerText = defaultName;
+        btn.onclick = () => switchTab(i + 1);
+        tabButtonsContainer.appendChild(btn);
+
+        // タブコンテンツ生成
+        const content = document.createElement('div');
+        content.className = `tab-content ${i === 0 ? 'active' : ''}`;
+        content.id = tabId;
+        content.innerHTML = `
+            <label style="font-size:12px; font-weight:bold; color:#666;">ファイル名:</label>
+            <input type="text" id="filename_${tabId}" class="file-name-input" value="${defaultName}">
+            
+            <textarea id="text_${tabId}" placeholder="ここに ${defaultName} のHTMLコードを入力..."></textarea>
+            
+            <div class="toolbar">
+                <button class="save" onclick="saveHtmlData('${tabId}')">💾 HTML保存（テンポラリー）</button>
+                <button class="restore" onclick="restorePrevious('${tabId}')">↩️ 直前に戻す</button>
+                <a id="download_${tabId}" style="font-size:13px; color:#007bff; text-decoration:none; font-weight:bold; margin-left:auto;" download="${defaultName}">⬇️ ファイルとしてダウンロード</a>
+            </div>
+
+            <div class="history-area">
+                <span style="font-weight:bold; color:#555;">📁 過去に使ったファイル名・履歴:</span>
+                <select id="history_${tabId}" style="flex-grow:1;" onchange="loadHistory('${tabId}')">
+                    <option value="">-- 過去の履歴・ファイルを選ぶ --</option>
+                </select>
+            </div>
+        `;
+        tabContentsContainer.appendChild(content);
+
+        loadLatestData(tabId, defaultName);
+        updateHistorySelect(tabId);
+    }
+
+    function switchTab(index) {
+        document.querySelectorAll('.tab-btn').forEach((b, idx) => {
+            b.classList.toggle('active', idx + 1 === index);
+        });
+        document.querySelectorAll('.tab-content').forEach((c, idx) => {
+            c.classList.toggle('active', idx + 1 === index);
+        });
+    }
+
+    function loadLatestData(tabId, defaultName) {
+        const histories = JSON.parse(localStorage.getItem(`history_${tabId}`) || '[]');
+        if (histories.length > 0) {
+            document.getElementById(`filename_${tabId}`).value = histories[0].filename;
+            document.getElementById(`text_${tabId}`).value = histories[0].text;
+            updateDownloadLink(tabId, histories[0].filename, histories[0].text);
+            if (histories.length > 1) {
+                document.getElementById(`text_${tabId}`).setAttribute('data-previous', histories[1].text);
+            }
+        } else {
+            // 初回はデフォルトのファイル名をダウンロードリンク等に反映
+            updateDownloadLink(tabId, defaultName, "");
+        }
+    }
+
+    function saveHtmlData(tabId) {
+        const filenameInput = document.getElementById(`filename_${tabId}`);
+        const textarea = document.getElementById(`text_${tabId}`);
+        const filename = filenameInput.value.trim() || 'unnamed.html';
+        const currentText = textarea.value;
+        const timestamp = new Date().toLocaleString();
+
+        let histories = JSON.parse(localStorage.getItem(`history_${tabId}`) || '[]');
+        if (histories.length > 0) {
+            textarea.setAttribute('data-previous', histories[0].text);
+        }
+
+        histories.unshift({ time: timestamp, filename: filename, text: currentText });
+        if (histories.length > 15) histories.pop();
+
+        localStorage.setItem(`history_${tabId}`, JSON.stringify(histories));
+        updateHistorySelect(tabId);
+        updateDownloadLink(tabId, filename, currentText);
+
+        alert(`「${filename}」をテンポラリーに保存しました！`);
+    }
+
+    function updateDownloadLink(tabId, filename, text) {
+        const blob = new Blob([text], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const link = document.getElementById(`download_${tabId}`);
+        link.href = url;
+        link.download = filename;
+    }
+
+    function updateHistorySelect(tabId) {
+        const select = document.getElementById(`history_${tabId}`);
+        const histories = JSON.parse(localStorage.getItem(`history_${tabId}`) || '[]');
+        
+        select.innerHTML = '<option value="">-- 過去の履歴・ファイルを選ぶ --</option>';
+        histories.forEach((item, index) => {
+            const opt = document.createElement('option');
+            opt.value = index;
+            opt.innerText = `[${item.filename}] (${item.time})`;
+            select.appendChild(opt);
+        });
+    }
+
+    function loadHistory(tabId) {
+        const select = document.getElementById(`history_${tabId}`);
+        const index = select.value;
+        if (index === "") return;
+
+        const histories = JSON.parse(localStorage.getItem(`history_${tabId}`) || '[]');
+        if (histories[index]) {
+            document.getElementById(`filename_${tabId}`).value = histories[index].filename;
+            document.getElementById(`text_${tabId}`).value = histories[index].text;
+            updateDownloadLink(tabId, histories[index].filename, histories[index].text);
+        }
+    }
+
+    function restorePrevious(tabId) {
+        const textarea = document.getElementById(`text_${tabId}`);
+        const prevText = textarea.getAttribute('data-previous');
+        if (prevText !== null && prevText !== undefined) {
+            textarea.value = prevText;
+            const filename = document.getElementById(`filename_${tabId}`).value;
+            updateDownloadLink(tabId, filename, prevText);
+            alert('直前の状態に戻しました。');
+        } else {
+            alert('戻せる履歴がありません。');
+        }
+    }
+
+    // 入力変更時にファイル名やダウンロードリンクを連動させる
+    for (let i = 0; i < tabCount; i++) {
+        const tabId = `tab${i + 1}`;
+        document.getElementById(`filename_${tabId}`).addEventListener('input', function() {
+            updateDownloadLink(tabId, this.value, document.getElementById(`text_${tabId}`).value);
+        });
+        document.getElementById(`text_${tabId}`).addEventListener('input', function() {
+            updateDownloadLink(tabId, document.getElementById(`filename_${tabId}`).value, this.value);
+        });
+    }
+</script>
+
+</body>
+</html>
