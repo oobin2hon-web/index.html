@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>マイ・ローカルデータベース＆Hub</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 15px; background: #f4f6f8; color: #333; box-sizing: border-box; }
+        h1 { font-size: 1.3rem; margin-bottom: 10px; color: #2c3e50; }
+        .card { background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 12px; }
+        .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; align-items: center; }
+        select, input, button { padding: 8px 10px; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #3498db; color: #fff; border: none; cursor: pointer; }
+        button:hover { background: #2980b9; }
+        .tab-buttons { display: flex; gap: 4px; border-bottom: 2px solid #ddd; margin-bottom: 12px; padding-bottom: 5px; flex-wrap: wrap; }
+        .tab-btn { background: #e0e0e0; color: #555; border: none; padding: 8px 12px; border-radius: 4px 4px 0 0; cursor: pointer; font-size: 0.85rem; }
+        .tab-btn.active { background: #2c3e50; color: #fff; font-weight: bold; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        textarea { width: 100%; height: 100px; padding: 10px; font-family: monospace; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 8px; }
+        .screenshot-area { border: 2px dashed #ccc; padding: 15px; text-align: center; border-radius: 6px; background: #fafafa; margin-bottom: 10px; }
+        .preview-img { max-width: 100%; max-height: 220px; margin-top: 10px; border-radius: 4px; border: 1px solid #ddd; display: block; margin-left: auto; margin-right: auto; }
+        .status { font-size: 0.85rem; color: #27ae60; font-weight: bold; }
+        .frame-container { width: 100%; }
+        .frame-box { width: 100%; height: 480px; border: 1px solid #ccc; border-radius: 4px; background: #fff; display: block; }
+        .link-bar { margin-bottom: 8px; font-size: 0.85rem; }
+        
+        /* リスト・カード用のスタイル */
+        .record-item { background: #fdfdfd; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .record-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 5px; }
+        .record-title { font-weight: bold; font-size: 0.95krem; color: #2c3e50; }
+        .record-body { font-size: 0.9rem; white-space: pre-wrap; word-break: break-all; color: #444; background: #f8fafc; padding: 8px; border-radius: 4px; border: 1px solid #edf2f7; }
+        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: #f1f5f9; padding: 8px; border-radius: 6px; }
+    </style>
+</head>
+<body>
+
+    <h1>🗂️ マイ・ローカルデータベース＆Hub</h1>
+
+    <!-- カテゴリ選択エリア -->
+    <div class="card">
+        <div class="controls">
+            <label for="categorySelect"><strong>カテゴリ:</strong></label>
+            <select id="categorySelect" onchange="loadAllData()">
+                <option value="job_craftsman">職人・生産系</option>
+                <option value="job_shop">販売・経営系</option>
+                <option value="recipe_memo">レシピ・素材メモ</option>
+                <option value="market_memo">相場・売買戦略</option>
+                <option value="free_memo">自由フリーメモ</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- 詳細切替タブ -->
+    <div class="card">
+        <div class="tab-buttons" id="tabButtonContainer">
+            <button class="tab-btn active" onclick="switchTab('textTab', this)">📝 詳細メモ</button>
+            <button class="tab-btn" onclick="switchTab('priceTab', this)">💰 売買・価格メモ</button>
+            <button class="tab-btn" onclick="switchTab('eventTab', this)">📅 イベント情報</button>
+            <button class="tab-btn" onclick="switchTab('imageTab', this)">📸 スクショ保存</button>
+            <button class="tab-btn" onclick="switchTab('wikiTab', this)">🌐 非公式Wiki</button>
+            <button class="tab-btn" onclick="switchTab('bbsTab', this)">💬 公式掲示板</button>
+        </div>
+
+        <!-- タブ1: テキスト詳細（リスト管理・検索・並び替え対応） -->
+        <div id="textTab" class="tab-content active">
+            <div class="screenshot-area" style="text-align: left; background: #fff;">
+                <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しい詳細メモを追加</h3>
+                <input type="text" id="textTitleInput" placeholder="タイトル（例：〇〇の効率手順）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
+                <textarea id="textBodyInput" placeholder="内容を入力..."></textarea>
+                <button onclick="addRecord('text')">💾 このメモを追加</button>
+            </div>
+
+            <div class="action-bar">
+                <input type="text" id="textSearchInput" placeholder="🔍 メモを検索..." oninput="renderRecords('text')" style="width: 55%;">
+                <select id="textSortSelect" onchange="renderRecords('text')" style="width: 40%;">
+                    <option value="new">新しい順</option>
+                    <option value="old">古い順</option>
+                </select>
+            </div>
+            <div id="textListContainer"></div>
+        </div>
+
+        <!-- タブ2: 売買・価格メモ -->
+        <div id="priceTab" class="tab-content">
+            <div class="screenshot-area" style="text-align: left; background: #fff;">
+                <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しい価格・相場メモを追加</h3>
+                <input type="text" id="priceTitleInput" placeholder="品名・アイテム名（例：鉄鉱石）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
+                <textarea id="priceBodyInput" placeholder="購入価格、目標売値、相場などを入力..."></textarea>
+                <button onclick="addRecord('price')">💾 この価格メモを追加</button>
+            </div>
+
+            <div class="action-bar">
+                <input type="text" id="priceSearchInput" placeholder="🔍 価格メモを検索..." oninput="renderRecords('price')" style="width: 55%;">
+                <select id="priceSortSelect" onchange="renderRecords('price')" style="width: 40%;">
+                    <option value="new">新しい順</option>
+                    <option value="old">古い順</option>
+                </select>
+            </div>
+            <div id="priceListContainer"></div>
+        </div>
+
+        <!-- タブ3: イベント情報タブ -->
+        <div id="eventTab" class="tab-content">
+            <div class="screenshot-area" style="text-align: left; background: #fff;">
+                <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しいイベント記録を追加</h3>
+                <input type="text" id="eventTitleInput" placeholder="イベント名（例：第5回 〇〇コンテスト）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
+                <textarea id="eventBodyInput" placeholder="【計画】&#13;&#10;【進捗】&#13;&#10;【結果】"></textarea>
+                <button onclick="addRecord('event')">💾 このイベント記録を追加</button>
+            </div>
+
+            <div class="action-bar">
+                <input type="text" id="eventSearchInput" placeholder="🔍 イベントを検索..." oninput="renderRecords('event')" style="width: 55%;">
+                <select id="eventSortSelect" onchange="renderRecords('event')" style="width: 40%;">
+                    <option value="new">新しい順</option>
+                    <option value="old">古い順</option>
+                </select>
+            </div>
+            <div id="eventListContainer"></div>
+        </div>
+
+        <!-- タブ4: スクショ・画像 -->
+        <div id="imageTab" class="tab-content">
+            <div class="screenshot-area">
+                <p style="margin: 0 0 8px 0; font-size: 0.9rem;">スクショ画像の追加</p>
+                <input type="text" id="imageTitleInput" placeholder="画像の名前（例：相場画面）" style="width: 80%; margin-bottom: 8px;"><br>
+                <input type="file" id="imageInput" accept="image/*">
+                <button onclick="addImageData()" style="margin-top: 5px;">➕ この画像を追加保存</button>
+            </div>
+
+            <div class="action-bar">
+                <input type="text" id="imageSearchInput" placeholder="🔍 画像を検索..." oninput="renderRecords('image')" style="width: 100%;">
+            </div>
+            <div id="imageListContainer"></div>
+        </div>
+
+        <!-- タブ5: Wiki埋め込み -->
+        <div id="wikiTab" class="tab-content">
+            <div class="link-bar">
+                🔗 参考Wiki: <a href="https://wikiwiki.jp/sold2/" target="_blank">https://wikiwiki.jp/sold2/</a> （別タブで開く）
+            </div>
+            <div class="frame-container">
+                <iframe src="https://wikiwiki.jp/sold2/" class="frame-box" title="Sold Out 2 Wiki"></iframe>
+            </div>
+        </div>
+
+        <!-- タブ6: 掲示板埋め込み -->
+        <div id="bbsTab" class="tab-content">
+            <div class="link-bar">
+                🔗 公式掲示板: <a href="https://so2-bbs.mutoys.com" target="_blank">https://so2-bbs.mutoys.com</a> （別タブで開く）
+            </div>
+            <div class="frame-container">
+                <iframe src="https://so2-bbs.mutoys.com" class="frame-box" title="Sold Out 2 BBS"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // タブ切り替え処理
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            if (btnElement) {
+                btnElement.classList.add('active');
+            }
+        }
+
+        function getCategory() {
+            return document.getElementById('categorySelect').value;
+        }
+
+        // 全データの読み込みと再描画
+        function loadAllData() {
+            renderRecords('text');
+            renderRecords('price');
+            renderRecords('event');
+            renderRecords('image');
+        }
+
+        // 汎用レコード（text, price, event）の追加
+        function addRecord(type) {
+            const cat = getCategory();
+            const titleInput = document.getElementById(type + 'TitleInput');
+            const bodyInput = document.getElementById(type + 'BodyInput');
+
+            const title = titleInput.value.trim();
+            const body = bodyInput.value.trim();
+
+            if (!title && !body) {
+                alert('タイトルか内容を入力してください。');
+                return;
+            }
+
+            let records = JSON.parse(localStorage.getItem(`hub_${type}_${cat}`) || '[]');
+            
+            // 新しい順に追加するため先頭へ、または末尾へ（タイムスタンプ付き）
+            records.unshift({
+                id: Date.now(),
+                title: title || '無題',
+                body: body,
+                date: new Date().toLocaleString()
+            });
+
+            localStorage.setItem(`hub_${type}_${cat}`, JSON.stringify(records));
+
+            // 入力欄をクリア
+            titleInput.value = '';
+            bodyInput.value = '';
+
+            renderRecords(type);
+        }
+
+        // レコードの削除
+        function deleteRecord(type, id) {
+            if (!confirm('この項目を削除しますか？')) return;
+            const cat = getCategory();
+            let records = JSON.parse(localStorage.getItem(`hub_${type}_${cat}`) || '[]');
+            
+            records = records.filter(item => item.id !== id);
+            localStorage.setItem(`hub_${type}_${cat}`, JSON.stringify(records));
+            
+            renderRecords(type);
+        }
+
+        // リストを描画（検索・並び替え対応）
+        function renderRecords(type) {
+            const cat = getCategory();
+            const container = document.getElementById(type + 'ListContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+
+            let records = JSON.parse(localStorage.getItem(`hub_${type}_${cat}`) || '[]');
+            
+            // 検索フィルター
+            const searchInput = document.getElementById(type + 'SearchInput');
+            const keyword = searchInput ? searchInput.value.toLowerCase() : '';
+            
+            if (keyword) {
+                records = records.filter(item => 
+                    item.title.toLowerCase().includes(keyword) || 
+                    (item.body && item.body.toLowerCase().includes(keyword))
+                );
+            }
+
+            // 並び替え (画像以外)
+            const sortSelect = document.getElementById(type + 'SortSelect');
+            if (sortSelect && type !== 'image') {
+                const sortVal = sortSelect.value;
+                records.sort((a, b) => {
+                    return sortVal === 'new' ? b.id - a.id : a.id - b.id;
+                });
+            }
+
+            if (records.length === 0) {
+                container.innerHTML = '<p style="font-size: 0.85rem; color: #888; text-align: center;">記録はありません。</p>';
+                return;
+            }
+
+            records.forEach((item) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'record-item';
+                
+                if (type === 'image') {
+                    // 画像用のカード表示
+                    itemDiv.innerHTML = `
+                        <div class="record-header">
+                            <span class="record-title">🏷️ ${escapeHtml(item.title)}</span>
+                            <button onclick="deleteRecord('image', ${item.id})" style="background: #e74c3c; font-size: 0.75rem; padding: 3px 8px;">🗑️ 削除</button>
+                        </div>
+                        <img src="${item.data}" class="preview-img" alt="スクショ">
+                        <div style="margin-top: 8px; text-align: right;">
+                            <a href="${item.data}" download="${item.title}.png"><button style="background: #27ae60; font-size: 0.8rem; padding: 5px 10px;">📥 取り出し(DL)</button></a>
+                        </div>
+                    `;
+                } else {
+                    // テキスト・価格・イベント用のカード表示
+                    itemDiv.innerHTML = `
+                        <div class="record-header">
+                            <span class="record-title">📌 ${escapeHtml(item.title)}</span>
+                            <button onclick="deleteRecord('${type}', ${item.id})" style="background: #e74c3c; font-size: 0.75rem; padding: 3px 8px;">🗑️ 削除</button>
+                        </div>
+                        <div class="record-body">${escapeHtml(item.body)}</div>
+                        <div style="font-size: 0.75rem; color: #888; text-align: right; margin-top: 4px;">保存日時: ${item.date || ''}</div>
+                    `;
+                }
+                container.appendChild(itemDiv);
+            });
+        }
+
+        // 画像の追加保存
+        function addImageData() {
+            const cat = getCategory();
+            const titleInput = document.getElementById('imageTitleInput');
+            const fileInput = document.getElementById('imageInput');
+            
+            if (!fileInput.files || !fileInput.files[0]) {
+                alert('画像ファイルを選択してください。');
+                return;
+            }
+
+            const title = titleInput.value.trim() || '無題のスクショ';
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const base64Data = e.target.result;
+                let images = JSON.parse(localStorage.getItem(`hub_image_${cat}`) || '[]');
+                
+                images.unshift({
+                    id: Date.now(),
+                    title: title,
+                    data: base64Data
+                });
+
+                localStorage.setItem(`hub_image_${cat}`, JSON.stringify(images));
+
+                titleInput.value = '';
+                fileInput.value = '';
+                renderRecords('image');
+            }
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+
+        // 簡易HTMLエスケープ
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&'`<>]/g, function(match) {
+                return { '&': '&amp;', "'": '&#x27;', '`': '&#x60;', '<': '&lt;', '>': '&gt;' }[match];
+            });
+        }
+
+        // 初期読み込み実行
+        window.onload = loadAllData;
+    </script>
+</body>
+</html>
