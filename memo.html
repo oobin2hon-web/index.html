@@ -7,19 +7,31 @@
         body { font-family: sans-serif; margin: 0; padding: 15px; background: #f4f6f8; color: #333; box-sizing: border-box; }
         h1 { font-size: 1.3rem; margin-bottom: 10px; color: #2c3e50; }
         .card { background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 12px; }
-        .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; align-items: center; }
+        .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 5px; align-items: center; }
+        .control-group { display: flex; align-items: center; gap: 5px; flex: 1; min-width: 200px; }
         select, input, button { padding: 8px 10px; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px; }
         button { background: #3498db; color: #fff; border: none; cursor: pointer; }
         button:hover { background: #2980b9; }
-        .tab-buttons { display: flex; gap: 4px; border-bottom: 2px solid #ddd; margin-bottom: 12px; padding-bottom: 5px; flex-wrap: wrap; }
-        .tab-btn { background: #e0e0e0; color: #555; border: none; padding: 8px 12px; border-radius: 4px 4px 0 0; cursor: pointer; font-size: 0.85rem; }
+        
+        /* 縦タブレイアウトのスタイル */
+        .main-layout { display: flex; gap: 12px; align-items: flex-start; }
+        @media (max-width: 768px) {
+            .main-layout { flex-direction: column; }
+        }
+        .tab-buttons { display: flex; flex-direction: column; gap: 4px; min-width: 150px; }
+        .tab-btn { background: #e0e0e0; color: #555; border: none; padding: 10px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; text-align: left; }
         .tab-btn.active { background: #2c3e50; color: #fff; font-weight: bold; }
+        .tab-content-area { flex-grow: 1; width: 100%; background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         textarea { width: 100%; height: 100px; padding: 10px; font-family: monospace; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 8px; }
         .screenshot-area { border: 2px dashed #ccc; padding: 15px; text-align: center; border-radius: 6px; background: #fafafa; margin-bottom: 10px; }
-        .preview-img { max-width: 100%; max-height: 220px; margin-top: 10px; border-radius: 4px; border: 1px solid #ddd; display: block; margin-left: auto; margin-right: auto; }
-        .status { font-size: 0.85rem; color: #27ae60; font-weight: bold; }
+        
+        /* 画像横並び用のスタイル */
+        .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+        .preview-img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; display: block; }
+        
         .frame-container { width: 100%; }
         .frame-box { width: 100%; height: 480px; border: 1px solid #ccc; border-radius: 4px; background: #fff; display: block; }
         .link-bar { margin-bottom: 8px; font-size: 0.85rem; }
@@ -27,31 +39,54 @@
         /* リスト・カード用のスタイル */
         .record-item { background: #fdfdfd; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .record-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 5px; }
-        .record-title { font-weight: bold; font-size: 0.95krem; color: #2c3e50; }
-        .record-body { font-size: 0.9rem; white-space: pre-wrap; word-break: break-all; color: #444; background: #f8fafc; padding: 8px; border-radius: 4px; border: 1px solid #edf2f7; }
-        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: #f1f5f9; padding: 8px; border-radius: 6px; }
+        .record-title { font-weight: bold; font-size: 0.95rem; color: #2c3e50; }
+        .record-body { font-size: 0.9rem; white-space: pre-wrap; word-break: break-all; color: #444; background: #f8fafc; padding: 8px; border-radius: 4px; border: 1px solid #edf2f7; margin-bottom: 8px; }
+        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: #f1f5f9; padding: 8px; border-radius: 6px; gap: 5px; flex-wrap: wrap; }
+        .order-btn { background: #7f8c8d; font-size: 0.75rem; padding: 3px 6px; }
+        .order-btn:hover { background: #616a6b; }
+        .badge { display: inline-block; background: #e2e8f0; color: #475569; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; margin-right: 4px; }
     </style>
 </head>
 <body>
 
     <h1>🗂️ マイ・ローカルデータベース＆Hub</h1>
 
-    <!-- カテゴリ選択エリア -->
+    <!-- カテゴリ＆分類 選択エリア（横並び） -->
     <div class="card">
         <div class="controls">
-            <label for="categorySelect"><strong>カテゴリ:</strong></label>
-            <select id="categorySelect" onchange="loadAllData()">
-                <option value="job_craftsman">職人・生産系</option>
-                <option value="job_shop">販売・経営系</option>
-                <option value="recipe_memo">レシピ・素材メモ</option>
-                <option value="market_memo">相場・売買戦略</option>
-                <option value="free_memo">自由フリーメモ</option>
-            </select>
+            <div class="control-group">
+                <label for="itemCategorySelect"><strong>💎 カテゴリ:</strong></label>
+                <select id="itemCategorySelect" onchange="loadAllData()" style="flex: 1;">
+                    <option value="all">📁 すべてのカテゴリ</option>
+                    <option value="genryo">💎 原料</option>
+                    <option value="hon">📖 本</option>
+                    <option value="kusuri">⚗️ 薬</option>
+                    <option value="ken">🗡️ 剣</option>
+                    <option value="yoroi">🛡️ 鎧</option>
+                    <option value="tate">🛡️ 盾</option>
+                    <option value="tsue">🪄 杖</option>
+                    <option value="accessory">💍 アクセサリ</option>
+                    <option value="chizu">🗺️ 地図</option>
+                    <option value="dougu">🔨 道具</option>
+                    <option value="seibutsu">🐉 生物</option>
+                    <option value="shokumotsu">☕ 食物</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="classificationSelect"><strong>📂 分類:</strong></label>
+                <select id="classificationSelect" onchange="loadAllData()" style="flex: 1;">
+                    <option value="job_craftsman">職人・生産系</option>
+                    <option value="job_shop">販売・経営系</option>
+                    <option value="recipe_memo">レシピ・素材メモ</option>
+                    <option value="market_memo">相場・売買戦略</option>
+                    <option value="free_memo">自由フリーメモ</option>
+                </select>
+            </div>
         </div>
     </div>
 
-    <!-- 詳細切替タブ -->
-    <div class="card">
+    <!-- 詳細切替タブ（縦タブレイアウト） -->
+    <div class="main-layout">
         <div class="tab-buttons" id="tabButtonContainer">
             <button class="tab-btn active" onclick="switchTab('textTab', this)">📝 詳細メモ</button>
             <button class="tab-btn" onclick="switchTab('priceTab', this)">💰 売買・価格メモ</button>
@@ -61,101 +96,109 @@
             <button class="tab-btn" onclick="switchTab('bbsTab', this)">💬 公式掲示板</button>
         </div>
 
-        <!-- タブ1: テキスト詳細（リスト管理・検索・並び替え対応） -->
-        <div id="textTab" class="tab-content active">
-            <div class="screenshot-area" style="text-align: left; background: #fff;">
-                <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しい詳細メモを追加</h3>
-                <input type="text" id="textTitleInput" placeholder="タイトル（例：〇〇の効率手順）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
-                <textarea id="textBodyInput" placeholder="内容を入力..."></textarea>
-                <button onclick="addRecord('text')">💾 このメモを追加</button>
+        <div class="tab-content-area">
+            <!-- タブ1: テキスト詳細 -->
+            <div id="textTab" class="tab-content active">
+                <div class="screenshot-area" style="text-align: left; background: #fff;">
+                    <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しい詳細メモを追加</h3>
+                    <input type="text" id="textTitleInput" placeholder="タイトル（例：〇〇の効率手順）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
+                    <textarea id="textBodyInput" placeholder="内容を入力..."></textarea>
+                    <button onclick="addRecord('text')">💾 このメモを追加</button>
+                </div>
+
+                <div class="action-bar">
+                    <input type="text" id="textSearchInput" placeholder="🔍 メモを検索..." oninput="renderRecords('text')" style="width: 55%;">
+                    <select id="textSortSelect" onchange="renderRecords('text')" style="width: 40%;">
+                        <option value="manual">カスタム並び順</option>
+                        <option value="new">新しい順</option>
+                        <option value="old">古い順</option>
+                    </select>
+                </div>
+                <div id="textListContainer"></div>
             </div>
 
-            <div class="action-bar">
-                <input type="text" id="textSearchInput" placeholder="🔍 メモを検索..." oninput="renderRecords('text')" style="width: 55%;">
-                <select id="textSortSelect" onchange="renderRecords('text')" style="width: 40%;">
-                    <option value="new">新しい順</option>
-                    <option value="old">古い順</option>
-                </select>
-            </div>
-            <div id="textListContainer"></div>
-        </div>
+            <!-- タブ2: 売買・価格メモ -->
+            <div id="priceTab" class="tab-content">
+                <div class="screenshot-area" style="text-align: left; background: #fff;">
+                    <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しい価格・相場メモを追加</h3>
+                    <input type="text" id="priceTitleInput" placeholder="品名・アイテム名（例：鉄鉱石）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
+                    <textarea id="priceBodyInput" placeholder="購入価格、目標売値、相場などを入力..."></textarea>
+                    <button onclick="addRecord('price')">💾 この価格メモを追加</button>
+                </div>
 
-        <!-- タブ2: 売買・価格メモ -->
-        <div id="priceTab" class="tab-content">
-            <div class="screenshot-area" style="text-align: left; background: #fff;">
-                <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しい価格・相場メモを追加</h3>
-                <input type="text" id="priceTitleInput" placeholder="品名・アイテム名（例：鉄鉱石）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
-                <textarea id="priceBodyInput" placeholder="購入価格、目標売値、相場などを入力..."></textarea>
-                <button onclick="addRecord('price')">💾 この価格メモを追加</button>
-            </div>
-
-            <div class="action-bar">
-                <input type="text" id="priceSearchInput" placeholder="🔍 価格メモを検索..." oninput="renderRecords('price')" style="width: 55%;">
-                <select id="priceSortSelect" onchange="renderRecords('price')" style="width: 40%;">
-                    <option value="new">新しい順</option>
-                    <option value="old">古い順</option>
-                </select>
-            </div>
-            <div id="priceListContainer"></div>
-        </div>
-
-        <!-- タブ3: イベント情報タブ -->
-        <div id="eventTab" class="tab-content">
-            <div class="screenshot-area" style="text-align: left; background: #fff;">
-                <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しいイベント記録を追加</h3>
-                <input type="text" id="eventTitleInput" placeholder="イベント名（例：第5回 〇〇コンテスト）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
-                <textarea id="eventBodyInput" placeholder="【計画】&#13;&#10;【進捗】&#13;&#10;【結果】"></textarea>
-                <button onclick="addRecord('event')">💾 このイベント記録を追加</button>
+                <div class="action-bar">
+                    <input type="text" id="priceSearchInput" placeholder="🔍 価格メモを検索..." oninput="renderRecords('price')" style="width: 55%;">
+                    <select id="priceSortSelect" onchange="renderRecords('price')" style="width: 40%;">
+                        <option value="manual">カスタム並び順</option>
+                        <option value="new">新しい順</option>
+                        <option value="old">古い順</option>
+                    </select>
+                </div>
+                <div id="priceListContainer"></div>
             </div>
 
-            <div class="action-bar">
-                <input type="text" id="eventSearchInput" placeholder="🔍 イベントを検索..." oninput="renderRecords('event')" style="width: 55%;">
-                <select id="eventSortSelect" onchange="renderRecords('event')" style="width: 40%;">
-                    <option value="new">新しい順</option>
-                    <option value="old">古い順</option>
-                </select>
-            </div>
-            <div id="eventListContainer"></div>
-        </div>
+            <!-- タブ3: イベント情報タブ -->
+            <div id="eventTab" class="tab-content">
+                <div class="screenshot-area" style="text-align: left; background: #fff;">
+                    <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しいイベント記録を追加</h3>
+                    <input type="text" id="eventTitleInput" placeholder="イベント名（例：第5回 〇〇コンテスト）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
+                    <textarea id="eventBodyInput" placeholder="【計画】&#13;&#10;【進捗】&#13;&#10;【結果】"></textarea>
+                    <div style="margin-bottom: 8px;">
+                        <label style="font-size: 0.85rem; display: block; margin-bottom: 4px;">📸 スクショ画像添付（任意）</label>
+                        <input type="file" id="eventImageInput" accept="image/*">
+                    </div>
+                    <button onclick="addRecord('event')">💾 このイベント記録を追加</button>
+                </div>
 
-        <!-- タブ4: スクショ・画像 -->
-        <div id="imageTab" class="tab-content">
-            <div class="screenshot-area">
-                <p style="margin: 0 0 8px 0; font-size: 0.9rem;">スクショ画像の追加</p>
-                <input type="text" id="imageTitleInput" placeholder="画像の名前（例：相場画面）" style="width: 80%; margin-bottom: 8px;"><br>
-                <input type="file" id="imageInput" accept="image/*">
-                <button onclick="addImageData()" style="margin-top: 5px;">➕ この画像を追加保存</button>
+                <div class="action-bar">
+                    <input type="text" id="eventSearchInput" placeholder="🔍 イベントを検索..." oninput="renderRecords('event')" style="width: 55%;">
+                    <select id="eventSortSelect" onchange="renderRecords('event')" style="width: 40%;">
+                        <option value="manual">カスタム並び順</option>
+                        <option value="new">新しい順</option>
+                        <option value="old">古い順</option>
+                    </select>
+                </div>
+                <div id="eventListContainer"></div>
             </div>
 
-            <div class="action-bar">
-                <input type="text" id="imageSearchInput" placeholder="🔍 画像を検索..." oninput="renderRecords('image')" style="width: 100%;">
-            </div>
-            <div id="imageListContainer"></div>
-        </div>
+            <!-- タブ4: スクショ・画像 -->
+            <div id="imageTab" class="tab-content">
+                <div class="screenshot-area">
+                    <p style="margin: 0 0 8px 0; font-size: 0.9rem;">スクショ画像の追加</p>
+                    <input type="text" id="imageTitleInput" placeholder="画像の名前（例：相場画面）" style="width: 80%; margin-bottom: 8px;"><br>
+                    <input type="file" id="imageInput" accept="image/*">
+                    <button onclick="addImageData()" style="margin-top: 5px;">➕ この画像を追加保存</button>
+                </div>
 
-        <!-- タブ5: Wiki埋め込み -->
-        <div id="wikiTab" class="tab-content">
-            <div class="link-bar">
-                🔗 参考Wiki: <a href="https://wikiwiki.jp/sold2/" target="_blank">https://wikiwiki.jp/sold2/</a> （別タブで開く）
+                <div class="action-bar">
+                    <input type="text" id="imageSearchInput" placeholder="🔍 画像を検索..." oninput="renderRecords('image')" style="width: 100%;">
+                </div>
+                <div id="imageListContainer"></div>
             </div>
-            <div class="frame-container">
-                <iframe src="https://wikiwiki.jp/sold2/" class="frame-box" title="Sold Out 2 Wiki"></iframe>
-            </div>
-        </div>
 
-        <!-- タブ6: 掲示板埋め込み -->
-        <div id="bbsTab" class="tab-content">
-            <div class="link-bar">
-                🔗 公式掲示板: <a href="https://so2-bbs.mutoys.com" target="_blank">https://so2-bbs.mutoys.com</a> （別タブで開く）
+            <!-- タブ5: Wiki埋め込み -->
+            <div id="wikiTab" class="tab-content">
+                <div class="link-bar">
+                    🔗 参考Wiki: <a href="https://wikiwiki.jp/sold2/" target="_blank">https://wikiwiki.jp/sold2/</a> （別タブで開く）
+                </div>
+                <div class="frame-container">
+                    <iframe src="https://wikiwiki.jp/sold2/" class="frame-box" title="Sold Out 2 Wiki"></iframe>
+                </div>
             </div>
-            <div class="frame-container">
-                <iframe src="https://so2-bbs.mutoys.com" class="frame-box" title="Sold Out 2 BBS"></iframe>
+
+            <!-- タブ6: 掲示板埋め込み -->
+            <div id="bbsTab" class="tab-content">
+                <div class="link-bar">
+                    🔗 公式掲示板: <a href="https://so2-bbs.mutoys.com" target="_blank">https://so2-bbs.mutoys.com</a> （別タブで開く）
+                </div>
+                <div class="frame-container">
+                    <iframe src="https://so2-bbs.mutoys.com" class="frame-box" title="Sold Out 2 BBS"></iframe>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // タブ切り替え処理
         function switchTab(tabId, btnElement) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -166,11 +209,29 @@
             }
         }
 
-        function getCategory() {
-            return document.getElementById('categorySelect').value;
+        function getClassification() {
+            return document.getElementById('classificationSelect').value;
         }
 
-        // 全データの読み込みと再描画
+        function getItemCategory() {
+            return document.getElementById('itemCategorySelect').value;
+        }
+
+        const categoryLabels = {
+            'genryo': '💎 原料',
+            'hon': '📖 本',
+            'kusuri': '⚗️ 薬',
+            'ken': '🗡️ 剣',
+            'yoroi': '🛡️ 鎧',
+            'tate': '🛡️ 盾',
+            'tsue': '🪄 杖',
+            'accessory': '💍 アクセサリ',
+            'chizu': '🗺️ 地図',
+            'dougu': '🔨 道具',
+            'seibutsu': '🐉 生物',
+            'shokumotsu': '☕ 食物'
+        };
+
         function loadAllData() {
             renderRecords('text');
             renderRecords('price');
@@ -178,9 +239,15 @@
             renderRecords('image');
         }
 
-        // 汎用レコード（text, price, event）の追加
         function addRecord(type) {
-            const cat = getCategory();
+            const classification = getClassification();
+            const itemCat = getItemCategory();
+            
+            if (itemCat === 'all') {
+                alert('保存先の「カテゴリ（原料、剣など）」を個別選択してください（「すべて」以外）。');
+                return;
+            }
+
             const titleInput = document.getElementById(type + 'TitleInput');
             const bodyInput = document.getElementById(type + 'BodyInput');
 
@@ -192,48 +259,89 @@
                 return;
             }
 
-            let records = JSON.parse(localStorage.getItem(`hub_${type}_${cat}`) || '[]');
+            if (type === 'event') {
+                const imgFileInput = document.getElementById('eventImageInput');
+                if (imgFileInput.files && imgFileInput.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        saveRecordData(type, classification, itemCat, title, body, e.target.result);
+                        imgFileInput.value = '';
+                    };
+                    reader.readAsDataURL(imgFileInput.files[0]);
+                    return;
+                }
+            }
+            saveRecordData(type, classification, itemCat, title, body, null);
+        }
+
+        function saveRecordData(type, classification, itemCat, title, body, imageData) {
+            let records = JSON.parse(localStorage.getItem(`hub_${type}_${classification}`) || '[]');
             
-            // 新しい順に追加するため先頭へ、または末尾へ（タイムスタンプ付き）
             records.unshift({
                 id: Date.now(),
+                itemCategory: itemCat,
                 title: title || '無題',
                 body: body,
+                image: imageData,
                 date: new Date().toLocaleString()
             });
 
-            localStorage.setItem(`hub_${type}_${cat}`, JSON.stringify(records));
+            localStorage.setItem(`hub_${type}_${classification}`, JSON.stringify(records));
 
-            // 入力欄をクリア
-            titleInput.value = '';
-            bodyInput.value = '';
+            const titleInput = document.getElementById(type + 'TitleInput');
+            const bodyInput = document.getElementById(type + 'BodyInput');
+            if (titleInput) titleInput.value = '';
+            if (bodyInput) bodyInput.value = '';
 
             renderRecords(type);
         }
 
-        // レコードの削除
         function deleteRecord(type, id) {
             if (!confirm('この項目を削除しますか？')) return;
-            const cat = getCategory();
-            let records = JSON.parse(localStorage.getItem(`hub_${type}_${cat}`) || '[]');
+            const classification = getClassification();
+            let records = JSON.parse(localStorage.getItem(`hub_${type}_${classification}`) || '[]');
             
             records = records.filter(item => item.id !== id);
-            localStorage.setItem(`hub_${type}_${cat}`, JSON.stringify(records));
+            localStorage.setItem(`hub_${type}_${classification}`, JSON.stringify(records));
             
             renderRecords(type);
         }
 
-        // リストを描画（検索・並び替え対応）
+        function moveRecord(type, id, direction) {
+            const classification = getClassification();
+            let records = JSON.parse(localStorage.getItem(`hub_${type}_${classification}`) || '[]');
+            const index = records.findIndex(item => item.id === id);
+            
+            if (index === -1) return;
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= records.length) return;
+
+            const temp = records[index];
+            records[index] = records[targetIndex];
+            records[targetIndex] = temp;
+
+            localStorage.setItem(`hub_${type}_${classification}`, JSON.stringify(records));
+
+            const sortSelect = document.getElementById(type + 'SortSelect');
+            if (sortSelect) sortSelect.value = 'manual';
+
+            renderRecords(type);
+        }
+
         function renderRecords(type) {
-            const cat = getCategory();
+            const classification = getClassification();
+            const selectedItemCat = getItemCategory();
             const container = document.getElementById(type + 'ListContainer');
             if (!container) return;
             
             container.innerHTML = '';
 
-            let records = JSON.parse(localStorage.getItem(`hub_${type}_${cat}`) || '[]');
+            let records = JSON.parse(localStorage.getItem(`hub_${type}_${classification}`) || '[]');
             
-            // 検索フィルター
+            if (selectedItemCat !== 'all') {
+                records = records.filter(item => item.itemCategory === selectedItemCat);
+            }
+
             const searchInput = document.getElementById(type + 'SearchInput');
             const keyword = searchInput ? searchInput.value.toLowerCase() : '';
             
@@ -244,54 +352,89 @@
                 );
             }
 
-            // 並び替え (画像以外)
             const sortSelect = document.getElementById(type + 'SortSelect');
             if (sortSelect && type !== 'image') {
                 const sortVal = sortSelect.value;
-                records.sort((a, b) => {
-                    return sortVal === 'new' ? b.id - a.id : a.id - b.id;
-                });
+                if (sortVal === 'new') {
+                    records.sort((a, b) => b.id - a.id);
+                } else if (sortVal === 'old') {
+                    records.sort((a, b) => a.id - b.id);
+                }
             }
 
             if (records.length === 0) {
-                container.innerHTML = '<p style="font-size: 0.85rem; color: #888; text-align: center;">記録はありません。</p>';
+                container.innerHTML = '<p style="font-size: 0.85rem; color: #888; text-align: center;">条件に一致する記録はありません。</p>';
                 return;
             }
 
-            records.forEach((item) => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'record-item';
-                
-                if (type === 'image') {
-                    // 画像用のカード表示
-                    itemDiv.innerHTML = `
-                        <div class="record-header">
-                            <span class="record-title">🏷️ ${escapeHtml(item.title)}</span>
-                            <button onclick="deleteRecord('image', ${item.id})" style="background: #e74c3c; font-size: 0.75rem; padding: 3px 8px;">🗑️ 削除</button>
-                        </div>
+            if (type === 'image') {
+                const gridDiv = document.createElement('div');
+                gridDiv.className = 'image-grid';
+
+                records.forEach((item) => {
+                    const card = document.createElement('div');
+                    card.className = 'record-item';
+                    card.style.margin = '0';
+                    const catBadge = categoryLabels[item.itemCategory] ? `<span class="badge">${categoryLabels[item.itemCategory]}</span>` : '';
+                    card.innerHTML = `
+                        <div style="margin-bottom: 4px;">${catBadge}</div>
+                        <div class="record-title" style="font-size: 0.85rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(item.title)}">🏷️ ${escapeHtml(item.title)}</div>
                         <img src="${item.data}" class="preview-img" alt="スクショ">
-                        <div style="margin-top: 8px; text-align: right;">
-                            <a href="${item.data}" download="${item.title}.png"><button style="background: #27ae60; font-size: 0.8rem; padding: 5px 10px;">📥 取り出し(DL)</button></a>
+                        <div style="display: flex; justify-content: space-between; margin-top: 6px; align-items: center;">
+                            <a href="${item.data}" download="${item.title}.png" style="font-size: 0.75rem;">📥DL</a>
+                            <button onclick="deleteRecord('image', ${item.id})" style="background: #e74c3c; font-size: 0.7rem; padding: 2px 5px;">🗑️</button>
                         </div>
                     `;
-                } else {
-                    // テキスト・価格・イベント用のカード表示
+                    gridDiv.appendChild(card);
+                });
+                container.appendChild(gridDiv);
+            } else {
+                records.forEach((item, index) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'record-item';
+                    
+                    const catBadge = categoryLabels[item.itemCategory] ? `<span class="badge">${categoryLabels[item.itemCategory]}</span>` : '';
+
+                    let imageHtml = '';
+                    if (item.image) {
+                        imageHtml = `
+                            <div style="margin-bottom: 8px;">
+                                <img src="${item.image}" class="preview-img" style="max-height: 160px; object-fit: contain; width: auto;" alt="添付スクショ">
+                                <div style="font-size: 0.75rem; text-align: right;"><a href="${item.image}" download="event_image.png">📥 画像を取り出し(DL)</a></div>
+                            </div>
+                        `;
+                    }
+
                     itemDiv.innerHTML = `
                         <div class="record-header">
-                            <span class="record-title">📌 ${escapeHtml(item.title)}</span>
-                            <button onclick="deleteRecord('${type}', ${item.id})" style="background: #e74c3c; font-size: 0.75rem; padding: 3px 8px;">🗑️ 削除</button>
+                            <div>
+                                ${catBadge}
+                                <span class="record-title">📌 ${escapeHtml(item.title)}</span>
+                            </div>
+                            <div>
+                                <button class="order-btn" onclick="moveRecord('${type}', ${item.id}, -1)" ${index === 0 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>▲</button>
+                                <button class="order-btn" onclick="moveRecord('${type}', ${item.id}, 1)" ${index === records.length - 1 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>▼</button>
+                                <button onclick="deleteRecord('${type}', ${item.id})" style="background: #e74c3c; font-size: 0.75rem; padding: 3px 8px; margin-left: 4px;">🗑️ 削除</button>
+                            </div>
                         </div>
+                        ${imageHtml}
                         <div class="record-body">${escapeHtml(item.body)}</div>
                         <div style="font-size: 0.75rem; color: #888; text-align: right; margin-top: 4px;">保存日時: ${item.date || ''}</div>
                     `;
-                }
-                container.appendChild(itemDiv);
-            });
+                    container.appendChild(itemDiv);
+                });
+            }
         }
 
-        // 画像の追加保存
         function addImageData() {
-            const cat = getCategory();
+            const classification = getClassification();
+            const itemCat = getItemCategory();
+
+            if (itemCat === 'all') {
+                alert('保存先の「カテゴリ（原料、剣など）」を個別選択してください（「すべて」以外）。');
+                return;
+            }
+
             const titleInput = document.getElementById('imageTitleInput');
             const fileInput = document.getElementById('imageInput');
             
@@ -305,15 +448,16 @@
             
             reader.onload = function(e) {
                 const base64Data = e.target.result;
-                let images = JSON.parse(localStorage.getItem(`hub_image_${cat}`) || '[]');
+                let images = JSON.parse(localStorage.getItem(`hub_image_${classification}`) || '[]');
                 
                 images.unshift({
                     id: Date.now(),
+                    itemCategory: itemCat,
                     title: title,
                     data: base64Data
                 });
 
-                localStorage.setItem(`hub_image_${cat}`, JSON.stringify(images));
+                localStorage.setItem(`hub_image_${classification}`, JSON.stringify(images));
 
                 titleInput.value = '';
                 fileInput.value = '';
@@ -322,7 +466,6 @@
             reader.readAsDataURL(fileInput.files[0]);
         }
 
-        // 簡易HTMLエスケープ
         function escapeHtml(str) {
             if (!str) return '';
             return str.replace(/[&'`<>]/g, function(match) {
@@ -330,7 +473,6 @@
             });
         }
 
-        // 初期読み込み実行
         window.onload = loadAllData;
     </script>
 </body>
