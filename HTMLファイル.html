@@ -32,6 +32,8 @@
         button, select { padding: 6px 10px; font-size: 13px; cursor: pointer; border-radius: 4px; }
         button.save { background: #28a745; color: white; border: none; font-weight: bold; }
         button.restore { background: #ffc107; border: none; font-weight: bold; }
+        button.test { background: #17a2b8; color: white; border: none; font-weight: bold; }
+        button.test:hover { background: #138496; }
         .history-area { margin-top: 8px; display: flex; gap: 8px; align-items: center; font-size: 13px; }
     </style>
 </head>
@@ -58,14 +60,13 @@
     </div>
 
     <!-- 9個のタブ作業スペース -->
-    <h2>✍️ 9タブ HTML編集・テンポラリー管理</h2>
+    <h2>✍️ 9タブ HTML編集・動作テスト管理</h2>
     <div class="tab-buttons" id="tabButtons"></div>
     <div id="tabContents"></div>
 
 </div>
 
 <script>
-    // 画像にあった実際のファイル名をデフォルトとして定義
     const defaultFileNames = [
         "PRO.html",
         "level.html",
@@ -86,7 +87,7 @@
         const tabId = `tab${i + 1}`;
         const defaultName = defaultFileNames[i];
 
-        // タブボタン生成（ボタンの文字もファイル名にする）
+        // タブボタン生成
         const btn = document.createElement('button');
         btn.className = `tab-btn ${i === 0 ? 'active' : ''}`;
         btn.innerText = defaultName;
@@ -106,7 +107,8 @@
             <div class="toolbar">
                 <button class="save" onclick="saveHtmlData('${tabId}')">💾 HTML保存（テンポラリー）</button>
                 <button class="restore" onclick="restorePrevious('${tabId}')">↩️ 直前に戻す</button>
-                <a id="download_${tabId}" style="font-size:13px; color:#007bff; text-decoration:none; font-weight:bold; margin-left:auto;" download="${defaultName}">⬇️ ファイルとしてダウンロード</a>
+                <button class="test" onclick="runTest('${tabId}')">▶️ 動作テスト（プレビュー）</button>
+                <a id="download_${tabId}" style="font-size:13px; color:#007bff; text-decoration:none; font-weight:bold; margin-left:auto;" download="${defaultName}">⬇️ ファイル出力</a>
             </div>
 
             <div class="history-area">
@@ -141,7 +143,7 @@
                 document.getElementById(`text_${tabId}`).setAttribute('data-previous', histories[1].text);
             }
         } else {
-            // 初回はデフォルトのファイル名をダウンロードリンク等に反映
+            document.getElementById(`filename_${tabId}`).value = defaultName;
             updateDownloadLink(tabId, defaultName, "");
         }
     }
@@ -166,6 +168,22 @@
         updateDownloadLink(tabId, filename, currentText);
 
         alert(`「${filename}」をテンポラリーに保存しました！`);
+    }
+
+    // ★追加：書いたHTMLをその場で別タブに開いて動作テストする機能
+    function runTest(tabId) {
+        const textarea = document.getElementById(`text_${tabId}`);
+        const htmlContent = textarea.value;
+        
+        if (!htmlContent.trim()) {
+            alert('テストするHTMLコードが入力されていません。');
+            return;
+        }
+
+        // 仮想的なページ（Blob）を作成して別タブで開く
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
     }
 
     function updateDownloadLink(tabId, filename, text) {
@@ -206,7 +224,7 @@
         const textarea = document.getElementById(`text_${tabId}`);
         const prevText = textarea.getAttribute('data-previous');
         if (prevText !== null && prevText !== undefined) {
-            textarea.value = prevText;
+            textarea.value = prevTest;
             const filename = document.getElementById(`filename_${tabId}`).value;
             updateDownloadLink(tabId, filename, prevText);
             alert('直前の状態に戻しました。');
@@ -215,7 +233,6 @@
         }
     }
 
-    // 入力変更時にファイル名やダウンロードリンクを連動させる
     for (let i = 0; i < tabCount; i++) {
         const tabId = `tab${i + 1}`;
         document.getElementById(`filename_${tabId}`).addEventListener('input', function() {
