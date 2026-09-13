@@ -183,19 +183,25 @@
                     <div id="itemMasterChips" style="display: flex; gap: 5px; flex-wrap: wrap; max-height: 100px; overflow-y: auto; background: #f8fafc; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px;"></div>
                 </div>
 
-                <!-- 新規テンプレート追加フォーム -->
+                <!-- 新規テンプレート追加フォーム ＆ データバックアップ -->
                 <div class="generator-panel" style="background: #fff; border-color: #3498db; margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 6px 0; font-size: 0.9rem; color: #2980b9;">➕ 新しい定型文フォーマットを追加（個別登録）</h4>
+                    <h4 style="margin: 0 0 6px 0; font-size: 0.9rem; color: #2980b9;">➕ 新しい定型文フォーマットを追加（マスター登録）</h4>
                     <div style="margin-bottom: 6px;">
                         <input type="text" id="newTplLabel" placeholder="フォーマット名（例：最安値宣伝 または 要望：〇〇機能について）" style="width: 100%; box-sizing: border-box;">
                     </div>
                     <div style="margin-bottom: 6px;">
                         <textarea id="newTplText" placeholder="テンプレート文面（例：{name} @1:{price} 最安値！在庫 {qty}）" style="height: 60px;"></textarea>
                     </div>
-                    <button onclick="addNewTemplate()" style="background: #27ae60; font-size: 0.85rem;">💾 このフォーマットを個別登録</button>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button onclick="addNewTemplate()" style="background: #27ae60; font-size: 0.85rem; flex: 1;">💾 このフォーマットを追加</button>
+                        <button onclick="exportTemplates()" style="background: #8e44ad; font-size: 0.85rem;">📤 定型文のエクスポート</button>
+                        <button onclick="importTemplatesPrompt()" style="background: #d35400; font-size: 0.85rem;">📥 定型文のインポート</button>
+                    </div>
                 </div>
 
-                <h3 style="font-size: 1rem; color: #2c3e50; margin-bottom: 8px;">📌 あなたが登録した定型文一覧</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h3 style="font-size: 1rem; color: #2c3e50; margin: 0;">📌 あなたが登録した定型文一覧マスター</h3>
+                </div>
                 <div id="templateListArea"></div>
             </div>
 
@@ -638,7 +644,7 @@
             labelInput.value = '';
             textInput.value = '';
             updateTemplates();
-            alert('新しいフォーマットを個別に登録しました！');
+            alert('新しいフォーマットをマスターに登録しました！');
         }
 
         function deleteTemplate(id) {
@@ -649,10 +655,53 @@
             updateTemplates();
         }
 
+        function moveTemplate(id, direction) {
+            let templates = getStoredTemplates();
+            const index = templates.findIndex(t => t.id === id);
+            if (index === -1) return;
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= templates.length) return;
+
+            const temp = templates[index];
+            templates[index] = templates[targetIndex];
+            templates[targetIndex] = temp;
+
+            saveStoredTemplates(templates);
+            updateTemplates();
+        }
+
+        function exportTemplates() {
+            const templates = getStoredTemplates();
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(templates, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "templates_master_" + getCurrentUser() + ".json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importTemplatesPrompt() {
+            const jsonStr = prompt("エクスポートしたJSONコードをここに貼り付けてください:");
+            if (!jsonStr) return;
+            try {
+                const parsed = JSON.parse(jsonStr);
+                if (Array.isArray(parsed)) {
+                    saveStoredTemplates(parsed);
+                    updateTemplates();
+                    alert("定型文マスターを正常にインポートしました！");
+                } else {
+                    alert("データ形式が正しくありません。");
+                }
+            } catch(e) {
+                alert("JSONのパースに失敗しました。");
+            }
+        }
+
         function insertFeedbackTemplate() {
             document.getElementById('newTplLabel').value = '【要望】UIや機能の改善提案';
             document.getElementById('newTplText').value = '【要望内容】\n\n【現状の困りごと・改善案】\n\n【参考スレッド】\nhttps://so2-bbs.mutoys.com/t/topic/8580';
-            alert('新規追加フォームに「要望テンプレート」をセットしました。内容を編集して「個別登録」ボタンを押してください！');
+            alert('新規追加フォームに「要望テンプレート」をセットしました。内容を編集して「追加」ボタンを押してください！');
         }
 
         function getGeneratedTemplates() {
@@ -723,21 +772,28 @@
 
         function updateTemplates() {
             const currentTemplates = getGeneratedTemplates();
+            const rawTemplates = getStoredTemplates();
 
-            // 1. 定型文タブのカード一覧を更新
+            // 1. 定型文タブのカード一覧を更新（並び替えボタン付き）
             const templateListArea = document.getElementById('templateListArea');
             if (templateListArea) {
                 templateListArea.innerHTML = '';
-                currentTemplates.forEach(tpl => {
+                currentTemplates.forEach((tpl, index) => {
                     const card = document.createElement('div');
                     card.className = 'template-card';
                     card.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                             <h4 style="margin: 0; font-size: 0.95rem; color: #2c3e50;">📝 ${escapeHtml(tpl.label)}</h4>
-                            <button onclick="deleteTemplate(${tpl.id})" style="background: #e74c3c; font-size: 0.75rem; padding: 2px 6px;">🗑️ 削除</button>
+                            <div>
+                                <button class="order-btn" onclick="moveTemplate(${tpl.id}, -1)" ${index === 0 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>▲</button>
+                                <button class="order-btn" onclick="moveTemplate(${tpl.id}, 1)" ${index === currentTemplates.length - 1 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>▼</button>
+                                <button onclick="deleteTemplate(${tpl.id})" style="background: #e74c3c; font-size: 0.75rem; padding: 2px 6px; margin-left: 4px;">🗑️ 削除</button>
+                            </div>
                         </div>
                         <div class="template-pre">${escapeHtml(tpl.text)}</div>
-                        <button onclick="copyToClipboard('${escapeJS(tpl.text)}')">📋 この定型文をコピー</button>
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick="copyToClipboard('${escapeJS(tpl.text)}')" style="flex: 1; font-size: 0.8rem;">📋 この定型文をコピー</button>
+                        </div>
                     `;
                     templateListArea.appendChild(card);
                 });
