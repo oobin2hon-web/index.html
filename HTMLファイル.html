@@ -26,6 +26,11 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
+        /* 各ファイル専用の独立したボタンエリア（タブ下・エディター上） */
+        .file-action-bar { background: #eef2f7; padding: 10px; border-radius: 6px; margin-bottom: 12px; display: flex; gap: 10px; align-items: center; border: 1px solid #cfe2ff; }
+        .file-action-bar .open-file-btn { background: #0d6efd; color: white; padding: 6px 14px; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: bold; display: inline-block; }
+        .file-action-bar .open-file-btn:hover { background: #0b5ed7; }
+
         /* 編集エリアのパーツ */
         .file-name-input { width: 100%; padding: 8px; box-sizing: border-box; font-size: 14px; font-weight: bold; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; background: #fffdf0; }
         textarea { width: 100%; height: 250px; padding: 10px; box-sizing: border-box; font-family: monospace; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; }
@@ -104,6 +109,12 @@
         content.className = `tab-content ${i === 0 ? 'active' : ''}`;
         content.id = tabId;
         content.innerHTML = `
+            <!-- 各ファイル専用の独立した操作バー（タブ下・エディター上部） -->
+            <div class="file-action-bar">
+                <span style="font-size:13px; font-weight:bold; color:#0056b3;">📌 このタブのファイル:</span>
+                <a id="open_page_${tabId}" href="${defaultName}" target="_blank" class="open-file-btn">🌐 ページを直接開く</a>
+            </div>
+
             <label style="font-size:12px; font-weight:bold; color:#666;">ファイル名:</label>
             <input type="text" id="filename_${tabId}" class="file-name-input" value="${defaultName}">
             
@@ -144,13 +155,13 @@
         if (histories.length > 0) {
             document.getElementById(`filename_${tabId}`).value = histories[0].filename;
             document.getElementById(`text_${tabId}`).value = histories[0].text;
-            updateDownloadLink(tabId, histories[0].filename, histories[0].text);
+            updateLinks(tabId, histories[0].filename, histories[0].text);
             if (histories.length > 1) {
                 document.getElementById(`text_${tabId}`).setAttribute('data-previous', histories[1].text);
             }
         } else {
             document.getElementById(`filename_${tabId}`).value = defaultName;
-            updateDownloadLink(tabId, defaultName, "");
+            updateLinks(tabId, defaultName, "");
         }
     }
 
@@ -171,7 +182,7 @@
 
         localStorage.setItem(`history_${tabId}`, JSON.stringify(histories));
         updateHistorySelect(tabId);
-        updateDownloadLink(tabId, filename, currentText);
+        updateLinks(tabId, filename, currentText);
 
         alert(`「${filename}」をテンポラリーに保存しました！`);
     }
@@ -194,17 +205,22 @@
         if (confirm('このタブに入力されているコードと内容をすべて消去しますか？')) {
             document.getElementById(`text_${tabId}`).value = '';
             const filename = document.getElementById(`filename_${tabId}`).value;
-            updateDownloadLink(tabId, filename, '');
+            updateLinks(tabId, filename, '');
             alert('コードを消去しました。');
         }
     }
 
-    function updateDownloadLink(tabId, filename, text) {
+    function updateLinks(tabId, filename, text) {
+        // ダウンロードリンクの更新
         const blob = new Blob([text], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
-        const link = document.getElementById(`download_${tabId}`);
-        link.href = url;
-        link.download = filename;
+        const downloadLink = document.getElementById(`download_${tabId}`);
+        downloadLink.href = url;
+        downloadLink.download = filename;
+
+        // 「ページを直接開く」ボタンのリンク先を連動
+        const openPageLink = document.getElementById(`open_page_${tabId}`);
+        openPageLink.href = filename;
     }
 
     function updateHistorySelect(tabId) {
@@ -229,7 +245,7 @@
         if (histories[index]) {
             document.getElementById(`filename_${tabId}`).value = histories[index].filename;
             document.getElementById(`text_${tabId}`).value = histories[index].text;
-            updateDownloadLink(tabId, histories[index].filename, histories[index].text);
+            updateLinks(tabId, histories[index].filename, histories[index].text);
         }
     }
 
@@ -239,7 +255,7 @@
         if (prevText !== null && prevText !== undefined) {
             textarea.value = prevText;
             const filename = document.getElementById(`filename_${tabId}`).value;
-            updateDownloadLink(tabId, filename, prevText);
+            updateLinks(tabId, filename, prevText);
             alert('直前の状態に戻しました。');
         } else {
             alert('戻せる履歴がありません。');
@@ -249,10 +265,10 @@
     for (let i = 0; i < tabCount; i++) {
         const tabId = `tab${i + 1}`;
         document.getElementById(`filename_${tabId}`).addEventListener('input', function() {
-            updateDownloadLink(tabId, this.value, document.getElementById(`text_${tabId}`).value);
+            updateLinks(tabId, this.value, document.getElementById(`text_${tabId}`).value);
         });
         document.getElementById(`text_${tabId}`).addEventListener('input', function() {
-            updateDownloadLink(tabId, document.getElementById(`filename_${tabId}`).value, this.value);
+            updateLinks(tabId, document.getElementById(`filename_${tabId}`).value, this.value);
         });
     }
 </script>
