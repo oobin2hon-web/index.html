@@ -109,10 +109,10 @@
                 </div>
                 <div id="itemRows" class="space-y-2">
                     <div class="work-row flex items-center space-x-1.5 bg-slate-50 p-2 rounded border border-slate-200">
-                        <input type="text" placeholder="アイテム名 (例: 獣の肉)" class="flex-1 text-xs p-1.5 border border-slate-300 rounded item-name">
-                        <input type="number" placeholder="数量" class="w-20 text-xs p-1.5 border border-slate-300 rounded item-qty">
-                        <input type="text" placeholder="単位" class="w-16 text-xs p-1.5 border border-slate-300 rounded item-unit">
-                        <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-2 py-1" onclick="deleteRow(this)">✕</button>
+                        <input type="text" placeholder="アイテム名" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded item-name">
+                        <input type="number" placeholder="数量" class="w-16 sm:w-20 text-xs p-1.5 border border-slate-300 rounded item-qty">
+                        <input type="text" placeholder="単位" class="w-12 sm:w-16 text-xs p-1.5 border border-slate-300 rounded item-unit">
+                        <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-1.5 py-1 flex-shrink-0" onclick="deleteRow(this)">✕</button>
                     </div>
                 </div>
             </div>
@@ -126,10 +126,10 @@
                     </button>
                 </div>
                 <div id="saleRows" class="space-y-2">
-                    <div class="sale-row flex items-center space-x-2 bg-slate-50 p-2 rounded border border-slate-200">
-                        <input type="number" placeholder="販売数 (未入力可)" class="flex-1 text-xs p-1.5 border border-slate-300 rounded sale-qty">
-                        <input type="number" step="0.01" placeholder="販売時間h (未入力可)" class="flex-1 text-xs p-1.5 border border-slate-300 rounded sale-hours">
-                        <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-2 py-1" onclick="deleteRow(this)">✕</button>
+                    <div class="sale-row flex items-center space-x-1.5 bg-slate-50 p-2 rounded border border-slate-200">
+                        <input type="number" placeholder="販売数" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded sale-qty">
+                        <input type="number" step="0.01" placeholder="販売時間h" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded sale-hours">
+                        <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-1.5 py-1 flex-shrink-0" onclick="deleteRow(this)">✕</button>
                     </div>
                 </div>
             </div>
@@ -137,7 +137,7 @@
             <!-- 計算・解析結果カード -->
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-3">
                 <h2 class="text-sm font-bold text-slate-700 border-b pb-2">計算・解析結果</h2>
-                <div id="result" class="text-xs text-slate-600 leading-relaxed">
+                <div id="result" class="text-xs text-slate-600 leading-relaxed break-words">
                     情報を入力して「総合計算を実行」してください。（未入力項目があってもエラーにならず、安全に計算されます）
                 </div>
             </div>
@@ -162,10 +162,10 @@ function addItemRow(name = "", qty = "", unit = "") {
     const div = document.createElement("div");
     div.className = "work-row flex items-center space-x-1.5 bg-slate-50 p-2 rounded border border-slate-200";
     div.innerHTML = `
-        <input type="text" placeholder="アイテム名" class="flex-1 text-xs p-1.5 border border-slate-300 rounded item-name" value="${escapeHTML(name)}">
-        <input type="number" placeholder="数量" class="w-20 text-xs p-1.5 border border-slate-300 rounded item-qty" value="${qty !== null && qty !== undefined ? qty : ""}">
-        <input type="text" placeholder="単位" class="w-16 text-xs p-1.5 border border-slate-300 rounded item-unit" value="${escapeHTML(unit)}">
-        <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-2 py-1" onclick="deleteRow(this)">✕</button>
+        <input type="text" placeholder="アイテム名" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded item-name" value="${escapeHTML(name)}">
+        <input type="number" placeholder="数量" class="w-16 sm:w-20 text-xs p-1.5 border border-slate-300 rounded item-qty" value="${qty !== null && qty !== undefined ? qty : ""}">
+        <input type="text" placeholder="単位" class="w-12 sm:w-16 text-xs p-1.5 border border-slate-300 rounded item-unit" value="${escapeHTML(unit)}">
+        <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-1.5 py-1 flex-shrink-0" onclick="deleteRow(this)">✕</button>
     `;
     container.appendChild(div);
 }
@@ -173,11 +173,11 @@ function addItemRow(name = "", qty = "", unit = "") {
 function addSaleRow(sales = "", hours = "") {
     const container = document.getElementById("saleRows");
     const div = document.createElement("div");
-    div.className = "sale-row flex items-center space-x-2 bg-slate-50 p-2 rounded border border-slate-200";
+    div.className = "sale-row flex items-center space-x-1.5 bg-slate-50 p-2 rounded border border-slate-200";
     div.innerHTML = `
-        <input type="number" placeholder="販売数 (未入力可)" class="flex-1 text-xs p-1.5 border border-slate-300 rounded sale-qty" value="${sales !== null && sales !== undefined ? sales : ""}">
-        <input type="number" step="0.01" placeholder="販売時間h (未入力可)" class="flex-1 text-xs p-1.5 border border-slate-300 rounded sale-hours" value="${hours !== null && hours !== undefined ? hours : ""}">
-        <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-2 py-1" onclick="deleteRow(this)">✕</button>
+        <input type="number" placeholder="販売数" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded sale-qty" value="${sales !== null && sales !== undefined ? sales : ""}">
+        <input type="number" step="0.01" placeholder="販売時間h" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded sale-hours" value="${hours !== null && hours !== undefined ? hours : ""}">
+        <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-1.5 py-1 flex-shrink-0" onclick="deleteRow(this)">✕</button>
     `;
     container.appendChild(div);
 }
@@ -509,17 +509,17 @@ function clearAll() {
     
     document.getElementById("itemRows").innerHTML = `
         <div class="work-row flex items-center space-x-1.5 bg-slate-50 p-2 rounded border border-slate-200">
-            <input type="text" placeholder="アイテム名" class="flex-1 text-xs p-1.5 border border-slate-300 rounded item-name">
-            <input type="number" placeholder="数量" class="w-20 text-xs p-1.5 border border-slate-300 rounded item-qty">
-            <input type="text" placeholder="単位" class="w-16 text-xs p-1.5 border border-slate-300 rounded item-unit">
-            <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-2 py-1" onclick="deleteRow(this)">✕</button>
+            <input type="text" placeholder="アイテム名" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded item-name">
+            <input type="number" placeholder="数量" class="w-16 sm:w-20 text-xs p-1.5 border border-slate-300 rounded item-qty">
+            <input type="text" placeholder="単位" class="w-12 sm:w-16 text-xs p-1.5 border border-slate-300 rounded item-unit">
+            <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-1.5 py-1 flex-shrink-0" onclick="deleteRow(this)">✕</button>
         </div>
     `;
     document.getElementById("saleRows").innerHTML = `
-        <div class="sale-row flex items-center space-x-2 bg-slate-50 p-2 rounded border border-slate-200">
-            <input type="number" placeholder="販売数 (未入力可)" class="flex-1 text-xs p-1.5 border border-slate-300 rounded sale-qty">
-            <input type="number" step="0.01" placeholder="販売時間h (未入力可)" class="flex-1 text-xs p-1.5 border border-slate-300 rounded sale-hours">
-            <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-2 py-1" onclick="deleteRow(this)">✕</button>
+        <div class="sale-row flex items-center space-x-1.5 bg-slate-50 p-2 rounded border border-slate-200">
+            <input type="number" placeholder="販売数" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded sale-qty">
+            <input type="number" step="0.01" placeholder="販売時間h" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded sale-hours">
+            <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-1.5 py-1 flex-shrink-0" onclick="deleteRow(this)">✕</button>
         </div>
     `;
     document.getElementById("result").innerHTML = "情報を入力して「総合計算を実行」してください。";
