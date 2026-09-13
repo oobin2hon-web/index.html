@@ -15,6 +15,8 @@
         .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-top: 15px; }
         .link-card { background: #f9f9f9; border: 1px solid #ddd; padding: 10px; border-radius: 6px; text-decoration: none; color: #333; font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         .link-card:hover { background: #e7f3fe; border-color: #007bff; color: #007bff; }
+        .link-card.memo { background: #e8f8f5; border-color: #27ae60; color: #27ae60; }
+        .link-card.memo:hover { background: #d4efdf; }
 
         /* 9個のタブスタイル */
         .tab-buttons { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; border-bottom: 2px solid #ddd; padding-bottom: 8px; }
@@ -50,6 +52,7 @@
     <!-- 既存ページの閲覧リンク -->
     <h2>📂 公開中ページ一覧（クイックリンク）</h2>
     <div class="link-grid">
+        <a href="memo.html" class="link-card memo"><span>📄 memo.html</span> <span>🔗</span></a>
         <a href="index.html" class="link-card"><span>index.html</span> <span>🔗</span></a>
         <a href="PRO.html" class="link-card"><span>PRO.html</span> <span>🔗</span></a>
         <a href="level.html" class="link-card"><span>level.html</span> <span>🔗</span></a>
@@ -173,7 +176,6 @@
         alert(`「${filename}」をテンポラリーに保存しました！`);
     }
 
-    // 動作テスト機能
     function runTest(tabId) {
         const textarea = document.getElementById(`text_${tabId}`);
         const htmlContent = textarea.value;
@@ -188,7 +190,6 @@
         window.open(url, '_blank');
     }
 
-    // ★追加：指定したタブのコードとファイル名入力を一発で全消去する機能
     function clearTabCode(tabId) {
         if (confirm('このタブに入力されているコードと内容をすべて消去しますか？')) {
             document.getElementById(`text_${tabId}`).value = '';
