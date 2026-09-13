@@ -2,1044 +2,260 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>マイ・ローカルデータベース＆Hub</title>
+    <title>Web Page Studio & Hub</title>
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 15px; background: #f4f6f8; color: #333; box-sizing: border-box; }
-        h1 { font-size: 1.3rem; margin-bottom: 10px; color: #2c3e50; }
-        .card { background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 12px; }
-        .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 5px; align-items: center; }
-        .control-group { display: flex; align-items: center; gap: 5px; flex: 1; min-width: 200px; }
-        select, input, button { padding: 8px 10px; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px; }
-        button { background: #3498db; color: #fff; border: none; cursor: pointer; }
-        button:hover { background: #2980b9; }
+        body { font-family: sans-serif; margin: 0; background: #f4f4f9; color: #333; }
+        .header { background: #007bff; color: white; padding: 15px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 20px; }
+        .container { max-width: 950px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
-        /* 縦タブレイアウトのスタイル */
-        .main-layout { display: flex; gap: 12px; align-items: flex-start; }
-        @media (max-width: 768px) {
-            .main-layout { flex-direction: column; }
-        }
-        .tab-buttons { display: flex; flex-direction: column; gap: 4px; min-width: 150px; }
-        .tab-btn { background: #e0e0e0; color: #555; border: none; padding: 10px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; text-align: left; }
-        .tab-btn.active { background: #2c3e50; color: #fff; font-weight: bold; }
-        .tab-content-area { flex-grow: 1; width: 100%; background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        h2 { border-bottom: 2px solid #007bff; padding-bottom: 5px; color: #007bff; font-size: 18px; margin-top: 30px; }
+        
+        /* リンクカード一覧 */
+        .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-top: 15px; }
+        .link-card { background: #f9f9f9; border: 1px solid #ddd; padding: 10px; border-radius: 6px; text-decoration: none; color: #333; font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .link-card:hover { background: #e7f3fe; border-color: #007bff; color: #007bff; }
+        .link-card.memo { background: #e8f8f5; border-color: #27ae60; color: #27ae60; }
+        .link-card.memo:hover { background: #d4efdf; }
+
+        /* 9個のタブスタイル */
+        .tab-buttons { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; border-bottom: 2px solid #ddd; padding-bottom: 8px; }
+        .tab-btn { padding: 6px 12px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 4px; font-size: 13px; font-weight: bold; }
+        .tab-btn.active { background: #28a745; color: #fff; }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        textarea { width: 100%; height: 100px; padding: 10px; font-family: monospace; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 8px; }
-        .screenshot-area { border: 2px dashed #ccc; padding: 15px; text-align: center; border-radius: 6px; background: #fafafa; margin-bottom: 10px; }
         
-        /* 画像横並び用のスタイル */
-        .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-        .preview-img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; display: block; }
+        /* 編集エリアのパーツ */
+        .file-name-input { width: 100%; padding: 8px; box-sizing: border-box; font-size: 14px; font-weight: bold; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; background: #fffdf0; }
+        textarea { width: 100%; height: 250px; padding: 10px; box-sizing: border-box; font-family: monospace; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; }
         
-        .frame-container { width: 100%; }
-        .frame-box { width: 100%; height: 480px; border: 1px solid #ccc; border-radius: 4px; background: #fff; display: block; }
-        .link-bar { margin-bottom: 8px; font-size: 0.85rem; }
-        
-        /* リスト・カード用のスタイル */
-        .record-item { background: #fdfdfd; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-        .record-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 5px; }
-        .record-title { font-weight: bold; font-size: 0.95rem; color: #2c3e50; }
-        .record-body { font-size: 0.9rem; white-space: pre-wrap; word-break: break-all; color: #444; background: #f8fafc; padding: 8px; border-radius: 4px; border: 1px solid #edf2f7; margin-bottom: 8px; }
-        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: #f1f5f9; padding: 8px; border-radius: 6px; gap: 5px; flex-wrap: wrap; }
-        .order-btn { background: #7f8c8d; font-size: 0.75rem; padding: 3px 6px; }
-        .order-btn:hover { background: #616a6b; }
-        .badge { display: inline-block; background: #e2e8f0; color: #475569; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; margin-right: 4px; }
-        
-        /* 定型文エリアのスタイル */
-        .template-box { background: #eef2f7; padding: 8px; border-radius: 4px; margin-bottom: 8px; text-align: left; font-size: 0.85rem; }
-        .template-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
-        .template-chip { background: #fff; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; color: #334155; }
-        .template-chip:hover { background: #e2e8f0; }
-
-        /* 定型文タブ専用のカードスタイル */
-        .template-card { background: #fff; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 10px; text-align: left; }
-        .template-card h4 { margin: 0 0 6px 0; font-size: 0.95rem; color: #2c3e50; }
-        .template-pre { background: #f8fafc; padding: 8px; border-radius: 4px; border: 1px solid #e2e8f0; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap; margin-bottom: 8px; }
-
-        /* ジェネレーター専用パネル */
-        .generator-panel { background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 12px; text-align: left; }
-        .generator-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 8px; }
-        .generator-grid input, .generator-grid select { width: 100%; box-sizing: border-box; }
-
-        /* 優先検索ワード用チップ */
-        .keyword-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
-        .keyword-chip { background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; color: #334155; }
-        .keyword-chip:hover { background: #cbd5e1; }
+        .toolbar { margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: #f9f9f9; padding: 10px; border-radius: 4px; border: 1px solid #ddd; }
+        button, select { padding: 6px 10px; font-size: 13px; cursor: pointer; border-radius: 4px; }
+        button.save { background: #28a745; color: white; border: none; font-weight: bold; }
+        button.restore { background: #ffc107; border: none; font-weight: bold; }
+        button.test { background: #17a2b8; color: white; border: none; font-weight: bold; }
+        button.test:hover { background: #138496; }
+        button.clear-btn { background: #e74c3c; color: white; border: none; font-weight: bold; }
+        button.clear-btn:hover { background: #c0392b; }
+        .history-area { margin-top: 8px; display: flex; gap: 8px; align-items: center; font-size: 13px; }
     </style>
 </head>
 <body>
 
-    <h1>🗂️ マイ・ローカルデータベース＆Hub</h1>
+<div class="header">
+    <h1>🚀 9タブ ファイル管理＆HTMLエディター Hub</h1>
+</div>
 
-    <!-- カテゴリ＆分類 選択エリア（横並び） -->
-    <div class="card">
-        <div class="controls">
-            <div class="control-group">
-                <label for="itemCategorySelect"><strong>💎 カテゴリ:</strong></label>
-                <select id="itemCategorySelect" onchange="loadAllData()" style="flex: 1;">
-                    <option value="all">📁 すべてのカテゴリ（指定なし含む）</option>
-                    <option value="none">📂 （指定なし）</option>
-                    <option value="genryo">💎 原料</option>
-                    <option value="hon">📖 本</option>
-                    <option value="kusuri">⚗️ 薬</option>
-                    <option value="ken">🗡️ 剣</option>
-                    <option value="yoroi">🛡️ 鎧</option>
-                    <option value="tate">🛡️ 盾</option>
-                    <option value="tsue">🪄 杖</option>
-                    <option value="accessory">💍 アクセサリ</option>
-                    <option value="chizu">🗺️ 地図</option>
-                    <option value="dougu">🔨 道具</option>
-                    <option value="seibutsu">🐉 生物</option>
-                    <option value="shokumotsu">☕ 食物</option>
-                </select>
-            </div>
-            <div class="control-group">
-                <label for="classificationSelect"><strong>📂 分類:</strong></label>
-                <select id="classificationSelect" onchange="onClassificationChange()" style="flex: 1;">
-                    <option value="all">📂 すべての分類（指定なし含む）</option>
-                    <option value="none">📂 （指定なし）</option>
-                    <option value="work">作業</option>
-                    <option value="transport">輸送</option>
-                    <option value="order">注文</option>
-                    <option value="purchase">購入</option>
-                    <option value="other">その他</option>
-                </select>
-            </div>
-        </div>
+<div class="container">
+
+    <!-- 既存ページの閲覧リンク -->
+    <h2>📂 公開中ページ一覧（クイックリンク）</h2>
+    <div class="link-grid">
+        <a href="memo.html" class="link-card memo"><span>📄 memo.html</span> <span>🔗</span></a>
+        <a href="index.html" class="link-card"><span>index.html</span> <span>🔗</span></a>
+        <a href="PRO.html" class="link-card"><span>PRO.html</span> <span>🔗</span></a>
+        <a href="level.html" class="link-card"><span>level.html</span> <span>🔗</span></a>
+        <a href="materials.html" class="link-card"><span>materials.html</span> <span>🔗</span></a>
+        <a href="sales.html" class="link-card"><span>sales.html</span> <span>🔗</span></a>
+        <a href="soldout2_parser.html" class="link-card"><span>soldout2_parser.html</span> <span>🔗</span></a>
+        <a href="trade.html" class="link-card"><span>trade.html</span> <span>🔗</span></a>
+        <a href="work_tool.html" class="link-card"><span>work_tool.html</span> <span>🔗</span></a>
+        <a href="xpcalc.html" class="link-card"><span>xpcalc.html</span> <span>🔗</span></a>
     </div>
 
-    <!-- 詳細切替タブ（縦タブレイアウト） -->
-    <div class="main-layout">
-        <div class="tab-buttons" id="tabButtonContainer">
-            <button class="tab-btn active" onclick="switchTab('templateTab', this)">📋 定型文・品名管理</button>
-            <button class="tab-btn" onclick="switchTab('textTab', this)">📝 詳細メモ</button>
-            <button class="tab-btn" onclick="switchTab('priceTab', this)">💰 売買・価格メモ</button>
-            <button class="tab-btn" onclick="switchTab('eventTab', this)">📅 イベント情報</button>
-            <button class="tab-btn" onclick="switchTab('imageTab', this)">📸 スクショ保存</button>
-            <button class="tab-btn" onclick="switchTab('wikiTab', this)">🌐 非公式Wiki</button>
-            <button class="tab-btn" onclick="switchTab('bbsTab', this)">💬 公式掲示板</button>
-        </div>
+    <!-- 9個のタブ作業スペース -->
+    <h2>✍️ 9タブ HTML編集・動作テスト管理</h2>
+    <div class="tab-buttons" id="tabButtons"></div>
+    <div id="tabContents"></div>
 
-        <div class="tab-content-area">
-            <!-- タブ0: 定型文一覧＆作成ツール ＆ 品名一括登録 -->
-            <div id="templateTab" class="tab-content active">
-                <h3 style="margin-top: 0; font-size: 1rem; color: #2c3e50;">✨ トレード・宣伝ジェネレーター</h3>
-                <p style="font-size: 0.85rem; color: #666;">
-                    変数として <code>{name}</code>（品名）, <code>{price}</code>（価格）, <code>{qty}</code>（数量） が使えます。
-                </p>
-                
-                <!-- ジェネレーター入力パネル -->
-                <div class="generator-panel">
-                    <div class="generator-grid">
-                        <div>
-                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">品名 (選択or直接入力):</label>
-                            <div style="display: flex; gap: 4px;">
-                                <select id="genItemSelect" onchange="onItemSelectChange()" style="flex: 1;">
-                                    <option value="">-- 登録品名から選択 --</option>
-                                </select>
-                            </div>
-                            <input type="text" id="genItemName" value="コッペパン" placeholder="例: コッペパン" style="margin-top: 4px;">
-                        </div>
-                        <div>
-                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">価格:</label>
-                            <input type="text" id="genPrice" value="200" placeholder="例: 200" style="margin-top: 4px;">
-                        </div>
-                        <div>
-                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">数量:</label>
-                            <input type="text" id="genQuantity" value="3口無言可" placeholder="例: 3口無言可" style="margin-top: 4px;">
-                        </div>
-                    </div>
-                </div>
+</div>
 
-                <!-- 品名一括登録パネル -->
-                <div class="generator-panel" style="background: #fff; border-color: #e67e22; margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 6px 0; font-size: 0.9rem; color: #d35400;">📦 品名の一括登録・管理</h4>
-                    <p style="font-size: 0.8rem; color: #666; margin: 0 0 6px 0;">改行区切りで複数の品名をペーストして一括登録できます。</p>
-                    <textarea id="bulkItemInput" placeholder="例：&#10;鉄鉱石&#10;木材&#10;コッペパン&#10;薬草" style="height: 60px; margin-bottom: 6px;"></textarea>
-                    <button onclick="addBulkItems()" style="background: #e67e22; font-size: 0.85rem; margin-bottom: 8px;">➕ 改行区切りの品名一括登録</button>
-                    
-                    <div style="font-size: 0.8rem; font-weight: bold; color: #475569; margin-bottom: 4px;">登録済み品名一覧（クリックでジェネレーターにセット / ✕で削除）:</div>
-                    <div id="itemMasterChips" style="display: flex; gap: 5px; flex-wrap: wrap; max-height: 100px; overflow-y: auto; background: #f8fafc; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px;"></div>
-                </div>
+<script>
+    const defaultFileNames = [
+        "PRO.html",
+        "level.html",
+        "materials.html",
+        "sales.html",
+        "soldout2_parser.html",
+        "trade.html",
+        "work_tool.html",
+        "xpcalc.html",
+        "xpcalc_detail.html"
+    ];
 
-                <!-- 新規テンプレート追加フォーム -->
-                <div class="generator-panel" style="background: #fff; border-color: #3498db; margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 6px 0; font-size: 0.9rem; color: #2980b9;">➕ 新しい定型文フォーマットを追加</h4>
-                    <div style="margin-bottom: 6px;">
-                        <input type="text" id="newTplLabel" placeholder="フォーマット名（例：最安値宣伝）" style="width: 100%; box-sizing: border-box;">
-                    </div>
-                    <div style="margin-bottom: 6px;">
-                        <textarea id="newTplText" placeholder="テンプレート文面（例：{name} @1:{price} 最安値！在庫 {qty}）" style="height: 60px;"></textarea>
-                    </div>
-                    <button onclick="addNewTemplate()" style="background: #27ae60; font-size: 0.85rem;">💾 このフォーマットを登録</button>
-                </div>
+    const tabCount = defaultFileNames.length;
+    const tabButtonsContainer = document.getElementById('tabButtons');
+    const tabContentsContainer = document.getElementById('tabContents');
 
-                <h3 style="font-size: 1rem; color: #2c3e50; margin-bottom: 8px;">📌 登録済み定型文一覧</h3>
-                <div id="templateListArea"></div>
-            </div>
+    for (let i = 0; i < tabCount; i++) {
+        const tabId = `tab${i + 1}`;
+        const defaultName = defaultFileNames[i];
 
-            <!-- タブ1: テキスト詳細 -->
-            <div id="textTab" class="tab-content">
-                <div class="screenshot-area" style="text-align: left; background: #fff;">
-                    <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しい詳細メモを追加</h3>
-                    
-                    <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
-                        <select id="textNewCategory" style="flex: 1; min-width: 130px;">
-                            <option value="none">💎 カテゴリ（任意）</option>
-                            <option value="genryo">💎 原料</option>
-                            <option value="hon">📖 本</option>
-                            <option value="kusuri">⚗️ 薬</option>
-                            <option value="ken">🗡️ 剣</option>
-                            <option value="yoroi">🛡️ 鎧</option>
-                            <option value="tate">🛡️ 盾</option>
-                            <option value="tsue">🪄 杖</option>
-                            <option value="accessory">💍 アクセサリ</option>
-                            <option value="chizu">🗺️ 地図</option>
-                            <option value="dougu">🔨 道具</option>
-                            <option value="seibutsu">🐉 生物</option>
-                            <option value="shokumotsu">☕ 食物</option>
-                        </select>
-                        <select id="textNewClassification" style="flex: 1; min-width: 130px;">
-                            <option value="none">📂 分類（任意）</option>
-                            <option value="work">作業</option>
-                            <option value="transport">輸送</option>
-                            <option value="order">注文</option>
-                            <option value="purchase">購入</option>
-                            <option value="other">その他</option>
-                        </select>
-                    </div>
+        // タブボタン生成
+        const btn = document.createElement('button');
+        btn.className = `tab-btn ${i === 0 ? 'active' : ''}`;
+        btn.innerText = defaultName;
+        btn.onclick = () => switchTab(i + 1);
+        tabButtonsContainer.appendChild(btn);
 
-                    <input type="text" id="textTitleInput" placeholder="タイトル（例：〇〇の効率手順）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
-                    
-                    <!-- 定型文チップエリア -->
-                    <div class="template-box">
-                        <span style="font-weight: bold; color: #475569;">💡 定型文（クリックで内容に挿入）:</span>
-                        <div class="template-chips" id="textTemplateContainer"></div>
-                    </div>
-
-                    <textarea id="textBodyInput" placeholder="内容を入力..."></textarea>
-                    <div style="display: flex; gap: 5px;">
-                        <button onclick="addRecord('text')" style="flex: 1;">💾 このメモを追加</button>
-                        <button onclick="clearInput('text')" style="background: #e74c3c;" title="入力内容をワンタッチでクリア">🗑️ 入力クリア</button>
-                    </div>
-                </div>
-
-                <div class="action-bar">
-                    <input type="text" id="textSearchInput" placeholder="🔍 メモを検索..." oninput="renderRecords('text')" style="width: 55%;">
-                    <select id="textSortSelect" onchange="renderRecords('text')" style="width: 40%;">
-                        <option value="manual">カスタム並び順</option>
-                        <option value="new">新しい順</option>
-                        <option value="old">古い順</option>
-                    </select>
-                </div>
-                <div class="keyword-chips" id="textKeywordChips">
-                    <span style="font-size: 0.8rem; font-weight: bold; align-self: center; color: #475569;">優先検索:</span>
-                    <button class="keyword-chip" onclick="setSearchKeyword('text', 'トレード')">トレード</button>
-                    <button class="keyword-chip" onclick="setSearchKeyword('text', '最安値')">最安値</button>
-                    <button class="keyword-chip" onclick="setSearchKeyword('text', '求')">求</button>
-                    <button class="keyword-chip" onclick="setSearchKeyword('text', '出')">出</button>
-                    <button class="keyword-chip" onclick="setSearchKeyword('text', '')">全クリア</button>
-                </div>
-                <div id="textListContainer"></div>
-            </div>
-
-            <!-- タブ2: 売買・価格メモ -->
-            <div id="priceTab" class="tab-content">
-                <div class="screenshot-area" style="text-align: left; background: #fff;">
-                    <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しい価格・相場メモを追加</h3>
-                    
-                    <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
-                        <select id="priceNewCategory" style="flex: 1; min-width: 130px;">
-                            <option value="none">💎 カテゴリ（任意）</option>
-                            <option value="genryo">💎 原料</option>
-                            <option value="hon">📖 本</option>
-                            <option value="kusuri">⚗️ 薬</option>
-                            <option value="ken">🗡️ 剣</option>
-                            <option value="yoroi">🛡️ 鎧</option>
-                            <option value="tate">🛡️ 盾</option>
-                            <option value="tsue">🪄 杖</option>
-                            <option value="accessory">💍 アクセサリ</option>
-                            <option value="chizu">🗺️ 地図</option>
-                            <option value="dougu">🔨 道具</option>
-                            <option value="seibutsu">🐉 生物</option>
-                            <option value="shokumotsu">☕ 食物</option>
-                        </select>
-                        <select id="priceNewClassification" style="flex: 1; min-width: 130px;">
-                            <option value="none">📂 分類（任意）</option>
-                            <option value="work">作業</option>
-                            <option value="transport">輸送</option>
-                            <option value="order">注文</option>
-                            <option value="purchase">購入</option>
-                            <option value="other">その他</option>
-                        </select>
-                    </div>
-
-                    <input type="text" id="priceTitleInput" placeholder="品名・アイテム名（例：鉄鉱石）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
-                    
-                    <div class="template-box">
-                        <span style="font-weight: bold; color: #475569;">💡 定型文（クリックで内容に挿入）:</span>
-                        <div class="template-chips" id="priceTemplateContainer"></div>
-                    </div>
-
-                    <textarea id="priceBodyInput" placeholder="購入価格、目標売値、相場などを入力..."></textarea>
-                    <div style="display: flex; gap: 5px;">
-                        <button onclick="addRecord('price')" style="flex: 1;">💾 この価格メモを追加</button>
-                        <button onclick="clearInput('price')" style="background: #e74c3c;" title="入力内容をワンタッチでクリア">🗑️ 入力クリア</button>
-                    </div>
-                </div>
-
-                <div class="action-bar">
-                    <input type="text" id="priceSearchInput" placeholder="🔍 価格メモを検索..." oninput="renderRecords('price')" style="width: 55%;">
-                    <select id="priceSortSelect" onchange="renderRecords('price')" style="width: 40%;">
-                        <option value="manual">カスタム並び順</option>
-                        <option value="new">新しい順</option>
-                        <option value="old">古い順</option>
-                    </select>
-                </div>
-                <div class="keyword-chips" id="priceKeywordChips">
-                    <span style="font-size: 0.8rem; font-weight: bold; align-self: center; color: #475569;">優先検索:</span>
-                    <button class="keyword-chip" onclick="setSearchKeyword('price', 'トレード')">トレード</button>
-                    <button class="keyword-chip" onclick="setSearchKeyword('price', '最安値')">最安値</button>
-                    <button class="keyword-chip" onclick="setSearchKeyword('price', '求')">求</button>
-                    <button class="keyword-chip" onclick="setSearchKeyword('price', '出')">出</button>
-                    <button class="keyword-chip" onclick="setSearchKeyword('price', '')">全クリア</button>
-                </div>
-                <div id="priceListContainer"></div>
-            </div>
-
-            <!-- タブ3: イベント情報タブ -->
-            <div id="eventTab" class="tab-content">
-                <div class="screenshot-area" style="text-align: left; background: #fff;">
-                    <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しいイベント記録を追加</h3>
-                    
-                    <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
-                        <select id="eventNewCategory" style="flex: 1; min-width: 130px;">
-                            <option value="none">💎 カテゴリ（任意）</option>
-                            <option value="genryo">💎 原料</option>
-                            <option value="hon">📖 本</option>
-                            <option value="kusuri">⚗️ 薬</option>
-                            <option value="ken">🗡️ 剣</option>
-                            <option value="yoroi">🛡️ 鎧</option>
-                            <option value="tate">🛡️ 盾</option>
-                            <option value="tsue">🪄 杖</option>
-                            <option value="accessory">💍 アクセサリ</option>
-                            <option value="chizu">🗺️ 地図</option>
-                            <option value="dougu">🔨 道具</option>
-                            <option value="seibutsu">🐉 生物</option>
-                            <option value="shokumotsu">☕ 食物</option>
-                        </select>
-                        <select id="eventNewClassification" style="flex: 1; min-width: 130px;">
-                            <option value="none">📂 分類（任意）</option>
-                            <option value="work">作業</option>
-                            <option value="transport">輸送</option>
-                            <option value="order">注文</option>
-                            <option value="purchase">購入</option>
-                            <option value="other">その他</option>
-                        </select>
-                    </div>
-
-                    <input type="text" id="eventTitleInput" placeholder="イベント名（例：第5回 〇〇コンテスト）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
-                    
-                    <div class="template-box">
-                        <span style="font-weight: bold; color: #475569;">💡 定型文（クリックで内容に挿入）:</span>
-                        <div class="template-chips" id="eventTemplateContainer"></div>
-                    </div>
-
-                    <textarea id="eventBodyInput" placeholder="【計画】&#13;&#10;【進捗】&#13;&#10;【結果】"></textarea>
-                    <div style="margin-bottom: 8px;">
-                        <label style="font-size: 0.85rem; display: block; margin-bottom: 4px;">📸 スクショ画像添付（任意）</label>
-                        <input type="file" id="eventImageInput" accept="image/*">
-                    </div>
-                    <div style="display: flex; gap: 5px;">
-                        <button onclick="addRecord('event')" style="flex: 1;">💾 このイベント記録を追加</button>
-                        <button onclick="clearInput('event')" style="background: #e74c3c;" title="入力内容をワンタッチでクリア">🗑️ 入力クリア</button>
-                    </div>
-                </div>
-
-                <div class="action-bar">
-                    <input type="text" id="eventSearchInput" placeholder="🔍 イベントを検索..." oninput="renderRecords('event')" style="width: 55%;">
-                    <select id="eventSortSelect" onchange="renderRecords('event')" style="width: 40%;">
-                        <option value="manual">カスタム並び順</option>
-                        <option value="new">新しい順</option>
-                        <option value="old">古い順</option>
-                    </select>
-                </div>
-                <div class="keyword-chips" id="eventKeywordChips">
-                    <span style="font-size: 0.8rem; font-weight: bold; align-self: center; color: #475569;">優先検索:</span>
-                    <button class="keyword-chip" onclick="setSearchKeyword('event', 'トレード')">トレード</button>
-                    <button class="keyword-chip" onclick="setSearchKeyword('event', '最安値')">最安値</button>
-                    <button class="keyword-chip" onclick="setSearchKeyword('event', '求')">求</button>
-                    <button class="keyword-chip" onclick="setSearchKeyword('event', '出')">出</button>
-                    <button class="keyword-chip" onclick="setSearchKeyword('event', '')">全クリア</button>
-                </div>
-                <div id="eventListContainer"></div>
-            </div>
-
-            <!-- タブ4: スクショ・画像 -->
-            <div id="imageTab" class="tab-content">
-                <div class="screenshot-area">
-                    <p style="margin: 0 0 8px 0; font-size: 0.9rem;">スクショ画像の追加</p>
-                    <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
-                        <select id="imageNewCategory" style="flex: 1; min-width: 130px;">
-                            <option value="none">💎 カテゴリ（任意）</option>
-                            <option value="genryo">💎 原料</option>
-                            <option value="hon">📖 本</option>
-                            <option value="kusuri">⚗️ 薬</option>
-                            <option value="ken">🗡️ 剣</option>
-                            <option value="yoroi">🛡️ 鎧</option>
-                            <option value="tate">🛡️ 盾</option>
-                            <option value="tsue">🪄 杖</option>
-                            <option value="accessory">💍 アクセサリ</option>
-                            <option value="chizu">🗺️ 地図</option>
-                            <option value="dougu">🔨 道具</option>
-                            <option value="seibutsu">🐉 生物</option>
-                            <option value="shokumotsu">☕ 食物</option>
-                        </select>
-                        <select id="imageNewClassification" style="flex: 1; min-width: 130px;">
-                            <option value="none">📂 分類（任意）</option>
-                            <option value="work">作業</option>
-                            <option value="transport">輸送</option>
-                            <option value="order">注文</option>
-                            <option value="purchase">購入</option>
-                            <option value="other">その他</option>
-                        </select>
-                    </div>
-                    <input type="text" id="imageTitleInput" placeholder="画像の名前（例：相場画面）" style="width: 80%; margin-bottom: 8px;"><br>
-                    <input type="file" id="imageInput" accept="image/*"><br>
-                    <button onclick="addImageData()" style="margin-top: 5px;">➕ この画像を追加保存</button>
-                </div>
-
-                <div class="action-bar">
-                    <input type="text" id="imageSearchInput" placeholder="🔍 画像を検索..." oninput="renderRecords('image')" style="width: 100%;">
-                </div>
-                <div class="keyword-chips" id="imageKeywordChips">
-                    <span style="font-size: 0.8rem; font-weight: bold; align-self: center; color: #475569;">優先検索:</span>
-                    <button class="keyword-chip" onclick="setSearchKeyword('image', 'トレード')">トレード</button>
-                    <button class="keyword-chip" onclick="setSearchKeyword('image', '最安値')">最安値</button>
-                    <button class="keyword-chip" onclick="setSearchKeyword('image', '求')">求</button>
-                    <button class="keyword-chip" onclick="setSearchKeyword('image', '出')">出</button>
-                    <button class="keyword-chip" onclick="setSearchKeyword('image', '')">全クリア</button>
-                </div>
-                <div id="imageListContainer"></div>
-            </div>
-
-            <!-- タブ5: Wiki埋め込み -->
-            <div id="wikiTab" class="tab-content">
-                <div class="link-bar">
-                    🔗 参考Wiki: <a href="https://wikiwiki.jp/sold2/" target="_blank">https://wikiwiki.jp/sold2/</a> （別タブで開く）
-                </div>
-                <div class="frame-container">
-                    <iframe src="https://wikiwiki.jp/sold2/" class="frame-box" title="Sold Out 2 Wiki"></iframe>
-                </div>
-            </div>
-
-            <!-- タブ6: 掲示板埋め込み -->
-            <div id="bbsTab" class="tab-content">
-                <div class="link-bar">
-                    🔗 公式掲示板: <a href="https://so2-bbs.mutoys.com" target="_blank">https://so2-bbs.mutoys.com</a> （別タブで開く）
-                </div>
-                <div class="frame-container">
-                    <iframe src="https://so2-bbs.mutoys.com" class="frame-box" title="Sold Out 2 BBS"></iframe>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // デフォルトのテンプレートデータ
-        const defaultTemplates = [
-            { id: 1, label: "求・出形式 (単体)", text: "{name}）求　{name}）出" },
-            { id: 2, label: "トレード用 (求/出)", text: "<トレード>\n求) {name} （{qty}）\n出) {name} @1:{price}\n無言可です。よろしくお願いします。" },
-            { id: 3, label: "宣伝・相場形式", text: "{name}@1:{price} 最安値" },
-            { id: 4, label: "シンプル販売", text: "{name} @1:{price} （{qty}）" }
-        ];
-
-        // デフォルトの品名マスター
-        const defaultItems = ["コッペパン", "鉄鉱石", "木材", "薬草"];
-
-        function getStoredItems() {
-            const stored = localStorage.getItem('hub_item_master');
-            if (!stored) {
-                return defaultItems;
-            }
-            try {
-                return JSON.parse(stored);
-            } catch(e) {
-                return defaultItems;
-            }
-        }
-
-        function saveStoredItems(items) {
-            localStorage.setItem('hub_item_master', JSON.stringify(items));
-        }
-
-        function addBulkItems() {
-            const bulkInput = document.getElementById('bulkItemInput');
-            const lines = bulkInput.value.split('\n');
-            let items = getStoredItems();
-
-            let addedCount = 0;
-            lines.forEach(line => {
-                const trimmed = line.trim();
-                if (trimmed && !items.includes(trimmed)) {
-                    items.push(trimmed);
-                    addedCount++;
-                }
-            });
-
-            saveStoredItems(items);
-            bulkInput.value = '';
-            updateItemMasterUI();
-            alert(`${addedCount}件の品名を追加しました！`);
-        }
-
-        function deleteItemMaster(itemName) {
-            if (!confirm(`品名「${itemName}」をマスターから削除しますか？`)) return;
-            let items = getStoredItems();
-            items = items.filter(i => i !== itemName);
-            saveStoredItems(items);
-            updateItemMasterUI();
-        }
-
-        function updateItemMasterUI() {
-            const items = getStoredItems();
+        // タブコンテンツ生成
+        const content = document.createElement('div');
+        content.className = `tab-content ${i === 0 ? 'active' : ''}`;
+        content.id = tabId;
+        content.innerHTML = `
+            <label style="font-size:12px; font-weight:bold; color:#666;">ファイル名:</label>
+            <input type="text" id="filename_${tabId}" class="file-name-input" value="${defaultName}">
             
-            // セレクトボックスの更新
-            const select = document.getElementById('genItemSelect');
-            if (select) {
-                const currentVal = document.getElementById('genItemName').value;
-                select.innerHTML = '<option value="">-- 登録品名から選択 --</option>';
-                items.forEach(item => {
-                    const opt = document.createElement('option');
-                    opt.value = item;
-                    opt.textContent = item;
-                    if (item === currentVal) opt.selected = true;
-                    select.appendChild(opt);
-                });
-            }
-
-            // チップ一覧の更新
-            const chipsArea = document.getElementById('itemMasterChips');
-            if (chipsArea) {
-                chipsArea.innerHTML = '';
-                if (items.length === 0) {
-                    chipsArea.innerHTML = '<span style="font-size: 0.75rem; color: #888;">登録されている品名はありません</span>';
-                    return;
-                }
-                items.forEach(item => {
-                    const chip = document.createElement('span');
-                    chip.style.cssText = 'background: #fff; border: 1px solid #cbd5e1; padding: 2px 6px; border-radius: 10px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #334155;';
-                    chip.innerHTML = `${escapeHtml(item)} <button type="button" onclick="event.stopPropagation(); deleteItemMaster('${escapeJS(item)}')" style="background:none; border:none; color:#e74c3c; cursor:pointer; font-size:0.7rem; padding:0;">✕</button>`;
-                    chip.onclick = function() {
-                        document.getElementById('genItemName').value = item;
-                        document.getElementById('genItemSelect').value = item;
-                        updateTemplates();
-                    };
-                    chipsArea.appendChild(chip);
-                });
-            }
-        }
-
-        function onItemSelectChange() {
-            const select = document.getElementById('genItemSelect');
-            if (select.value) {
-                document.getElementById('genItemName').value = select.value;
-                updateTemplates();
-            }
-        }
-
-        function getStoredTemplates() {
-            const stored = localStorage.getItem('hub_custom_templates');
-            if (!stored) {
-                return defaultTemplates;
-            }
-            try {
-                return JSON.parse(stored);
-            } catch(e) {
-                return defaultTemplates;
-            }
-        }
-
-        function saveStoredTemplates(templates) {
-            localStorage.setItem('hub_custom_templates', JSON.stringify(templates));
-        }
-
-        function addNewTemplate() {
-            const labelInput = document.getElementById('newTplLabel');
-            const textInput = document.getElementById('newTplText');
-            const label = labelInput.value.trim();
-            const text = textInput.value.trim();
-
-            if (!label || !text) {
-                alert('フォーマット名とテンプレート文面の両方を入力してください。');
-                return;
-            }
-
-            let templates = getStoredTemplates();
-            templates.push({
-                id: Date.now(),
-                label: label,
-                text: text
-            });
-
-            saveStoredTemplates(templates);
-            labelInput.value = '';
-            textInput.value = '';
-            updateTemplates();
-            alert('新しいフォーマットを登録しました！');
-        }
-
-        function deleteTemplate(id) {
-            if (!confirm('この定型文フォーマットを削除しますか？')) return;
-            let templates = getStoredTemplates();
-            templates = templates.filter(t => t.id !== id);
-            saveStoredTemplates(templates);
-            updateTemplates();
-        }
-
-        function getGeneratedTemplates() {
-            const name = document.getElementById('genItemName').value.trim() || '品名';
-            const price = document.getElementById('genPrice').value.trim() || '価格';
-            const qty = document.getElementById('genQuantity').value.trim() || '数量';
-
-            const rawTemplates = getStoredTemplates();
-
-            return rawTemplates.map(tpl => {
-                let replacedText = tpl.text
-                    .replace(/\{name\}/g, name)
-                    .replace(/\{price\}/g, price)
-                    .replace(/\{qty\}/g, qty);
-                return {
-                    id: tpl.id,
-                    label: tpl.label,
-                    text: replacedText
-                };
-            });
-        }
-
-        function switchTab(tabId, btnElement) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            <textarea id="text_${tabId}" placeholder="ここに ${defaultName} のHTMLコードを入力..."></textarea>
             
-            document.getElementById(tabId).classList.add('active');
-            if (btnElement) {
-                btnElement.classList.add('active');
-            }
-        }
+            <div class="toolbar">
+                <button class="save" onclick="saveHtmlData('${tabId}')">💾 HTML保存（テンポラリー）</button>
+                <button class="restore" onclick="restorePrevious('${tabId}')">↩️ 直前に戻す</button>
+                <button class="test" onclick="runTest('${tabId}')">▶️ 動作テスト（プレビュー）</button>
+                <button class="clear-btn" onclick="clearTabCode('${tabId}')">🗑️ すべて消去</button>
+                <a id="download_${tabId}" style="font-size:13px; color:#007bff; text-decoration:none; font-weight:bold; margin-left:auto;" download="${defaultName}">⬇️ ファイル出力</a>
+            </div>
 
-        function getClassification() {
-            return document.getElementById('classificationSelect').value;
-        }
+            <div class="history-area">
+                <span style="font-weight:bold; color:#555;">📁 過去に使ったファイル名・履歴:</span>
+                <select id="history_${tabId}" style="flex-grow:1;" onchange="loadHistory('${tabId}')">
+                    <option value="">-- 過去の履歴・ファイルを選ぶ --</option>
+                </select>
+            </div>
+        `;
+        tabContentsContainer.appendChild(content);
 
-        function getItemCategory() {
-            return document.getElementById('itemCategorySelect').value;
-        }
+        loadLatestData(tabId, defaultName);
+        updateHistorySelect(tabId);
+    }
 
-        const categoryLabels = {
-            'genryo': '💎 原料',
-            'hon': '📖 本',
-            'kusuri': '⚗️ 薬',
-            'ken': '🗡️ 剣',
-            'yoroi': '🛡️ 鎧',
-            'tate': '🛡️ 盾',
-            'tsue': '🪄 杖',
-            'accessory': '💍 アクセサリ',
-            'chizu': '🗺️ 地図',
-            'dougu': '🔨 道具',
-            'seibutsu': '🐉 生物',
-            'shokumotsu': '☕ 食物'
-        };
-
-        const classificationLabels = {
-            'work': '作業',
-            'transport': '輸送',
-            'order': '注文',
-            'purchase': '購入',
-            'other': 'その他'
-        };
-
-        function onClassificationChange() {
-            updateTemplates();
-            loadAllData();
-        }
-
-        function updateTemplates() {
-            const currentTemplates = getGeneratedTemplates();
-
-            // 1. 定型文タブのカード一覧を更新
-            const templateListArea = document.getElementById('templateListArea');
-            if (templateListArea) {
-                templateListArea.innerHTML = '';
-                currentTemplates.forEach(tpl => {
-                    const card = document.createElement('div');
-                    card.className = 'template-card';
-                    card.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                            <h4 style="margin: 0; font-size: 0.95rem; color: #2c3e50;">📝 ${escapeHtml(tpl.label)}</h4>
-                            <button onclick="deleteTemplate(${tpl.id})" style="background: #e74c3c; font-size: 0.75rem; padding: 2px 6px;">🗑️ 削除</button>
-                        </div>
-                        <div class="template-pre">${escapeHtml(tpl.text)}</div>
-                        <button onclick="copyToClipboard('${escapeJS(tpl.text)}')">📋 この定型文をコピー</button>
-                    `;
-                    templateListArea.appendChild(card);
-                });
-            }
-
-            // 2. 各メモ追加フォーム等のチップ描画を更新
-            ['text', 'price', 'event'].forEach(type => {
-                const container = document.getElementById(type + 'TemplateContainer');
-                if (!container) return;
-                container.innerHTML = '';
-
-                currentTemplates.forEach(tpl => {
-                    const chip = document.createElement('button');
-                    chip.type = 'button';
-                    chip.className = 'template-chip';
-                    chip.textContent = tpl.label;
-                    chip.title = tpl.text;
-                    chip.onclick = function() {
-                        const bodyInput = document.getElementById(type + 'BodyInput');
-                        if (bodyInput) {
-                            if (bodyInput.value) {
-                                bodyInput.value += "\n" + tpl.text;
-                            } else {
-                                bodyInput.value = tpl.text;
-                            }
-                        }
-                    };
-                    container.appendChild(chip);
-                });
-            });
-        }
-
-        // ジェネレーターの入力変更時にリアルタイムで定型文を更新
-        ['genItemName', 'genPrice', 'genQuantity'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.addEventListener('input', updateTemplates);
-            }
+    function switchTab(index) {
+        document.querySelectorAll('.tab-btn').forEach((b, idx) => {
+            b.classList.toggle('active', idx + 1 === index);
         });
+        document.querySelectorAll('.tab-content').forEach((c, idx) => {
+            c.classList.toggle('active', idx + 1 === index);
+        });
+    }
 
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert('定型文をコピーしました！');
-            }).catch(err => {
-                alert('コピーに失敗しました');
-            });
+    function loadLatestData(tabId, defaultName) {
+        const histories = JSON.parse(localStorage.getItem(`history_${tabId}`) || '[]');
+        if (histories.length > 0) {
+            document.getElementById(`filename_${tabId}`).value = histories[0].filename;
+            document.getElementById(`text_${tabId}`).value = histories[0].text;
+            updateDownloadLink(tabId, histories[0].filename, histories[0].text);
+            if (histories.length > 1) {
+                document.getElementById(`text_${tabId}`).setAttribute('data-previous', histories[1].text);
+            }
+        } else {
+            document.getElementById(`filename_${tabId}`).value = defaultName;
+            updateDownloadLink(tabId, defaultName, "");
+        }
+    }
+
+    function saveHtmlData(tabId) {
+        const filenameInput = document.getElementById(`filename_${tabId}`);
+        const textarea = document.getElementById(`text_${tabId}`);
+        const filename = filenameInput.value.trim() || 'unnamed.html';
+        const currentText = textarea.value;
+        const timestamp = new Date().toLocaleString();
+
+        let histories = JSON.parse(localStorage.getItem(`history_${tabId}`) || '[]');
+        if (histories.length > 0) {
+            textarea.setAttribute('data-previous', histories[0].text);
         }
 
-        function clearInput(type) {
-            if (confirm('入力中の内容をクリアしますか？')) {
-                const titleInput = document.getElementById(type + 'TitleInput');
-                const bodyInput = document.getElementById(type + 'BodyInput');
-                if (titleInput) titleInput.value = '';
-                if (bodyInput) bodyInput.value = '';
-            }
+        histories.unshift({ time: timestamp, filename: filename, text: currentText });
+        if (histories.length > 15) histories.pop();
+
+        localStorage.setItem(`history_${tabId}`, JSON.stringify(histories));
+        updateHistorySelect(tabId);
+        updateDownloadLink(tabId, filename, currentText);
+
+        alert(`「${filename}」をテンポラリーに保存しました！`);
+    }
+
+    function runTest(tabId) {
+        const textarea = document.getElementById(`text_${tabId}`);
+        const htmlContent = textarea.value;
+        
+        if (!htmlContent.trim()) {
+            alert('テストするHTMLコードが入力されていません。');
+            return;
         }
 
-        function setSearchKeyword(type, keyword) {
-            const searchInput = document.getElementById(type + 'SearchInput');
-            if (searchInput) {
-                searchInput.value = keyword;
-                renderRecords(type);
-            }
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+    }
+
+    function clearTabCode(tabId) {
+        if (confirm('このタブに入力されているコードと内容をすべて消去しますか？')) {
+            document.getElementById(`text_${tabId}`).value = '';
+            const filename = document.getElementById(`filename_${tabId}`).value;
+            updateDownloadLink(tabId, filename, '');
+            alert('コードを消去しました。');
         }
+    }
 
-        function loadAllData() {
-            renderRecords('text');
-            renderRecords('price');
-            renderRecords('event');
-            renderRecords('image');
+    function updateDownloadLink(tabId, filename, text) {
+        const blob = new Blob([text], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const link = document.getElementById(`download_${tabId}`);
+        link.href = url;
+        link.download = filename;
+    }
+
+    function updateHistorySelect(tabId) {
+        const select = document.getElementById(`history_${tabId}`);
+        const histories = JSON.parse(localStorage.getItem(`history_${tabId}`) || '[]');
+        
+        select.innerHTML = '<option value="">-- 過去の履歴・ファイルを選ぶ --</option>';
+        histories.forEach((item, index) => {
+            const opt = document.createElement('option');
+            opt.value = index;
+            opt.innerText = `[${item.filename}] (${item.time})`;
+            select.appendChild(opt);
+        });
+    }
+
+    function loadHistory(tabId) {
+        const select = document.getElementById(`history_${tabId}`);
+        const index = select.value;
+        if (index === "") return;
+
+        const histories = JSON.parse(localStorage.getItem(`history_${tabId}`) || '[]');
+        if (histories[index]) {
+            document.getElementById(`filename_${tabId}`).value = histories[index].filename;
+            document.getElementById(`text_${tabId}`).value = histories[index].text;
+            updateDownloadLink(tabId, histories[index].filename, histories[index].text);
         }
+    }
 
-        function addRecord(type) {
-            const catSelect = document.getElementById(type + 'NewCategory');
-            const classSelect = document.getElementById(type + 'NewClassification');
-            
-            const itemCat = catSelect ? catSelect.value : 'none';
-            const classification = classSelect ? classSelect.value : 'none';
-
-            const titleInput = document.getElementById(type + 'TitleInput');
-            const bodyInput = document.getElementById(type + 'BodyInput');
-
-            const title = titleInput ? titleInput.value.trim() : '';
-            const body = bodyInput ? bodyInput.value.trim() : '';
-
-            if (!title && !body) {
-                alert('タイトルか内容を入力してください。');
-                return;
-            }
-
-            if (type === 'event') {
-                const imgFileInput = document.getElementById('eventImageInput');
-                if (imgFileInput && imgFileInput.files && imgFileInput.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        saveRecordData(type, classification, itemCat, title, body, e.target.result);
-                        imgFileInput.value = '';
-                    };
-                    reader.readAsDataURL(imgFileInput.files[0]);
-                    return;
-                }
-            }
-            saveRecordData(type, classification, itemCat, title, body, null);
+    function restorePrevious(tabId) {
+        const textarea = document.getElementById(`text_${tabId}`);
+        const prevText = textarea.getAttribute('data-previous');
+        if (prevText !== null && prevText !== undefined) {
+            textarea.value = prevText;
+            const filename = document.getElementById(`filename_${tabId}`).value;
+            updateDownloadLink(tabId, filename, prevText);
+            alert('直前の状態に戻しました。');
+        } else {
+            alert('戻せる履歴がありません。');
         }
+    }
 
-        function saveRecordData(type, classification, itemCat, title, body, imageData) {
-            let records = JSON.parse(localStorage.getItem('hub_records_all') || '[]');
-            
-            records.unshift({
-                id: Date.now(),
-                type: type,
-                classification: classification,
-                itemCategory: itemCat,
-                title: title || '無題',
-                body: body,
-                image: imageData,
-                date: new Date().toLocaleString()
-            });
+    for (let i = 0; i < tabCount; i++) {
+        const tabId = `tab${i + 1}`;
+        document.getElementById(`filename_${tabId}`).addEventListener('input', function() {
+            updateDownloadLink(tabId, this.value, document.getElementById(`text_${tabId}`).value);
+        });
+        document.getElementById(`text_${tabId}`).addEventListener('input', function() {
+            updateDownloadLink(tabId, document.getElementById(`filename_${tabId}`).value, this.value);
+        });
+    }
+</script>
 
-            localStorage.setItem('hub_records_all', JSON.stringify(records));
-
-            const titleInput = document.getElementById(type + 'TitleInput');
-            const bodyInput = document.getElementById(type + 'BodyInput');
-            if (titleInput) titleInput.value = '';
-            if (bodyInput) bodyInput.value = '';
-
-            loadAllData();
-        }
-
-        function deleteRecord(id) {
-            if (!confirm('この項目を削除しますか？')) return;
-            let records = JSON.parse(localStorage.getItem('hub_records_all') || '[]');
-            records = records.filter(item => item.id !== id);
-            localStorage.setItem('hub_records_all', JSON.stringify(records));
-            loadAllData();
-        }
-
-        function updateRecordMeta(id, newCat, newClass) {
-            let records = JSON.parse(localStorage.getItem('hub_records_all') || '[]');
-            const target = records.find(item => item.id === id);
-            if (target) {
-                target.itemCategory = newCat;
-                target.classification = newClass;
-                localStorage.setItem('hub_records_all', JSON.stringify(records));
-                loadAllData();
-            }
-        }
-
-        function moveRecord(id, direction) {
-            let records = JSON.parse(localStorage.getItem('hub_records_all') || '[]');
-            const index = records.findIndex(item => item.id === id);
-            
-            if (index === -1) return;
-            const targetIndex = index + direction;
-            if (targetIndex < 0 || targetIndex >= records.length) return;
-
-            const temp = records[index];
-            records[index] = records[targetIndex];
-            records[targetIndex] = temp;
-
-            localStorage.setItem('hub_records_all', JSON.stringify(records));
-            loadAllData();
-        }
-
-        function renderRecords(type) {
-            const selectedClass = getClassification();
-            const selectedItemCat = getItemCategory();
-            const container = document.getElementById(type + 'ListContainer');
-            if (!container) return;
-            
-            container.innerHTML = '';
-
-            let records = JSON.parse(localStorage.getItem('hub_records_all') || '[]');
-            
-            records = records.filter(item => item.type === type);
-
-            if (selectedClass !== 'all') {
-                records = records.filter(item => item.classification === selectedClass);
-            }
-
-            if (selectedItemCat !== 'all') {
-                records = records.filter(item => item.itemCategory === selectedItemCat);
-            }
-
-            const searchInput = document.getElementById(type + 'SearchInput');
-            const keyword = searchInput ? searchInput.value.toLowerCase() : '';
-            
-            if (keyword) {
-                records = records.filter(item => 
-                    item.title.toLowerCase().includes(keyword) || 
-                    (item.body && item.body.toLowerCase().includes(keyword))
-                );
-            }
-
-            const sortSelect = document.getElementById(type + 'SortSelect');
-            if (sortSelect && type !== 'image') {
-                const sortVal = sortSelect.value;
-                if (sortVal === 'new') {
-                    records.sort((a, b) => b.id - a.id);
-                } else if (sortVal === 'old') {
-                    records.sort((a, b) => a.id - b.id);
-                }
-            }
-
-            if (records.length === 0) {
-                container.innerHTML = '<p style="font-size: 0.85rem; color: #888; text-align: center;">条件に一致する記録はありません。</p>';
-                return;
-            }
-
-            if (type === 'image') {
-                const gridDiv = document.createElement('div');
-                gridDiv.className = 'image-grid';
-
-                records.forEach((item) => {
-                    const card = document.createElement('div');
-                    card.className = 'record-item';
-                    card.style.margin = '0';
-                    
-                    const catBadge = item.itemCategory && item.itemCategory !== 'none' && categoryLabels[item.itemCategory] ? `<span class="badge">${categoryLabels[item.itemCategory]}</span>` : '';
-                    const classBadge = item.classification && item.classification !== 'none' && classificationLabels[item.classification] ? `<span class="badge" style="background:#e0f2fe; color:#0369a1;">${classificationLabels[item.classification]}</span>` : '';
-
-                    card.innerHTML = `
-                        <div style="margin-bottom: 4px; display: flex; gap: 4px; flex-wrap: wrap;">${catBadge}${classBadge}</div>
-                        <div class="record-title" style="font-size: 0.85rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(item.title)}">🏷️ ${escapeHtml(item.title)}</div>
-                        <img src="${item.data}" class="preview-img" alt="スクショ">
-                        <div style="display: flex; justify-content: space-between; margin-top: 6px; align-items: center;">
-                            <a href="${item.data}" download="${item.title}.png" style="font-size: 0.75rem;">📥DL</a>
-                            <button onclick="deleteRecord(${item.id})" style="background: #e74c3c; font-size: 0.7rem; padding: 2px 5px;">🗑️</button>
-                        </div>
-                    `;
-                    gridDiv.appendChild(card);
-                });
-                container.appendChild(gridDiv);
-            } else {
-                records.forEach((item, index) => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'record-item';
-                    
-                    const catBadge = item.itemCategory && item.itemCategory !== 'none' && categoryLabels[item.itemCategory] ? `<span class="badge">${categoryLabels[item.itemCategory]}</span>` : '<span class="badge" style="background:#f1f5f9; color:#94a3b8;">カテゴリなし</span>';
-                    const classBadge = item.classification && item.classification !== 'none' && classificationLabels[item.classification] ? `<span class="badge" style="background:#e0f2fe; color:#0369a1;">${classificationLabels[item.classification]}</span>` : '<span class="badge" style="background:#f1f5f9; color:#94a3b8;">分類なし</span>';
-
-                    let imageHtml = '';
-                    if (item.image) {
-                        imageHtml = `
-                            <div style="margin-bottom: 8px;">
-                                <img src="${item.image}" class="preview-img" style="max-height: 160px; object-fit: contain; width: auto;" alt="添付スクショ">
-                                <div style="font-size: 0.75rem; text-align: right;"><a href="${item.image}" download="event_image.png">📥 画像を取り出し(DL)</a></div>
-                            </div>
-                        `;
-                    }
-
-                    const metaEditHtml = `
-                        <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 6px; font-size: 0.8rem; background: #f8fafc; padding: 4px; border-radius: 4px;">
-                            <span>変更:</span>
-                            <select onchange="updateRecordMeta(${item.id}, this.value, '${item.classification}')" style="padding: 2px; font-size: 0.75rem;">
-                                <option value="none">💎 カテゴリ選択</option>
-                                <option value="genryo" ${item.itemCategory==='genryo'?'selected':''}>💎 原料</option>
-                                <option value="hon" ${item.itemCategory==='hon'?'selected':''}>📖 本</option>
-                                <option value="kusuri" ${item.itemCategory==='kusuri'?'selected':''}>⚗️ 薬</option>
-                                <option value="ken" ${item.itemCategory==='ken'?'selected':''}>🗡️ 剣</option>
-                                <option value="yoroi" ${item.itemCategory==='yoroi'?'selected':''}>🛡️ 鎧</option>
-                                <option value="tate" ${item.itemCategory==='tate'?'selected':''}>🛡️ 盾</option>
-                                <option value="tsue" ${item.itemCategory==='tsue'?'selected':''}>🪄 杖</option>
-                                <option value="accessory" ${item.itemCategory==='accessory'?'selected':''}>💍 アクセサリ</option>
-                                <option value="chizu" ${item.itemCategory==='chizu'?'selected':''}>🗺️ 地図</option>
-                                <option value="dougu" ${item.itemCategory==='dougu'?'selected':''}>🔨 道具</option>
-                                <option value="seibutsu" ${item.itemCategory==='seibutsu'?'selected':''}>🐉 生物</option>
-                                <option value="shokumotsu" ${item.itemCategory==='shokumotsu'?'selected':''}>☕ 食物</option>
-                            </select>
-                            <select onchange="updateRecordMeta(${item.id}, '${item.itemCategory}', this.value)" style="padding: 2px; font-size: 0.75rem;">
-                                <option value="none">📂 分類選択</option>
-                                <option value="work" ${item.classification==='work'?'selected':''}>作業</option>
-                                <option value="transport" ${item.classification==='transport'?'selected':''}>輸送</option>
-                                <option value="order" ${item.classification==='order'?'selected':''}>注文</option>
-                                <option value="purchase" ${item.classification==='purchase'?'selected':''}>購入</option>
-                                <option value="other" ${item.classification==='other'?'selected':''}>その他</option>
-                            </select>
-                        </div>
-                    `;
-
-                    itemDiv.innerHTML = `
-                        <div class="record-header">
-                            <div style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
-                                ${catBadge}${classBadge}
-                                <span class="record-title">📌 ${escapeHtml(item.title)}</span>
-                            </div>
-                            <div>
-                                <button class="order-btn" onclick="moveRecord(${item.id}, -1)" ${index === 0 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>▲</button>
-                                <button class="order-btn" onclick="moveRecord(${item.id}, 1)" ${index === records.length - 1 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>▼</button>
-                                <button onclick="deleteRecord(${item.id})" style="background: #e74c3c; font-size: 0.75rem; padding: 3px 8px; margin-left: 4px;">🗑️ 削除</button>
-                            </div>
-                        </div>
-                        ${metaEditHtml}
-                        ${imageHtml}
-                        <div class="record-body">${escapeHtml(item.body)}</div>
-                        <div style="font-size: 0.75rem; color: #888; text-align: right; margin-top: 4px;">保存日時: ${item.date || ''}</div>
-                    `;
-                    container.appendChild(itemDiv);
-                });
-            }
-        }
-
-        function addImageData() {
-            const catSelect = document.getElementById('imageNewCategory');
-            const classSelect = document.getElementById('imageNewClassification');
-            const itemCat = catSelect ? catSelect.value : 'none';
-            const classification = classSelect ? classSelect.value : 'none';
-
-            const titleInput = document.getElementById('imageTitleInput');
-            const fileInput = document.getElementById('imageInput');
-            
-            if (!fileInput.files || !fileInput.files[0]) {
-                alert('画像ファイルを選択してください。');
-                return;
-            }
-
-            const title = titleInput.value.trim() || '無題のスクショ';
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                const base64Data = e.target.result;
-                let records = JSON.parse(localStorage.getItem('hub_records_all') || '[]');
-                
-                records.unshift({
-                    id: Date.now(),
-                    type: 'image',
-                    classification: classification,
-                    itemCategory: itemCat,
-                    title: title,
-                    data: base64Data,
-                    date: new Date().toLocaleString()
-                });
-
-                localStorage.setItem('hub_records_all', JSON.stringify(records));
-
-                titleInput.value = '';
-                fileInput.value = '';
-                loadAllData();
-            }
-            reader.readAsDataURL(fileInput.files[0]);
-        }
-
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&'`<>]/g, function(match) {
-                return { '&': '&amp;', "'": '&#x27;', '`': '&#x60;', '<': '&lt;', '>': '&gt;' }[match];
-            });
-        }
-
-        function escapeJS(str) {
-            if (!str) return '';
-            return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
-        }
-
-        window.onload = function() {
-            updateItemMasterUI();
-            updateTemplates();
-            loadAllData();
-        };
-    </script>
 </body>
 </html>
