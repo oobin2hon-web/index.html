@@ -501,17 +501,27 @@
             { id: 4, label: "【要望】機能改善の提案", text: "【要望・フィードバック】\n要望内容：\n現状の課題：\n期待する動作：\n参考スレッド: https://so2-bbs.mutoys.com/t/topic/8580" }
         ];
 
-        // デフォルトの品名マスター
+        // デフォルトの品名マスター（文字列配列 または オブジェクト配列の両方に対応できるようにする）
         const defaultItems = ["コッペパン", "鉄鉱石", "木材", "薬草"];
 
         function getStoredItems() {
             const user = getCurrentUser();
-            const stored = localStorage.getItem('hub_item_master_' + user);
+            
+            // 統合Hub（Hub側）のデータキーもフォールバックとして共有参照できるようにする
+            let stored = localStorage.getItem('hub_item_master_' + user);
+            if (!stored) {
+                stored = localStorage.getItem('hub_item_master_default_user');
+            }
             if (!stored) {
                 return defaultItems;
             }
             try {
-                return JSON.parse(stored);
+                let parsed = JSON.parse(stored);
+                // 文字列やオブジェクトが混ざっていても安全に「品名文字列の配列」に正規化する
+                return parsed.map(item => {
+                    if (typeof item === 'string') return item;
+                    return item.name || '';
+                }).filter(name => name.length > 0);
             } catch(e) {
                 return defaultItems;
             }
@@ -519,6 +529,7 @@
 
         function saveStoredItems(items) {
             const user = getCurrentUser();
+            // 保存時はシンプルに文字列の配列として保存、あるいはオブジェクト形式に合わせる
             localStorage.setItem('hub_item_master_' + user, JSON.stringify(items));
         }
 
