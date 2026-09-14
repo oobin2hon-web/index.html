@@ -20,7 +20,7 @@
         .link-card.memo { background: #e8f8f5; border-color: #27ae60; color: #27ae60; }
         .link-card.memo:hover { background: #d4efdf; }
 
-        /* 左右レイアウト（エディターが左、右側に縦並びタブ） */
+        /* 左右レイアウト */
         .main-layout { display: flex; gap: 20px; align-items: flex-start; margin-top: 15px; }
         .tab-content-area { flex-grow: 1; width: 0; }
         .tab-buttons { display: flex; flex-direction: column; gap: 5px; min-width: 210px; }
@@ -53,6 +53,11 @@
         /* Wiki ＆ OCRタブ専用スタイル */
         .wiki-ocr-box { background: #fdf8f4; border: 1px solid #e67e22; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
         .frame-box { width: 100%; height: 450px; border: 1px solid #ccc; border-radius: 4px; background: #fff; display: block; margin-top: 8px; }
+        
+        /* 削除ボタンを左側に配置したリストのスタイル */
+        .master-item-row { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-bottom: 1px solid #eee; }
+        .master-item-row:hover { background: #f1f1f1; }
+        .delete-item-btn { background: #e74c3c; color: white; border: none; padding: 2px 6px; font-size: 11px; border-radius: 3px; cursor: pointer; flex-shrink: 0; }
     </style>
 </head>
 <body>
@@ -101,6 +106,8 @@
         "🌐 Wiki＆OCR品名登録"
     ];
 
+    const wikiCategories = ["原料", "本", "薬", "剣", "鎧", "盾", "杖", "アクセサリ", "地図", "道具", "生物", "食物"];
+
     const tabCount = defaultFileNames.length;
     const tabButtonsContainer = document.getElementById('tabButtons');
     const tabContentsContainer = document.getElementById('tabContents');
@@ -127,33 +134,54 @@
         content.id = tabId;
 
         if (isSpecialWikiTab) {
+            let categoryOptionsHtml = wikiCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+            let filterOptionsHtml = `<option value="all">すべて表示</option>` + wikiCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+
             content.innerHTML = `
                 <div class="wiki-ocr-box">
-                    <h3 style="margin-top:0; font-size:15px; color:#d35400;">🤖 スクショ画像から品名を自動OCR抽出</h3>
-                    <p style="font-size:12px; color:#555; margin-bottom:8px;">テキストファイルを挟まず、画像を選ぶだけでブラウザ内に品名を直接一括登録できます。</p>
+                    <h3 style="margin-top:0; font-size:15px; color:#d35400;">🤖 カテゴリ別スクショOCR自動抽出</h3>
+                    <p style="font-size:12px; color:#555; margin-bottom:8px;">Wikiの分類に合わせてカテゴリを選択し、画像を選ぶとブラウザ内に品名を分類保存できます。</p>
+                    
+                    <div style="margin-bottom:8px;">
+                        <label style="font-size:12px; font-weight:bold;">保存先カテゴリ:</label>
+                        <select id="ocrCategorySelect" style="padding:4px; font-size:12px; margin-left:5px;">
+                            ${categoryOptionsHtml}
+                        </select>
+                    </div>
+
                     <input type="file" id="ocrImageInput" accept="image/*" style="font-size:12px; margin-bottom:8px;"><br>
-                    <button type="button" onclick="runOcrExtraction()" style="background:#e67e22; color:#fff; border:none; padding:6px 12px; font-size:13px; font-weight:bold; cursor:pointer; border-radius:4px;">🔍 画像から文字を解析してマスターへ追加</button>
+                    <button type="button" onclick="runOcrExtraction()" style="background:#e67e22; color:#fff; border:none; padding:6px 12px; font-size:13px; font-weight:bold; cursor:pointer; border-radius:4px;">🔍 画像から文字を解析して追加</button>
                     <span id="ocrStatus" style="font-size:12px; color:#333; margin-left:8px; font-weight:bold;"></span>
                 </div>
 
-                <!-- 新規追加：HTMLへの組み込みテスト（プルダウン動作確認用） -->
+                <!-- HTML組み込みテスト用 -->
                 <div style="background:#e8f4fd; border:1px solid #b8daff; padding:15px; border-radius:6px; margin-bottom:15px;">
-                    <h3 style="margin-top:0; font-size:15px; color:#004085;">🧪 HTMLへの組み込みテスト（プルダウン動作確認）</h3>
-                    <p style="font-size:12px; color:#333; margin-bottom:8px;">他のHTMLファイルに以下のコードを貼り付けると、保存されたマスターがこのようにセレクトボックスに反映されます。</p>
+                    <h3 style="margin-top:0; font-size:15px; color:#004085;">🧪 組み込みテスト（プルダウン動作確認）</h3>
                     <div style="display: flex; gap: 10px; align-items: center;">
                         <select id="testItemSelect" style="padding:6px; font-size:13px; flex-grow:1; max-width:350px; background:#fff;">
                             <option value="">-- 保存された品名から選択（テスト） --</option>
                         </select>
-                        <button type="button" onclick="loadTestSelect()" style="font-size:12px; padding:6px 10px; background:#007bff; color:#fff; border:none; border-radius:4px; font-weight:bold;">🔄 プルダウン更新</button>
+                        <button type="button" onclick="loadTestSelect()" style="font-size:12px; padding:6px 10px; background:#007bff; color:#fff; border:none; border-radius:4px; font-weight:bold;">🔄 更新</button>
                     </div>
                 </div>
 
+                <!-- 保存データ確認・個別削除ビューア -->
                 <div style="background:#fff; border:1px solid #ccc; padding:15px; border-radius:6px; margin-bottom:15px;">
-                    <h3 style="margin-top:0; font-size:15px; color:#2c3e50;">📋 現在ブラウザに保存されている品名一覧（確認用ビューア）</h3>
-                    <div id="masterItemList" style="max-height: 150px; overflow-y: auto; background: #f9f9f9; border: 1px solid #ddd; padding: 10px; font-size: 13px; font-family: monospace; line-height: 1.5;"></div>
-                    <div style="margin-top: 8px; display: flex; gap: 10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <h3 style="margin:0; font-size:15px; color:#2c3e50;">📋 登録された品名一覧（左側のボタンで個別削除できます）</h3>
+                        <div>
+                            <label style="font-size:12px;">表示フィルタ:</label>
+                            <select id="filterCategory" onchange="loadAndDisplayMasterItems()" style="font-size:12px; padding:3px;">
+                                ${filterOptionsHtml}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="masterItemList" style="max-height: 200px; overflow-y: auto; background: #f9f9f9; border: 1px solid #ddd; padding: 6px; font-size: 13px;"></div>
+                    
+                    <div style="margin-top: 10px; display: flex; gap: 10px;">
                         <button type="button" onclick="loadAndDisplayMasterItems(); loadTestSelect();" style="font-size:12px; padding:5px 10px; background:#6c757d; color:#fff; border:none; border-radius:4px; font-weight:bold;">🔄 リストを更新</button>
-                        <button type="button" onclick="clearMasterItems()" style="font-size:12px; padding:5px 10px; background:#e74c3c; color:#fff; border:none; border-radius:4px; font-weight:bold;">🗑️ マスターをすべてリセット</button>
+                        <button type="button" onclick="clearMasterItems()" style="font-size:12px; padding:5px 10px; background:#e74c3c; color:#fff; border:none; border-radius:4px; font-weight:bold;">🗑️ 全データをリセット</button>
                     </div>
                 </div>
 
@@ -320,16 +348,18 @@
         }
     }
 
-    // OCR品名抽出
+    // カテゴリ付きOCR抽出
     async function runOcrExtraction() {
         const fileInput = document.getElementById('ocrImageInput');
         const statusLabel = document.getElementById('ocrStatus');
+        const categorySelect = document.getElementById('ocrCategorySelect');
         
         if (!fileInput.files || !fileInput.files[0]) {
             alert('解析する画像ファイルを選択してください。');
             return;
         }
 
+        const selectedCategory = categorySelect.value;
         statusLabel.textContent = '🔄 画像を解析中 (OCR処理中)...';
         
         try {
@@ -349,18 +379,27 @@
             const lines = text.split(/[\r\n]+/);
             
             let extractedCount = 0;
-            let items = JSON.parse(localStorage.getItem('hub_item_master_default_user') || '[]');
+            let rawData = JSON.parse(localStorage.getItem('hub_item_master_default_user') || '[]');
+            let items = rawData.map(item => {
+                if (typeof item === 'string') {
+                    return { name: item, category: '原料' };
+                }
+                return item;
+            });
             
             lines.forEach(line => {
                 const trimmed = line.trim();
-                if (trimmed && trimmed.length >= 2 && trimmed.length <= 15 && !items.includes(trimmed)) {
-                    items.push(trimmed);
-                    extractedCount++;
+                if (trimmed && trimmed.length >= 2 && trimmed.length <= 15) {
+                    const exists = items.some(i => i.name === trimmed);
+                    if (!exists) {
+                        items.push({ name: trimmed, category: selectedCategory });
+                        extractedCount++;
+                    }
                 }
             });
 
             localStorage.setItem('hub_item_master_default_user', JSON.stringify(items));
-            statusLabel.textContent = `✅ 完了！ ${extractedCount}件の品名を追加しました！`;
+            statusLabel.textContent = `✅ 完了！ [${selectedCategory}] に ${extractedCount}件追加しました！`;
             fileInput.value = '';
             
             loadAndDisplayMasterItems();
@@ -371,45 +410,84 @@
         }
     }
 
-    // 画面にリスト表示
+    // リスト表示（削除ボタンを左側に配置）
     function loadAndDisplayMasterItems() {
         const listContainer = document.getElementById('masterItemList');
+        const filterCategory = document.getElementById('filterCategory');
         if (!listContainer) return;
 
-        const items = JSON.parse(localStorage.getItem('hub_item_master_default_user') || '[]');
+        let rawData = JSON.parse(localStorage.getItem('hub_item_master_default_user') || '[]');
+        let items = rawData.map(item => {
+            if (typeof item === 'string') {
+                return { name: item, category: '原料' };
+            }
+            return item;
+        });
+
+        const currentFilter = filterCategory ? filterCategory.value : 'all';
+        if (currentFilter !== 'all') {
+            items = items.filter(i => i.category === currentFilter);
+        }
+
         if (items.length === 0) {
-            listContainer.innerHTML = '<span style="color:#888;">（まだ品名データが保存されていません。上のOCR機能から画像を選択して読み込んでください）</span>';
+            listContainer.innerHTML = '<span style="color:#888; padding:5px; display:block;">（保存されている品名データはありません）</span>';
             return;
         }
 
-        listContainer.innerHTML = items.map((item, index) => `[${index + 1}] ${item}`).join('<br>');
+        let html = '';
+        items.forEach((item, index) => {
+            const fullRaw = JSON.parse(localStorage.getItem('hub_item_master_default_user') || '[]');
+            const realIndex = fullRaw.findIndex(i => (typeof i === 'string' ? i : i.name) === item.name);
+
+            html += `
+                <div class="master-item-row">
+                    <button type="button" class="delete-item-btn" onclick="deleteOneItem(${realIndex})">❌ 削除</button>
+                    <span><b>[${item.category || '原料'}]</b> ${item.name}</span>
+                </div>
+            `;
+        });
+        listContainer.innerHTML = html;
     }
 
-    // テスト用プルダウンにデータを流し込む（これが他のHTMLファイルでやる実装そのものです）
+    // 1件だけ削除する関数
+    function deleteOneItem(index) {
+        let rawData = JSON.parse(localStorage.getItem('hub_item_master_default_user') || '[]');
+        if (index > -1 && index < rawData.length) {
+            const targetName = typeof rawData[index] === 'string' ? rawData[index] : rawData[index].name;
+            if (confirm(`「${targetName}」をマスターから削除しますか？`)) {
+                rawData.splice(index, 1);
+                localStorage.setItem('hub_item_master_default_user', JSON.stringify(rawData));
+                loadAndDisplayMasterItems();
+                loadTestSelect();
+            }
+        }
+    }
+
+    // テスト用プルダウンに反映
     function loadTestSelect() {
         const selectEl = document.getElementById('testItemSelect');
         if (!selectEl) return;
 
-        const items = JSON.parse(localStorage.getItem('hub_item_master_default_user') || '[]');
-        
-        // 既存の選択肢をリセットして初期状態に戻す
+        let rawData = JSON.parse(localStorage.getItem('hub_item_master_default_user') || '[]');
         selectEl.innerHTML = '<option value="">-- 保存された品名から選択（テスト） --</option>';
 
-        items.forEach(itemName => {
+        rawData.forEach(item => {
+            const name = typeof item === 'string' ? item : item.name;
+            const cat = typeof item === 'string' ? '原料' : item.category;
             const opt = document.createElement('option');
-            opt.value = itemName;
-            opt.textContent = itemName;
+            opt.value = name;
+            opt.textContent = `[${cat}] ${name}`;
             selectEl.appendChild(opt);
         });
     }
 
     // マスター全リセット
     function clearMasterItems() {
-        if (confirm('保存されている品名マスターをすべて消去しますか？')) {
+        if (confirm('保存されているすべての品名マスターを消去しますか？')) {
             localStorage.removeItem('hub_item_master_default_user');
             loadAndDisplayMasterItems();
             loadTestSelect();
-            alert('マスターを消去しました。');
+            alert('マスターをすべて消去しました。');
         }
     }
 
