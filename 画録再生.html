@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マイ・歌声プレイヤー</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        #player-container {
+            max-width: 100%;
+            margin: 20px auto;
+        }
+        video {
+            width: 100%;
+            max-height: 60vh;
+            background: black;
+            border-radius: 8px;
+        }
+        .btn {
+            background: #007aff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>マイ・歌声プレイヤー</h2>
+    
+    <!-- 1. 動画ファイルを選ぶボタン -->
+    <p>動画（画面録画）ファイルを選択してください（複数選択可）</p>
+    <input type="file" id="fileInput" accept="video/*" multiple class="btn"><br><br>
+
+    <!-- 2. スマホの制限を突破するための「再生開始」ボタン -->
+    <button id="startBtn" class="btn" style="background: #34c759; display: none;">再生をスタートする</button>
+
+    <!-- 3. 動画を表示するエリア -->
+    <div id="player-container">
+        <video id="myVideo" controls playsinline></video>
+    </div>
+    
+    <p id="status">ファイルが選択されていません</p>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const video = document.getElementById('myVideo');
+        const startBtn = document.getElementById('startBtn');
+        const status = document.getElementById('status');
+
+        let playlist = [];
+        let currentIndex = 0;
+
+        // ファイルが選ばれたときの処理
+        fileInput.addEventListener('change', function(e) {
+            playlist = Array.from(e.target.files);
+            if (playlist.length > 0) {
+                currentIndex = 0;
+                status.textContent = `${playlist.length}個のファイルが読み込まれました`;
+                // スマホで再生を許可させるためのボタンを表示する
+                startBtn.style.display = 'inline-block';
+            }
+        });
+
+        // 「再生をスタートする」ボタンが押されたとき（ここでスマホの制限をクリア！）
+        startBtn.addEventListener('click', function() {
+            if (playlist.length > 0) {
+                startBtn.style.display = 'none'; // ボタンを隠す
+                playVideo(currentIndex);
+            }
+        });
+
+        // 指定した番号の動画を再生する関数
+        function playVideo(index) {
+            if (index >= playlist.length) {
+                // プレイリストが一周したら最初に戻す（ループ再生）
+                currentIndex = 0;
+            }
+            
+            const file = playlist[currentIndex];
+            const fileURL = URL.createObjectURL(file);
+            
+            video.src = fileURL;
+            video.play().then(() => {
+                status.textContent = `再生中: ${file.name}`;
+            }).catch(err => {
+                console.log("再生エラー:", err);
+                status.textContent = "再生に失敗しました。ボタンを押してください。";
+                startBtn.style.display = 'inline-block';
+            });
+        }
+
+        // 1つの動画が終わったら自動的に次の動画へ進む
+        video.addEventListener('ended', function() {
+            currentIndex++;
+            playVideo(currentIndex);
+        });
+    </script>
+
+</body>
+</html>
