@@ -180,8 +180,9 @@
                     
                     <div id="masterItemList" style="max-height: 200px; overflow-y: auto; background: #f9f9f9; border: 1px solid #ddd; padding: 6px; font-size: 13px;"></div>
                     
-                    <div style="margin-top: 10px; display: flex; gap: 10px;">
+                    <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
                         <button type="button" onclick="loadAndDisplayMasterItems(); loadTestSelect();" style="font-size:12px; padding:5px 10px; background:#6c757d; color:#fff; border:none; border-radius:4px; font-weight:bold;">🔄 リストを更新</button>
+                        <button type="button" onclick="exportMasterJson()" style="font-size:12px; padding:5px 10px; background:#27ae60; color:#fff; border:none; border-radius:4px; font-weight:bold;">📦 JSON形式でダウンロード</button>
                         <button type="button" onclick="clearMasterItems()" style="font-size:12px; padding:5px 10px; background:#e74c3c; color:#fff; border:none; border-radius:4px; font-weight:bold;">🗑️ 全データをリセット</button>
                     </div>
                 </div>
@@ -374,7 +375,6 @@
         });
 
         try {
-            // 選択されたすべての画像を順番に処理
             for (let i = 0; i < totalFiles; i++) {
                 const file = fileInput.files[i];
                 statusLabel.textContent = `🔄 (${i + 1}/${totalFiles}枚目) 解析中...`;
@@ -486,6 +486,28 @@
             opt.textContent = `[${cat}]${name}`;
             selectEl.appendChild(opt);
         });
+    }
+
+    // 保存された品名マスターをJSONファイルとしてダウンロードする関数
+    function exportMasterJson() {
+        let rawData = JSON.parse(localStorage.getItem('hub_item_master_default_user') || '[]');
+        if (rawData.length === 0) {
+            alert('ダウンロードするデータがありません。');
+            return;
+        }
+
+        const jsonString = JSON.stringify(rawData, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'item_master.json';
+        document.body.appendChild(a);
+        a.click();
+        
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
     // マスター全リセット
