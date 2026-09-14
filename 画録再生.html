@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>マイ・歌声プレイヤー</title>
+    <title>マイ・歌声プレイヤー（安定・継ぎ足し対応）</title>
     <style>
         body {
             font-family: sans-serif;
@@ -31,75 +31,204 @@
             cursor: pointer;
             margin: 10px;
         }
+        .danger-btn {
+            background: #ff3b30;
+        }
     </style>
 </head>
 <body>
 
-    <h2>マイ・歌声プレイヤー</h2>
+    <h2>マイ・歌声プレイヤー（安定版）</h2>
     
-    <!-- 1. 動画ファイルを選ぶボタン -->
-    <p>動画（画面録画）ファイルを選択してください（複数選択可）</p>
+    <!-- 1. 動画ファイルを選ぶボタン（追加選択可） -->
+    <p>追加する動画ファイルを選択してください（複数選択可）</p>
     <input type="file" id="fileInput" accept="video/*" multiple class="btn"><br><br>
 
-    <!-- 2. スマホの制限を突破するための「再生開始」ボタン -->
+    <!-- 2. 再生・管理ボタン -->
     <button id="startBtn" class="btn" style="background: #34c759; display: none;">再生をスタートする</button>
+    <button id="clearBtn" class="btn danger-btn" style="display: none;">保存データを削除する</button>
 
     <!-- 3. 動画を表示するエリア -->
     <div id="player-container">
         <video id="myVideo" controls playsinline></video>
     </div>
     
-    <p id="status">ファイルが選択されていません</p>
+    <p id="status">保存データを読み込んでいます...</p>
 
     <script>
+        const DB_NAME = 'VideoPlayerDB_Stable';
+        const STORE_NAME = 'videos';
+        const DB_VERSION = 1;
+
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { autoIncrement: true });
+                    }
+                };
+            });
+        }
+
+        // データベースへ安全にファイルを追加する
+        async function appendVideosToDB(files) {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                
+                Array.from(files).forEach(file => {
+                    store.add(file);
+                });
+
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject(transaction.error);
+            });
+        }
+
+        async function loadVideosFromDB() {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.getAll();
+
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function clearDB() {
+            const db = await openDB();
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.clear();
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject(transaction.error);
+            });
+        }
+
         const fileInput = document.getElementById('fileInput');
         const video = document.getElementById('myVideo');
         const startBtn = document.getElementById('startBtn');
+        const clearBtn = document.getElementById('clearBtn');
         const status = document.getElementById('status');
 
         let playlist = [];
         let currentIndex = 0;
+        let currentObjectURL = null; // メモリリーク防止用のURL保持変数
 
-        // ファイルが選ばれたときの処理
-        fileInput.addEventListener('change', function(e) {
-            playlist = Array.from(e.target.files);
-            if (playlist.length > 0) {
-                currentIndex = 0;
-                status.textContent = `${playlist.length}個のファイルが読み込まれました`;
-                // スマホで再生を許可させるためのボタンを表示する
-                startBtn.style.display = 'inline-block';
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const savedFiles = await loadVideosFromDB();
+                if (savedFiles && savedFiles.length > 0) {
+                    playlist = savedFiles;
+                    status.textContent = `保存されていた ${playlist.length}個のファイルが読み込まれました`;
+                    startBtn.style.display = 'inline-block';
+                    clearBtn.style.display = 'inline-block';
+                } else {
+                    status.textContent = 'ファイルが選択されていません';
+                }
+            } catch (err) {
+                console.error("DB読み込みエラー:", err);
+                status.textContent = 'データの読み込みに失敗しました';
             }
         });
 
-        // 「再生をスタートする」ボタンが押されたとき（ここでスマホの制限をクリア！）
+        fileInput.addEventListener('change', async function(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                status.textContent = 'ファイルを追加保存中...';
+                try {
+                    await appendVideosToDB(files);
+                    playlist = await loadVideosFromDB();
+                    currentIndex = 0;
+                    status.textContent = `追加保存完了！ 合計 ${playlist.length}個のファイル`;
+                    startBtn.style.display = 'inline-block';
+                    clearBtn.style.display = 'inline-block';
+                    fileInput.value = '';
+                } catch (err) {
+                    console.error("DB保存エラー:", err);
+                    status.textContent = '容量制限などでファイルの追加に失敗しました。';
+                }
+            }
+        });
+
         startBtn.addEventListener('click', function() {
             if (playlist.length > 0) {
-                startBtn.style.display = 'none'; // ボタンを隠す
+                startBtn.style.display = 'none';
+                video.muted = false;
                 playVideo(currentIndex);
             }
         });
 
-        // 指定した番号の動画を再生する関数
+        clearBtn.addEventListener('click', async function() {
+            if (confirm('保存されているすべての動画データを削除しますか？')) {
+                await clearDB();
+                playlist = [];
+                if (currentObjectURL) URL.revokeObjectURL(currentObjectURL);
+                video.src = '';
+                startBtn.style.display = 'none';
+                clearBtn.style.display = 'none';
+                status.textContent = '保存データを削除しました';
+            }
+        });
+
         function playVideo(index) {
             if (index >= playlist.length) {
-                // プレイリストが一周したら最初に戻す（ループ再生）
                 currentIndex = 0;
             }
             
             const file = playlist[currentIndex];
-            const fileURL = URL.createObjectURL(file);
+            if (!file) {
+                status.textContent = "動画データが見つかりません。";
+                return;
+            }
+
+            // 古いオブジェクトURLが残っている場合は破棄してメモリを解放
+            if (currentObjectURL) {
+                URL.revokeObjectURL(currentObjectURL);
+            }
+
+            currentObjectURL = URL.createObjectURL(file);
             
-            video.src = fileURL;
+            video.src = currentObjectURL;
+            video.load(); // 読み込みをリセットしてエラーを防止
+            
             video.play().then(() => {
-                status.textContent = `再生中: ${file.name}`;
+                status.textContent = `再生中 (${currentIndex + 1}/${playlist.length}): ${file.name || '動画'}`;
+                
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: file.name || `動画 ${index + 1}`,
+                        artist: 'マイ・歌声プレイヤー',
+                        album: '画面録画リスト'
+                    });
+
+                    navigator.mediaSession.setActionHandler('play', () => { video.play(); });
+                    navigator.mediaSession.setActionHandler('pause', () => { video.pause(); });
+                    navigator.mediaSession.setActionHandler('previoustrack', () => {
+                        currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+                        playVideo(currentIndex);
+                    });
+                    navigator.mediaSession.setActionHandler('nexttrack', () => {
+                        currentIndex++;
+                        playVideo(currentIndex);
+                    });
+                }
+
             }).catch(err => {
                 console.log("再生エラー:", err);
-                status.textContent = "再生に失敗しました。ボタンを押してください。";
+                status.textContent = "再生エラーが発生しました。もう一度スタートボタンを押してください。";
                 startBtn.style.display = 'inline-block';
             });
         }
 
-        // 1つの動画が終わったら自動的に次の動画へ進む
         video.addEventListener('ended', function() {
             currentIndex++;
             playVideo(currentIndex);
