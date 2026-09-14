@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Web Page Studio & Hub</title>
+    <!-- ブラウザ用OCRライブラリ (Tesseract.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         body { font-family: sans-serif; margin: 0; background: #f4f4f9; color: #333; }
         .header { background: #007bff; color: white; padding: 15px 20px; text-align: center; }
         .header h1 { margin: 0; font-size: 20px; }
-        .container { max-width: 950px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .container { max-width: 1150px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
         h2 { border-bottom: 2px solid #007bff; padding-bottom: 5px; color: #007bff; font-size: 18px; margin-top: 30px; }
         
@@ -18,15 +20,18 @@
         .link-card.memo { background: #e8f8f5; border-color: #27ae60; color: #27ae60; }
         .link-card.memo:hover { background: #d4efdf; }
 
-        /* 9個のタブスタイル */
-        .tab-buttons { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; border-bottom: 2px solid #ddd; padding-bottom: 8px; }
-        .tab-btn { padding: 6px 12px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 4px; font-size: 13px; font-weight: bold; }
+        /* 左右レイアウト（エディターが左、右側に縦並びタブ） */
+        .main-layout { display: flex; gap: 20px; align-items: flex-start; margin-top: 15px; }
+        .tab-content-area { flex-grow: 1; width: 0; }
+        .tab-buttons { display: flex; flex-direction: column; gap: 5px; min-width: 210px; }
+        
+        .tab-btn { padding: 8px 12px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 4px; font-size: 13px; font-weight: bold; text-align: left; }
         .tab-btn.active { background: #28a745; color: #fff; }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        /* 各ファイル専用の独立したボタンエリア（タブ下・エディター上） */
+        /* 各ファイル専用の独立したボタンエリア */
         .file-action-bar { background: #eef2f7; padding: 10px; border-radius: 6px; margin-bottom: 12px; display: flex; gap: 10px; align-items: center; border: 1px solid #cfe2ff; }
         .file-action-bar .open-file-btn { background: #0d6efd; color: white; padding: 6px 14px; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: bold; display: inline-block; }
         .file-action-bar .open-file-btn:hover { background: #0b5ed7; }
@@ -44,6 +49,10 @@
         button.clear-btn { background: #e74c3c; color: white; border: none; font-weight: bold; }
         button.clear-btn:hover { background: #c0392b; }
         .history-area { margin-top: 8px; display: flex; gap: 8px; align-items: center; font-size: 13px; }
+
+        /* Wiki ＆ OCRタブ専用スタイル */
+        .wiki-ocr-box { background: #fdf8f4; border: 1px solid #e67e22; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
+        .frame-box { width: 100%; height: 450px; border: 1px solid #ccc; border-radius: 4px; background: #fff; display: block; margin-top: 8px; }
     </style>
 </head>
 <body>
@@ -69,10 +78,12 @@
         <a href="xpcalc.html" class="link-card"><span>xpcalc.html</span> <span>🔗</span></a>
     </div>
 
-    <!-- 9個のタブ作業スペース -->
-    <h2>✍️ 9タブ HTML編集・動作テスト管理</h2>
-    <div class="tab-buttons" id="tabButtons"></div>
-    <div id="tabContents"></div>
+    <!-- タブ作業スペース管理 -->
+    <h2>✍️ タブ作業スペース管理</h2>
+    <div class="main-layout">
+        <div class="tab-content-area" id="tabContents"></div>
+        <div class="tab-buttons" id="tabButtons"></div>
+    </div>
 
 </div>
 
@@ -86,7 +97,8 @@
         "trade.html",
         "work_tool.html",
         "xpcalc.html",
-        "xpcalc_detail.html"
+        "xpcalc_detail.html",
+        "🌐 Wiki＆OCR品名登録"
     ];
 
     const tabCount = defaultFileNames.length;
@@ -96,49 +108,93 @@
     for (let i = 0; i < tabCount; i++) {
         const tabId = `tab${i + 1}`;
         const defaultName = defaultFileNames[i];
+        const isSpecialWikiTab = (i === tabCount - 1);
 
-        // タブボタン生成
         const btn = document.createElement('button');
         btn.className = `tab-btn ${i === 0 ? 'active' : ''}`;
         btn.innerText = defaultName;
-        btn.onclick = () => switchTab(i + 1);
+        btn.onclick = () => {
+            switchTab(i + 1);
+            if (isSpecialWikiTab) {
+                loadAndDisplayMasterItems();
+                loadTestSelect();
+            }
+        };
         tabButtonsContainer.appendChild(btn);
 
-        // タブコンテンツ生成
         const content = document.createElement('div');
         content.className = `tab-content ${i === 0 ? 'active' : ''}`;
         content.id = tabId;
-        content.innerHTML = `
-            <!-- 各ファイル専用の独立した操作バー（タブ下・エディター上部） -->
-            <div class="file-action-bar">
-                <span style="font-size:13px; font-weight:bold; color:#0056b3;">📌 このタブのファイル:</span>
-                <a id="open_page_${tabId}" href="${defaultName}" target="_blank" class="open-file-btn">🌐 ページを直接開く</a>
-            </div>
 
-            <label style="font-size:12px; font-weight:bold; color:#666;">ファイル名:</label>
-            <input type="text" id="filename_${tabId}" class="file-name-input" value="${defaultName}">
-            
-            <textarea id="text_${tabId}" placeholder="ここに ${defaultName} のHTMLコードを入力..."></textarea>
-            
-            <div class="toolbar">
-                <button class="save" onclick="saveHtmlData('${tabId}')">💾 HTML保存（テンポラリー）</button>
-                <button class="restore" onclick="restorePrevious('${tabId}')">↩️ 直前に戻す</button>
-                <button class="test" onclick="runTest('${tabId}')">▶️ 動作テスト（プレビュー）</button>
-                <button class="clear-btn" onclick="clearTabCode('${tabId}')">🗑️ すべて消去</button>
-                <a id="download_${tabId}" style="font-size:13px; color:#007bff; text-decoration:none; font-weight:bold; margin-left:auto;" download="${defaultName}">⬇️ ファイル出力</a>
-            </div>
+        if (isSpecialWikiTab) {
+            content.innerHTML = `
+                <div class="wiki-ocr-box">
+                    <h3 style="margin-top:0; font-size:15px; color:#d35400;">🤖 スクショ画像から品名を自動OCR抽出</h3>
+                    <p style="font-size:12px; color:#555; margin-bottom:8px;">テキストファイルを挟まず、画像を選ぶだけでブラウザ内に品名を直接一括登録できます。</p>
+                    <input type="file" id="ocrImageInput" accept="image/*" style="font-size:12px; margin-bottom:8px;"><br>
+                    <button type="button" onclick="runOcrExtraction()" style="background:#e67e22; color:#fff; border:none; padding:6px 12px; font-size:13px; font-weight:bold; cursor:pointer; border-radius:4px;">🔍 画像から文字を解析してマスターへ追加</button>
+                    <span id="ocrStatus" style="font-size:12px; color:#333; margin-left:8px; font-weight:bold;"></span>
+                </div>
 
-            <div class="history-area">
-                <span style="font-weight:bold; color:#555;">📁 過去に使ったファイル名・履歴:</span>
-                <select id="history_${tabId}" style="flex-grow:1;" onchange="loadHistory('${tabId}')">
-                    <option value="">-- 過去の履歴・ファイルを選ぶ --</option>
-                </select>
-            </div>
-        `;
+                <!-- 新規追加：HTMLへの組み込みテスト（プルダウン動作確認用） -->
+                <div style="background:#e8f4fd; border:1px solid #b8daff; padding:15px; border-radius:6px; margin-bottom:15px;">
+                    <h3 style="margin-top:0; font-size:15px; color:#004085;">🧪 HTMLへの組み込みテスト（プルダウン動作確認）</h3>
+                    <p style="font-size:12px; color:#333; margin-bottom:8px;">他のHTMLファイルに以下のコードを貼り付けると、保存されたマスターがこのようにセレクトボックスに反映されます。</p>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select id="testItemSelect" style="padding:6px; font-size:13px; flex-grow:1; max-width:350px; background:#fff;">
+                            <option value="">-- 保存された品名から選択（テスト） --</option>
+                        </select>
+                        <button type="button" onclick="loadTestSelect()" style="font-size:12px; padding:6px 10px; background:#007bff; color:#fff; border:none; border-radius:4px; font-weight:bold;">🔄 プルダウン更新</button>
+                    </div>
+                </div>
+
+                <div style="background:#fff; border:1px solid #ccc; padding:15px; border-radius:6px; margin-bottom:15px;">
+                    <h3 style="margin-top:0; font-size:15px; color:#2c3e50;">📋 現在ブラウザに保存されている品名一覧（確認用ビューア）</h3>
+                    <div id="masterItemList" style="max-height: 150px; overflow-y: auto; background: #f9f9f9; border: 1px solid #ddd; padding: 10px; font-size: 13px; font-family: monospace; line-height: 1.5;"></div>
+                    <div style="margin-top: 8px; display: flex; gap: 10px;">
+                        <button type="button" onclick="loadAndDisplayMasterItems(); loadTestSelect();" style="font-size:12px; padding:5px 10px; background:#6c757d; color:#fff; border:none; border-radius:4px; font-weight:bold;">🔄 リストを更新</button>
+                        <button type="button" onclick="clearMasterItems()" style="font-size:12px; padding:5px 10px; background:#e74c3c; color:#fff; border:none; border-radius:4px; font-weight:bold;">🗑️ マスターをすべてリセット</button>
+                    </div>
+                </div>
+
+                <div style="background:#f9f9f9; border:1px solid #ddd; padding:12px; border-radius:6px;">
+                    <h3 style="margin-top:0; font-size:15px; color:#007bff;">🔗 Wiki表示ビューア</h3>
+                    <span style="font-size:12px; color:#555;">別タブで開くリンク: <a href="https://wikiwiki.jp/sold2/" target="_blank">https://wikiwiki.jp/sold2/</a></span>
+                    <iframe src="https://wikiwiki.jp/sold2/" class="frame-box" title="Wiki"></iframe>
+                </div>
+            `;
+        } else {
+            content.innerHTML = `
+                <div class="file-action-bar">
+                    <span style="font-size:13px; font-weight:bold; color:#0056b3;">📌 このタブのファイル:</span>
+                    <a id="open_page_${tabId}" href="${defaultName}" target="_blank" class="open-file-btn">🌐 ページを直接開く</a>
+                </div>
+
+                <label style="font-size:12px; font-weight:bold; color:#666;">ファイル名:</label>
+                <input type="text" id="filename_${tabId}" class="file-name-input" value="${defaultName}">
+                
+                <textarea id="text_${tabId}" placeholder="ここに ${defaultName} のHTMLコードを入力..."></textarea>
+                
+                <div class="toolbar">
+                    <button class="save" onclick="saveHtmlData('${tabId}')">💾 HTML保存（テンポラリー）</button>
+                    <button class="restore" onclick="restorePrevious('${tabId}')">↩️ 直前に戻す</button>
+                    <button class="test" onclick="runTest('${tabId}')">▶️ 動作テスト（プレビュー）</button>
+                    <button class="clear-btn" onclick="clearTabCode('${tabId}')">🗑️ すべて消去</button>
+                    <a id="download_${tabId}" style="font-size:13px; color:#007bff; text-decoration:none; font-weight:bold; margin-left:auto;" download="${defaultName}">⬇️ ファイル出力</a>
+                </div>
+
+                <div class="history-area">
+                    <span style="font-weight:bold; color:#555;">📁 過去に使ったファイル名・履歴:</span>
+                    <select id="history_${tabId}" style="flex-grow:1;" onchange="loadHistory('${tabId}')">
+                        <option value="">-- 過去の履歴・ファイルを選ぶ --</option>
+                    </select>
+                </div>
+            `;
+            loadLatestData(tabId, defaultName);
+            updateHistorySelect(tabId);
+        }
+
         tabContentsContainer.appendChild(content);
-
-        loadLatestData(tabId, defaultName);
-        updateHistorySelect(tabId);
     }
 
     function switchTab(index) {
@@ -152,15 +208,19 @@
 
     function loadLatestData(tabId, defaultName) {
         const histories = JSON.parse(localStorage.getItem(`history_${tabId}`) || '[]');
+        const filenameEl = document.getElementById(`filename_${tabId}`);
+        const textEl = document.getElementById(`text_${tabId}`);
+        if (!filenameEl || !textEl) return;
+
         if (histories.length > 0) {
-            document.getElementById(`filename_${tabId}`).value = histories[0].filename;
-            document.getElementById(`text_${tabId}`).value = histories[0].text;
+            filenameEl.value = histories[0].filename;
+            textEl.value = histories[0].text;
             updateLinks(tabId, histories[0].filename, histories[0].text);
             if (histories.length > 1) {
-                document.getElementById(`text_${tabId}`).setAttribute('data-previous', histories[1].text);
+                textEl.setAttribute('data-previous', histories[1].text);
             }
         } else {
-            document.getElementById(`filename_${tabId}`).value = defaultName;
+            filenameEl.value = defaultName;
             updateLinks(tabId, defaultName, "");
         }
     }
@@ -190,12 +250,10 @@
     function runTest(tabId) {
         const textarea = document.getElementById(`text_${tabId}`);
         const htmlContent = textarea.value;
-        
         if (!htmlContent.trim()) {
             alert('テストするHTMLコードが入力されていません。');
             return;
         }
-
         const blob = new Blob([htmlContent], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
         window.open(url, '_blank');
@@ -211,22 +269,23 @@
     }
 
     function updateLinks(tabId, filename, text) {
-        // ダウンロードリンクの更新
         const blob = new Blob([text], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
         const downloadLink = document.getElementById(`download_${tabId}`);
-        downloadLink.href = url;
-        downloadLink.download = filename;
-
-        // 「ページを直接開く」ボタンのリンク先を連動
+        if (downloadLink) {
+            downloadLink.href = url;
+            downloadLink.download = filename;
+        }
         const openPageLink = document.getElementById(`open_page_${tabId}`);
-        openPageLink.href = filename;
+        if (openPageLink) {
+            openPageLink.href = filename;
+        }
     }
 
     function updateHistorySelect(tabId) {
         const select = document.getElementById(`history_${tabId}`);
+        if (!select) return;
         const histories = JSON.parse(localStorage.getItem(`history_${tabId}`) || '[]');
-        
         select.innerHTML = '<option value="">-- 過去の履歴・ファイルを選ぶ --</option>';
         histories.forEach((item, index) => {
             const opt = document.createElement('option');
@@ -240,7 +299,6 @@
         const select = document.getElementById(`history_${tabId}`);
         const index = select.value;
         if (index === "") return;
-
         const histories = JSON.parse(localStorage.getItem(`history_${tabId}`) || '[]');
         if (histories[index]) {
             document.getElementById(`filename_${tabId}`).value = histories[index].filename;
@@ -262,15 +320,117 @@
         }
     }
 
-    for (let i = 0; i < tabCount; i++) {
-        const tabId = `tab${i + 1}`;
-        document.getElementById(`filename_${tabId}`).addEventListener('input', function() {
-            updateLinks(tabId, this.value, document.getElementById(`text_${tabId}`).value);
-        });
-        document.getElementById(`text_${tabId}`).addEventListener('input', function() {
-            updateLinks(tabId, document.getElementById(`filename_${tabId}`).value, this.value);
+    // OCR品名抽出
+    async function runOcrExtraction() {
+        const fileInput = document.getElementById('ocrImageInput');
+        const statusLabel = document.getElementById('ocrStatus');
+        
+        if (!fileInput.files || !fileInput.files[0]) {
+            alert('解析する画像ファイルを選択してください。');
+            return;
+        }
+
+        statusLabel.textContent = '🔄 画像を解析中 (OCR処理中)...';
+        
+        try {
+            const result = await Tesseract.recognize(
+                fileInput.files[0],
+                'jpn+eng',
+                { 
+                    logger: m => {
+                        if (m.status === 'recognizing text') {
+                            statusLabel.textContent = `🔄 解析中... (${Math.round(m.progress * 100)}%)`;
+                        }
+                    }
+                }
+            );
+
+            const text = result.data.text;
+            const lines = text.split(/[\r\n]+/);
+            
+            let extractedCount = 0;
+            let items = JSON.parse(localStorage.getItem('hub_item_master_default_user') || '[]');
+            
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (trimmed && trimmed.length >= 2 && trimmed.length <= 15 && !items.includes(trimmed)) {
+                    items.push(trimmed);
+                    extractedCount++;
+                }
+            });
+
+            localStorage.setItem('hub_item_master_default_user', JSON.stringify(items));
+            statusLabel.textContent = `✅ 完了！ ${extractedCount}件の品名を追加しました！`;
+            fileInput.value = '';
+            
+            loadAndDisplayMasterItems();
+            loadTestSelect();
+        } catch (error) {
+            console.error(error);
+            statusLabel.textContent = '❌ OCR解析に失敗しました';
+        }
+    }
+
+    // 画面にリスト表示
+    function loadAndDisplayMasterItems() {
+        const listContainer = document.getElementById('masterItemList');
+        if (!listContainer) return;
+
+        const items = JSON.parse(localStorage.getItem('hub_item_master_default_user') || '[]');
+        if (items.length === 0) {
+            listContainer.innerHTML = '<span style="color:#888;">（まだ品名データが保存されていません。上のOCR機能から画像を選択して読み込んでください）</span>';
+            return;
+        }
+
+        listContainer.innerHTML = items.map((item, index) => `[${index + 1}] ${item}`).join('<br>');
+    }
+
+    // テスト用プルダウンにデータを流し込む（これが他のHTMLファイルでやる実装そのものです）
+    function loadTestSelect() {
+        const selectEl = document.getElementById('testItemSelect');
+        if (!selectEl) return;
+
+        const items = JSON.parse(localStorage.getItem('hub_item_master_default_user') || '[]');
+        
+        // 既存の選択肢をリセットして初期状態に戻す
+        selectEl.innerHTML = '<option value="">-- 保存された品名から選択（テスト） --</option>';
+
+        items.forEach(itemName => {
+            const opt = document.createElement('option');
+            opt.value = itemName;
+            opt.textContent = itemName;
+            selectEl.appendChild(opt);
         });
     }
+
+    // マスター全リセット
+    function clearMasterItems() {
+        if (confirm('保存されている品名マスターをすべて消去しますか？')) {
+            localStorage.removeItem('hub_item_master_default_user');
+            loadAndDisplayMasterItems();
+            loadTestSelect();
+            alert('マスターを消去しました。');
+        }
+    }
+
+    for (let i = 0; i < tabCount - 1; i++) {
+        const tabId = `tab${i + 1}`;
+        const filenameInput = document.getElementById(`filename_${tabId}`);
+        const textarea = document.getElementById(`text_${tabId}`);
+        if (filenameInput && textarea) {
+            filenameInput.addEventListener('input', function() {
+                updateLinks(tabId, this.value, textarea.value);
+            });
+            textarea.addEventListener('input', function() {
+                updateLinks(tabId, filenameInput.value, this.value);
+            });
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        loadAndDisplayMasterItems();
+        loadTestSelect();
+    });
 </script>
 
 </body>
