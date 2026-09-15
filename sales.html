@@ -1,530 +1,269 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SOLDOUT2 販売・作業管理＆完売予想</title>
-<!-- Tailwind CSS CDN を採用して work_tool.html のデザインテイストに寄せています -->
-<script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
-
-<div class="max-w-4xl w-full mx-auto p-4 md:p-6 flex-grow">
-
-    <!-- 相互ナビゲーションバー -->
-    <div class="flex justify-between items-center mb-4">
-        <a href="index.html" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded transition font-medium">
-            ← ポータルへ戻る
-        </a>
-        <div class="flex space-x-2">
-            <a href="sales.html" class="text-xs bg-indigo-50 text-indigo-700 font-bold px-3 py-1 rounded border border-indigo-200">販売管理</a>
-            <a href="work_tool.html" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded transition">Work Tool</a>
-        </div>
-    </div>
-
-    <!-- 分かりやすいタイトルヘッダーバナー -->
-    <div class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-5 rounded-xl shadow-md mb-6">
-        <h1 class="text-lg md:text-xl font-bold tracking-wider mb-1">📦 SOLDOUT2 販売速度・作業効率 管理ツール</h1>
-        <p class="text-xs text-indigo-100">作業ログの解析データと販売実績を紐づけ、完売予想や売上をシミュレーションします（未入力エラーなし対応）。</p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        <!-- 左側：入力・解析セクション (work_tool.html 寄りのレイアウト) -->
-        <div class="md:col-span-1 space-y-4">
-            
-            <!-- 一括テキスト取り込みカード -->
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                <div class="flex justify-between items-center">
-                    <label class="block text-xs font-semibold text-slate-600">一括テキスト取り込み</label>
-                    <button type="button" onclick="clearRawText()" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-0.5 rounded transition font-medium">
-                        ✕ 文章をクリア
-                    </button>
-                </div>
-                <textarea id="raw-input-text" rows="4" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none font-mono" placeholder="ここにログを貼り付け..."></textarea>
-                <button type="button" onclick="parseRawText()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2 rounded-lg transition border border-slate-300">
-                    テキストを自動解析して反映
-                </button>
-            </div>
-
-            <!-- アクション操作カード -->
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-2">
-                <button onclick="calculateAll()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3 rounded-lg transition shadow">
-                    総合計算を実行
-                </button>
-                <div class="grid grid-cols-2 gap-2 pt-1">
-                    <button onclick="saveData()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-2 rounded-lg transition">データ保存</button>
-                    <button onclick="loadData()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold py-2 rounded-lg transition">データ読込</button>
-                </div>
-                <button onclick="clearAll()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs py-2 rounded-lg transition">すべてクリア</button>
-            </div>
-
-        </div>
-
-        <!-- 右側：詳細フォーム＆結果セクション -->
-        <div class="md:col-span-2 space-y-6">
-
-            <!-- 商品・作業情報カード -->
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
-                <h2 class="text-sm font-bold text-slate-700 border-b pb-2">商品・作業情報</h2>
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">商品名 / 作業名</label>
-                        <input type="text" id="productName" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例: 獣の肉">
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">現在の在庫 <span class="text-slate-400 font-normal">※省略可</span></label>
-                            <input type="number" id="stock" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例: 200">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">販売価格 (G) <span class="text-slate-400 font-normal">※省略可</span></label>
-                            <input type="number" id="price" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例: 150">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">レベル</label>
-                            <input type="text" id="workLevel" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例: Lv.9">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">作業回数</label>
-                            <input type="number" id="workCount" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例: 20">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">効率</label>
-                            <input type="text" id="efficiency" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="例: 1.0h">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 複数成果物・獲得アイテムカード -->
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                <div class="flex justify-between items-center border-b pb-2">
-                    <h2 class="text-sm font-bold text-slate-700">作業成果物・獲得アイテム（複数対応）</h2>
-                    <button type="button" onclick="addItemRow()" class="text-[10px] bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded transition font-medium">
-                        ＋ アイテム追加
-                    </button>
-                </div>
-                <div id="itemRows" class="space-y-2">
-                    <div class="work-row flex items-center space-x-1.5 bg-slate-50 p-2 rounded border border-slate-200">
-                        <input type="text" placeholder="アイテム名" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded item-name">
-                        <input type="number" placeholder="数量" class="w-16 sm:w-20 text-xs p-1.5 border border-slate-300 rounded item-qty">
-                        <input type="text" placeholder="単位" class="w-12 sm:w-16 text-xs p-1.5 border border-slate-300 rounded item-unit">
-                        <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-1.5 py-1 flex-shrink-0" onclick="deleteRow(this)">✕</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 販売実績カード -->
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                <div class="flex justify-between items-center border-b pb-2">
-                    <h2 class="text-sm font-bold text-slate-700">販売実績（複数対応）</h2>
-                    <button type="button" onclick="addSaleRow()" class="text-[10px] bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded transition font-medium">
-                        ＋ 販売実績追加
-                    </button>
-                </div>
-                <div id="saleRows" class="space-y-2">
-                    <div class="sale-row flex items-center space-x-1.5 bg-slate-50 p-2 rounded border border-slate-200">
-                        <input type="number" placeholder="販売数" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded sale-qty">
-                        <input type="number" step="0.01" placeholder="販売時間h" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded sale-hours">
-                        <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-1.5 py-1 flex-shrink-0" onclick="deleteRow(this)">✕</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 計算・解析結果カード -->
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-3">
-                <h2 class="text-sm font-bold text-slate-700 border-b pb-2">計算・解析結果</h2>
-                <div id="result" class="text-xs text-slate-600 leading-relaxed break-words">
-                    情報を入力して「総合計算を実行」してください。（未入力項目があってもエラーにならず、安全に計算されます）
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-<!-- フッター -->
-<footer class="bg-slate-100 border-t border-slate-200 mt-auto py-4 text-center text-xs text-slate-500">
-    &copy; 2026 SOLDOUT2 販売・作業管理ツール. All rights reserved.
-</footer>
-
-<script>
-/* =========================
-   行の追加・削除
-========================= */
-function addItemRow(name = "", qty = "", unit = "") {
-    const container = document.getElementById("itemRows");
-    const div = document.createElement("div");
-    div.className = "work-row flex items-center space-x-1.5 bg-slate-50 p-2 rounded border border-slate-200";
-    div.innerHTML = `
-        <input type="text" placeholder="アイテム名" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded item-name" value="${escapeHTML(name)}">
-        <input type="number" placeholder="数量" class="w-16 sm:w-20 text-xs p-1.5 border border-slate-300 rounded item-qty" value="${qty !== null && qty !== undefined ? qty : ""}">
-        <input type="text" placeholder="単位" class="w-12 sm:w-16 text-xs p-1.5 border border-slate-300 rounded item-unit" value="${escapeHTML(unit)}">
-        <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-1.5 py-1 flex-shrink-0" onclick="deleteRow(this)">✕</button>
-    `;
-    container.appendChild(div);
-}
-
-function addSaleRow(sales = "", hours = "") {
-    const container = document.getElementById("saleRows");
-    const div = document.createElement("div");
-    div.className = "sale-row flex items-center space-x-1.5 bg-slate-50 p-2 rounded border border-slate-200";
-    div.innerHTML = `
-        <input type="number" placeholder="販売数" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded sale-qty" value="${sales !== null && sales !== undefined ? sales : ""}">
-        <input type="number" step="0.01" placeholder="販売時間h" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded sale-hours" value="${hours !== null && hours !== undefined ? hours : ""}">
-        <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-1.5 py-1 flex-shrink-0" onclick="deleteRow(this)">✕</button>
-    `;
-    container.appendChild(div);
-}
-
-function deleteRow(button) {
-    const row = button.parentElement;
-    const container = row.parentElement;
-    if (container.children.length > 1) {
-        row.remove();
-    } else {
-        // 最後の1行の場合はクリアにする（削除せず未入力状態にする）
-        row.querySelectorAll("input").forEach(input => input.value = "");
-    }
-}
-
-function clearRawText() {
-    document.getElementById("raw-input-text").value = "";
-}
-
-/* =========================
-   一括テキスト自動解析（work_tool.html 互換）
-========================= */
-function parseRawText() {
-    const text = document.getElementById("raw-input-text").value.trim();
-    if (!text) {
-        alert("解析するテキストを入力してください。");
-        return;
-    }
-
-    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    let titleVal = "";
-    let percentageVal = "";
-    let operationsVal = "";
-    const parsedItems = [];
-    let isAcquiredSection = false;
-
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-
-        if ((line.includes("LV") || line.includes("Lv") || line.includes("レベル")) && !titleVal) {
-            titleVal = line;
-            continue;
-        }
-
-        if (line.match(/^\d+(\.\d+)?%$/) && !percentageVal) {
-            percentageVal = line;
-            continue;
-        }
-
-        if (line.includes("作業回数") || line.includes("回数")) {
-            const opMatch = line.match(/(\d+)/g);
-            if (opMatch) {
-                operationsVal = opMatch[opMatch.length - 1];
-            }
-            continue;
-        }
-
-        if (line === "獲得したもの") {
-            isAcquiredSection = true;
-            continue;
-        }
-
-        if (isAcquiredSection) {
-            const qtyUnitMatch = line.match(/^([\d,]+)([^\d\s]+)?([\d\s\S]*)$/);
-            if (qtyUnitMatch && parsedItems.length > 0 && parsedItems[parsedItems.length - 1].quantity === null) {
-                const lastItem = parsedItems[parsedItems.length - 1];
-                lastItem.quantity = parseInt(qtyUnitMatch[1].replace(/,/g, ''), 10);
-                lastItem.unit = qtyUnitMatch[2] || "";
-            } else {
-                if (!line.includes("回数") && !line.match(/^\d+$/)) {
-                    parsedItems.push({ name: line, quantity: null, unit: "" });
-                }
-            }
-        }
-    }
-
-    if (titleVal) document.getElementById("productName").value = titleVal;
-    if (percentageVal) document.getElementById("workLevel").value = percentageVal;
-    if (operationsVal !== "") document.getElementById("workCount").value = operationsVal;
-
-    if (parsedItems.length > 0) {
-        document.getElementById("itemRows").innerHTML = "";
-        parsedItems.forEach(item => {
-            addItemRow(item.name, item.quantity, item.unit);
-        });
-    } else if (lines.length > 0 && !titleVal) {
-        document.getElementById("productName").value = lines[0];
-    }
-
-    alert("テキストの解析が完了しました！");
-    calculateAll();
-}
-
-/* =========================
-   総合計算・分析ロジック（未入力エラー防止対応）
-========================= */
-function calculateAll() {
-    const productName = document.getElementById("productName").value.trim();
-    const stockVal = document.getElementById("stock").value.trim();
-    const priceVal = document.getElementById("price").value.trim();
-    const workLevel = document.getElementById("workLevel").value.trim();
-    const workCountVal = document.getElementById("workCount").value.trim();
-    const efficiency = document.getElementById("efficiency").value.trim();
-
-    // 未入力や空欄は NaN やエラーとせず、0 または null として安全に扱う
-    const stock = stockVal === "" ? 0 : Number(stockVal);
-    const price = priceVal === "" ? 0 : Number(priceVal);
-    const parsedWorkCount = workCountVal === "" ? null : Number(workCountVal);
-
-    const itemRows = document.querySelectorAll(".work-row");
-    let itemsResultHTML = "";
-
-    itemRows.forEach(row => {
-        const name = row.querySelector(".item-name").value.trim();
-        const qtyVal = row.querySelector(".item-qty").value.trim();
-        const unit = row.querySelector(".item-unit").value.trim();
-
-        if (name || qtyVal !== "") {
-            const qty = qtyVal === "" ? null : Number(qtyVal);
-            let avgText = "";
-            if (parsedWorkCount !== null && parsedWorkCount > 0 && qty !== null && !isNaN(qty)) {
-                const avg = qty / parsedWorkCount;
-                const formattedAvg = Number.isInteger(avg) ? avg : avg.toFixed(4);
-                avgText = ` (平均: ${formattedAvg}${unit || "個"}/回)`;
-            }
-            const displayQty = qty !== null && !isNaN(qty) ? formatNumber(qty) + (unit || "") : "数量未入力";
-            itemsResultHTML += `<li><strong>${escapeHTML(name || "無名アイテム")}</strong>: ${displayQty}${avgText}</li>`;
-        }
-    });
-
-    const saleRows = document.querySelectorAll(".sale-row");
-    let totalSales = 0;
-    let totalHours = 0;
-    let hasSalesInput = false;
-
-    saleRows.forEach(row => {
-        const salesInput = row.querySelector(".sale-qty").value.trim();
-        const hoursInput = row.querySelector(".sale-hours").value.trim();
+    <meta charset="UTF-8">
+    <title>マイ・ローカルデータベース＆Hub</title>
+    <!-- 👇 ここに結合されたデータが埋め込まれます -->
+    <script id="embedded-data" type="application/json">{}</script>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 15px; background: #f4f6f8; color: #333; box-sizing: border-box; }
+        h1 { font-size: 1.3rem; margin-bottom: 10px; color: #2c3e50; }
+        .card { background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 12px; }
+        select, input, button { padding: 8px 10px; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #3498db; color: #fff; border: none; cursor: pointer; }
+        button:hover { background: #2980b9; }
         
-        if (salesInput !== "" || hoursInput !== "") {
-            hasSalesInput = true;
-            const sales = salesInput === "" ? 0 : Number(salesInput);
-            const hours = hoursInput === "" ? 0 : Number(hoursInput);
-            if (!isNaN(sales)) totalSales += sales;
-            if (!isNaN(hours)) totalHours += hours;
+        .main-layout { display: flex; gap: 12px; align-items: flex-start; }
+        @media (max-width: 768px) { .main-layout { flex-direction: column; } }
+        .tab-buttons { display: flex; flex-direction: column; gap: 4px; min-width: 150px; }
+        .tab-btn { background: #e0e0e0; color: #555; border: none; padding: 10px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; text-align: left; }
+        .tab-btn.active { background: #2c3e50; color: #fff; font-weight: bold; }
+        .tab-content-area { flex-grow: 1; width: 100%; background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        textarea { width: 100%; height: 100px; padding: 10px; font-family: monospace; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 8px; }
+        
+        .template-card { background: #fff; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 10px; text-align: left; }
+        .template-card h4 { margin: 0 0 6px 0; font-size: 0.95rem; color: #2c3e50; }
+        .template-pre { background: #f8fafc; padding: 8px; border-radius: 4px; border: 1px solid #e2e8f0; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap; margin-bottom: 8px; }
+        .generator-panel { background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 12px; text-align: left; }
+        .generator-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 8px; }
+        .generator-grid input, .generator-grid select { width: 100%; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+    <h1>🗂️ マイ・ローカルデータベース＆Hub</h1>
+
+    <div class="card" style="background: #eef2f7; border: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 0.9rem; font-weight: bold; color: #2c3e50;">👤 ユーザー:</span>
+            <input type="text" id="usernameInput" placeholder="ユーザー名" style="padding: 5px 8px; font-size: 0.85rem;" onchange="saveCurrentUser()">
+        </div>
+        <button onclick="exportIntegratedHTML()" style="background: #e67e22; font-size: 0.85rem;">📦 結合したHTMLを出力する</button>
+    </div>
+
+    <div class="main-layout">
+        <div class="tab-buttons" id="tabButtonContainer">
+            <button class="tab-btn active" onclick="switchTab('templateTab', this)">📋 定型文・品名登録</button>
+            <button class="tab-btn" onclick="switchTab('adminTab', this)" style="background: #27ae60; color: #fff;">⚙️ HTML & JSON 結合管理</button>
+        </div>
+
+        <div class="tab-content-area">
+            <!-- タブ: 定型文・品名登録 -->
+            <div id="templateTab" class="tab-content active">
+                <div class="generator-panel">
+                    <div class="generator-grid">
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: bold;">カテゴリ・品名選択:</label>
+                            <select id="categorySelect" onchange="onCategoryChange()" style="margin-bottom: 4px;">
+                                <option value="">-- カテゴリを選択 --</option>
+                            </select>
+                            <input type="text" id="genItemName" value="コッペパン" placeholder="品名">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: bold;">価格:</label>
+                            <input type="text" id="genPrice" value="200">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: bold;">数量:</label>
+                            <input type="text" id="genQuantity" value="3口無言可">
+                        </div>
+                    </div>
+                </div>
+                <div id="templateListArea"></div>
+            </div>
+
+            <!-- タブ: 結合管理画面 -->
+            <div id="adminTab" class="tab-content">
+                <h3 style="margin-top: 0; font-size: 1.1rem; color: #2c3e50;">⚙️ HTMLとJSONの取り込み・結合</h3>
+                <div class="generator-panel" style="background: #fff; border-color: #cbd5e1; margin-top: 15px;">
+                    <h4 style="margin: 0 0 6px 0; font-size: 0.9rem;">1. ベースHTMLファイルの取り込み</h4>
+                    <input type="file" id="htmlImportFile" accept=".html" style="width: 100%; margin-bottom: 8px;">
+
+                    <h4 style="margin: 10px 0 6px 0; font-size: 0.9rem;">2. 品名マスターJSONファイルの取り込み</h4>
+                    <input type="file" id="jsonImportFile" accept=".json" style="width: 100%; margin-bottom: 8px;">
+
+                    <button onclick="processIntegration()" style="background: #d35400; width: 100%; margin-top: 6px;">🔗 取り込んでデータを結合する</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getCurrentUser() {
+            let user = localStorage.getItem('hub_current_user');
+            if (!user) { user = 'default_user'; localStorage.setItem('hub_current_user', user); }
+            return user;
         }
-    });
 
-    let salesPerHour = 0;
-    let revenuePerHour = 0;
-    let selloutHours = 0;
-    let totalRevenue = stock * price;
-    let selloutTimeText = "－";
-
-    if (totalSales > 0 && totalHours > 0) {
-        salesPerHour = totalSales / totalHours;
-        revenuePerHour = salesPerHour * price;
-        if (stock > 0) {
-            selloutHours = stock / salesPerHour;
-            const now = new Date();
-            const selloutTime = new Date(now.getTime() + selloutHours * 60 * 60 * 1000);
-            selloutTimeText = formatDateTime(selloutTime);
+        function saveCurrentUser() {
+            localStorage.setItem('hub_current_user', document.getElementById('usernameInput').value.trim() || 'default_user');
+            updateTemplates();
         }
-    }
 
-    document.getElementById("result").innerHTML = `
-        <div class="bg-indigo-50/60 p-3 rounded-lg space-y-1 mb-3 text-xs">
-            商品・作業名：<strong>${escapeHTML(productName || "－")}</strong> ${workLevel ? `(${escapeHTML(workLevel)})` : ""}<br>
-            現在の在庫：<strong>${formatNumber(stock)}</strong> 個 ／ 販売価格：<strong>${formatNumber(price)}</strong> G<br>
-            作業回数：<strong>${parsedWorkCount !== null ? parsedWorkCount + '回' : "未入力"}</strong> ／ 効率: <strong>${escapeHTML(efficiency || "未設定")}</strong>
-        </div>
+        const defaultTemplates = [
+            { id: 1, category: "パン・食品", label: "求・出形式", text: "{name}）求　{name}）出" },
+            { id: 2, category: "パン・食品", label: "トレード用", text: "<トレード>\n求) {name} （{qty}）\n出) {name} @1:{price}\n無言可です。" }
+        ];
 
-        ${itemsResultHTML ? `
-        <div class="bg-amber-50/60 p-3 rounded-lg mb-3 text-xs">
-            <strong>獲得アイテム・成果物一覧:</strong>
-            <ul style="margin: 4px 0 0 16px; padding-left: 0;" class="list-disc space-y-1">
-                ${itemsResultHTML}
-            </ul>
-        </div>` : ""}
+        function getStoredData() {
+            const user = getCurrentUser();
+            const stored = localStorage.getItem('hub_master_data_' + user);
+            try { return stored ? JSON.parse(stored) : { templates: defaultTemplates }; } catch(e) { return { templates: defaultTemplates }; }
+        }
 
-        <div class="bg-slate-100 p-3 rounded-lg space-y-1 mb-3 text-xs">
-            合計販売数：<strong>${formatNumber(totalSales)}</strong> 個 ／ 合計販売時間：<strong>${formatNumber(totalHours)}</strong> 時間<br>
-            1時間あたり販売数：<strong>${formatNumber(salesPerHour)}</strong> 個 / 時間
-        </div>
+        function saveStoredData(data) {
+            localStorage.setItem('hub_master_data_' + getCurrentUser(), JSON.stringify(data));
+        }
 
-        <div class="bg-emerald-50 p-3 rounded-lg mb-3 text-xs text-emerald-900">
-            1時間あたり売上：<strong>${formatNumber(revenuePerHour)}</strong> G / 時間
-        </div>
+        // HTMLファイルとJSONファイルを同時に取り込んで結合する処理
+        function processIntegration() {
+            const htmlFile = document.getElementById('htmlImportFile').files[0];
+            const jsonFile = document.getElementById('jsonImportFile').files[0];
 
-        <div class="bg-slate-100 p-3 rounded-lg space-y-1 mb-3 text-xs">
-            完売予想時間：<strong>${totalSales > 0 ? formatDuration(selloutHours) : "販売実績データ不足"}</strong><br>
-            完売予想時刻：<strong>${selloutTimeText}</strong>
-        </div>
+            if (!jsonFile) return alert('品名マスターのJSONファイルを選択してください。');
 
-        <div class="bg-emerald-50 p-3 rounded-lg text-xs text-emerald-900">
-            在庫を全部売った場合の売上：<strong>${formatNumber(totalRevenue)}</strong> G
-        </div>
-    `;
-}
+            const readerJson = new FileReader();
+            readerJson.onload = function(eJSON) {
+                try {
+                    const parsedJson = JSON.parse(eJSON.target.result);
+                    let currentData = getStoredData();
+                    
+                    // JSONが配列またはオブジェクトの場合の調整
+                    if (Array.isArray(parsedJson)) {
+                        currentData.templates = parsedJson;
+                    } else if (parsedJson.templates) {
+                        currentData = parsedJson;
+                    }
+                    saveStoredData(currentData);
 
-/* =========================
-   LocalStorage 保存・読み込み機能
-========================= */
-function saveData() {
-    const data = {
-        productName: document.getElementById("productName").value,
-        stock: document.getElementById("stock").value,
-        price: document.getElementById("price").value,
-        workLevel: document.getElementById("workLevel").value,
-        workCount: document.getElementById("workCount").value,
-        efficiency: document.getElementById("efficiency").value,
-        items: [],
-        sales: []
-    };
+                    // もしHTMLファイルも選択されていれば、その中身をベースにする処理
+                    if (htmlFile) {
+                        const readerHtml = new FileReader();
+                        readerHtml.onload = function(eHtml) {
+                            // 簡易的にHTMLを取り込んだ場合の処理（今回はブラウザ上のデータを更新）
+                            updateTemplates();
+                            updateCategoryDropdown(currentData.templates);
+                            alert('HTMLとJSONの結合・取り込みが完了しました！');
+                        };
+                        readerHtml.readAsText(htmlFile, 'utf-8');
+                    } else {
+                        updateTemplates();
+                        updateCategoryDropdown(currentData.templates);
+                        alert('JSONデータの取り込みとカテゴリ連動が完了しました！');
+                    }
+                } catch(err) {
+                    alert('JSONファイルの解析に失敗しました。');
+                }
+            };
+            readerJson.readAsText(jsonFile, 'utf-8');
+        }
 
-    document.querySelectorAll(".work-row").forEach(row => {
-        data.items.push({
-            name: row.querySelector(".item-name").value,
-            qty: row.querySelector(".item-qty").value,
-            unit: row.querySelector(".item-unit").value
-        });
-    });
-
-    document.querySelectorAll(".sale-row").forEach(row => {
-        data.sales.push({
-            sales: row.querySelector(".sale-qty").value,
-            hours: row.querySelector(".sale-hours").value
-        });
-    });
-
-    localStorage.setItem("soldout2_sales_work_data", JSON.stringify(data));
-    alert("データをブラウザに保存しました！");
-}
-
-function loadData() {
-    const json = localStorage.getItem("soldout2_sales_work_data");
-    if (!json) {
-        alert("保存されたデータが見つかりません。");
-        return;
-    }
-
-    try {
-        const data = JSON.parse(json);
-        document.getElementById("productName").value = data.productName || "";
-        document.getElementById("stock").value = data.stock || "";
-        document.getElementById("price").value = data.price || "";
-        document.getElementById("workLevel").value = data.workLevel || "";
-        document.getElementById("workCount").value = data.workCount || "";
-        document.getElementById("efficiency").value = data.efficiency || "";
-
-        const itemContainer = document.getElementById("itemRows");
-        itemContainer.innerHTML = "";
-        if (data.items && data.items.length > 0) {
-            data.items.forEach(item => {
-                addItemRow(item.name || "", item.qty || "", item.unit || "");
+        // カテゴリと連動したセレクトボックスの構築
+        function updateCategoryDropdown(templates) {
+            const select = document.getElementById('categorySelect');
+            select.innerHTML = '<option value="">-- カテゴリ・品名を選択 --</option>';
+            
+            templates.forEach(t => {
+                const opt = document.createElement('option');
+                const catName = t.category ? `[${t.category}] ` : '';
+                opt.value = t.label || t.name || '品名';
+                opt.textContent = catName + (t.label || t.name || '品名');
+                select.appendChild(opt);
             });
-        } else {
-            addItemRow();
         }
 
-        const saleContainer = document.getElementById("saleRows");
-        saleContainer.innerHTML = "";
-        if (data.sales && data.sales.length > 0) {
-            data.sales.forEach(sale => {
-                addSaleRow(sale.sales || "", sale.hours || "");
+        function onCategoryChange() {
+            const select = document.getElementById('categorySelect');
+            if (select.value) {
+                document.getElementById('genItemName').value = select.value;
+                updateTemplates();
+            }
+        }
+
+        function exportIntegratedHTML() {
+            const data = getStoredData();
+            const clone = document.documentElement.cloneNode(true);
+            let dataScript = clone.querySelector('#embedded-data');
+            if (!dataScript) {
+                dataScript = document.createElement('script');
+                dataScript.id = 'embedded-data';
+                dataScript.type = 'application/json';
+                clone.querySelector('head').appendChild(dataScript);
+            }
+            dataScript.textContent = JSON.stringify(data);
+
+            const htmlContent = "<!DOCTYPE html>\n<html lang=\"ja\">\n" + clone.innerHTML + "\n</html>";
+            const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "memo.html";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function getGeneratedTemplates() {
+            const name = document.getElementById('genItemName').value.trim() || '品名';
+            const price = document.getElementById('genPrice').value.trim() || '価格';
+            const qty = document.getElementById('genQuantity').value.trim() || '数量';
+            const data = getStoredData();
+            return (data.templates || []).map(tpl => ({
+                id: tpl.id || Date.now(),
+                label: tpl.label || 'テンプレート',
+                text: (tpl.text || '').replace(/\{name\}/g, name).replace(/\{price\}/g, price).replace(/\{qty\}/g, qty)
+            }));
+        }
+
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if (btnElement) btnElement.classList.add('active');
+        }
+
+        function updateTemplates() {
+            const area = document.getElementById('templateListArea');
+            area.innerHTML = '';
+            getGeneratedTemplates().forEach(tpl => {
+                const card = document.createElement('div');
+                card.className = 'template-card';
+                card.innerHTML = `
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 ${escapeHtml(tpl.label)}</div>
+                    <div class="template-pre">${escapeHtml(tpl.text)}</div>
+                    <button onclick="copyToClipboard('${escapeJS(tpl.text)}')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                `;
+                area.appendChild(card);
             });
-        } else {
-            addSaleRow();
         }
 
-        alert("保存データを正常に読み込みました！");
-        calculateAll();
-    } catch (e) {
-        alert("データの読み込みに失敗しました。");
-    }
-}
+        ['genItemName', 'genPrice', 'genQuantity'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateTemplates);
+        });
 
-/* =========================
-   ユーティリティ関数
-========================= */
-function formatDuration(hours) {
-    if (hours <= 0) return "0時間";
-    const totalMinutes = Math.round(hours * 60);
-    const days = Math.floor(totalMinutes / 1440);
-    const remainingMinutes = totalMinutes % 1440;
-    const h = Math.floor(remainingMinutes / 60);
-    const m = remainingMinutes % 60;
-    let result = "";
-    if (days > 0) result += days + "日 ";
-    if (h > 0) result += h + "時間 ";
-    if (m > 0) result += m + "分";
-    return result.trim() || "1分未満";
-}
+        function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => alert('コピーしました！')); }
+        function escapeHtml(str) { return str ? str.replace(/[&'`<>]/g, m => ({ '&': '&amp;', "'": '&#x27;', '`': '&#x60;', '<': '&lt;', '>': '&gt;' }[m])) : ''; }
+        function escapeJS(str) { return str ? str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n') : ''; }
 
-function formatDateTime(date) {
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    return `${month}月${day}日 ${hours}:${minutes}`;
-}
-
-function formatNumber(number) {
-    if (Number.isInteger(number)) {
-        return number.toLocaleString("ja-JP");
-    }
-    return number.toLocaleString("ja-JP", { maximumFractionDigits: 4 });
-}
-
-function escapeHTML(text) {
-    if (!text) return "";
-    return String(text)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-function clearAll() {
-    if (!confirm("入力をすべてクリアしますか？")) return;
-    document.getElementById("productName").value = "";
-    document.getElementById("stock").value = "";
-    document.getElementById("price").value = "";
-    document.getElementById("workLevel").value = "";
-    document.getElementById("workCount").value = "";
-    document.getElementById("efficiency").value = "";
-    document.getElementById("raw-input-text").value = "";
-    
-    document.getElementById("itemRows").innerHTML = `
-        <div class="work-row flex items-center space-x-1.5 bg-slate-50 p-2 rounded border border-slate-200">
-            <input type="text" placeholder="アイテム名" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded item-name">
-            <input type="number" placeholder="数量" class="w-16 sm:w-20 text-xs p-1.5 border border-slate-300 rounded item-qty">
-            <input type="text" placeholder="単位" class="w-12 sm:w-16 text-xs p-1.5 border border-slate-300 rounded item-unit">
-            <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-1.5 py-1 flex-shrink-0" onclick="deleteRow(this)">✕</button>
-        </div>
-    `;
-    document.getElementById("saleRows").innerHTML = `
-        <div class="sale-row flex items-center space-x-1.5 bg-slate-50 p-2 rounded border border-slate-200">
-            <input type="number" placeholder="販売数" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded sale-qty">
-            <input type="number" step="0.01" placeholder="販売時間h" class="min-w-0 flex-1 text-xs p-1.5 border border-slate-300 rounded sale-hours">
-            <button type="button" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-1.5 py-1 flex-shrink-0" onclick="deleteRow(this)">✕</button>
-        </div>
-    `;
-    document.getElementById("result").innerHTML = "情報を入力して「総合計算を実行」してください。";
-}
-</script>
-
+        window.onload = function() {
+            const dataScript = document.getElementById('embedded-data');
+            if (dataScript && dataScript.textContent && dataScript.textContent !== '{}') {
+                try {
+                    const embedded = JSON.parse(dataScript.textContent);
+                    if (embedded.templates) saveStoredData(embedded);
+                } catch(e) {}
+            }
+            document.getElementById('usernameInput').value = getCurrentUser();
+            const data = getStoredData();
+            updateTemplates();
+            updateCategoryDropdown(data.templates);
+        };
+    </script>
 </body>
 </html>
+
+<!-- 追加したJSONデータ -->
+<script>
+const embeddedItemMaster = [];
+</script>
