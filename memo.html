@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>マイ・ローカルデータベース＆Hub</title>
+    <!-- Tesseract.js (ブラウザ用OCRライブラリ) のCDN読み込み -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v5/dist/tesseract.min.js"></script>
     <style>
         body { font-family: sans-serif; margin: 0; padding: 15px; background: #f4f6f8; color: #333; box-sizing: border-box; }
         h1 { font-size: 1.3rem; margin-bottom: 10px; color: #2c3e50; }
@@ -52,35 +54,44 @@
         .template-chip { background: #fff; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; color: #334155; }
         .template-chip:hover { background: #e2e8f0; }
 
+        /* 定型文タブ専用のカードスタイル */
         .template-card { background: #fff; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 10px; text-align: left; }
         .template-card h4 { margin: 0 0 6px 0; font-size: 0.95rem; color: #2c3e50; }
         .template-pre { background: #f8fafc; padding: 8px; border-radius: 4px; border: 1px solid #e2e8f0; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap; margin-bottom: 8px; }
 
+        /* ジェネレーター専用パネル */
         .generator-panel { background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 12px; text-align: left; }
         .generator-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 8px; }
         .generator-grid input, .generator-grid select { width: 100%; box-sizing: border-box; }
 
-        .keyword-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
-        .keyword-chip { background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; color: #334155; }
-        .keyword-chip:hover { background: #cbd5e1; }
+        /* ローディングオーバーレイ */
+        #loadingOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; color: #fff; font-size: 1.2rem; flex-direction: column; gap: 10px; }
     </style>
 </head>
 <body>
 
+    <div id="loadingOverlay">
+        <div id="loadingText">OCR処理中... しばらくお待ちください</div>
+    </div>
+
     <h1>🗂️ マイ・ローカルデータベース＆Hub</h1>
 
-    <!-- ユーザー切り替え用バー -->
+    <!-- 簡易ユーザー登録・切り替え・一括入出力用バー -->
     <div class="card" style="background: #eef2f7; border: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
         <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 0.9rem; font-weight: bold; color: #2c3e50;">👤 ユーザープロファイル:</span>
-            <input type="text" id="usernameInput" placeholder="ユーザー名を入力" style="padding: 5px 8px; font-size: 0.85rem;" onchange="saveCurrentUser()">
+            <span style="font-size: 0.9rem; font-weight: bold; color: #2c3e50;">👤 プロファイル:</span>
+            <input type="text" id="usernameInput" placeholder="ユーザー名" style="padding: 5px 8px; font-size: 0.85rem; width: 120px;" onchange="saveCurrentUser()">
         </div>
-        <div style="font-size: 0.8rem; color: #555;">
-            ※ユーザーごとに独立して保存されます。
+        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            <button onclick="exportAllDataJSON()" style="background: #27ae60; font-size: 0.8rem; padding: 5px 8px;">💾 全データJSON出力</button>
+            <label style="background: #2980b9; color: #fff; font-size: 0.8rem; padding: 6px 10px; border-radius: 4px; cursor: pointer; display: inline-block;">
+                📥 全データJSONインポート
+                <input type="file" id="allDataImportInput" accept=".json" style="display: none;" onchange="importAllDataJSON(event)">
+            </label>
         </div>
     </div>
 
-    <!-- カテゴリ＆分類 選択エリア -->
+    <!-- カテゴリ＆分類 選択エリア（横並び） -->
     <div class="card">
         <div class="controls">
             <div class="control-group">
@@ -120,19 +131,78 @@
     <!-- 詳細切替タブ（縦タブレイアウト） -->
     <div class="main-layout">
         <div class="tab-buttons" id="tabButtonContainer">
-            <button class="tab-btn active" onclick="switchTab('templateTab', this)">📋 定型文・トレード</button>
+            <button class="tab-btn active" onclick="switchTab('pictureBookTab', this)">📖 図鑑タブ</button>
+            <button class="tab-btn" onclick="switchTab('templateTab', this)">📋 定型文・品名管理</button>
             <button class="tab-btn" onclick="switchTab('textTab', this)">📝 詳細メモ</button>
             <button class="tab-btn" onclick="switchTab('priceTab', this)">💰 売買・価格メモ</button>
             <button class="tab-btn" onclick="switchTab('eventTab', this)">📅 イベント情報</button>
             <button class="tab-btn" onclick="switchTab('imageTab', this)">📸 スクショ保存</button>
-            <button class="tab-btn" onclick="switchTab('adminTab', this)" style="background: #27ae60; color: #fff;">⚙️ メンテナンス画面</button>
             <button class="tab-btn" onclick="switchTab('wikiTab', this)">🌐 非公式Wiki</button>
             <button class="tab-btn" onclick="switchTab('bbsTab', this)">💬 公式掲示板</button>
         </div>
 
         <div class="tab-content-area">
-            <!-- タブ0: 定型文一覧＆作成ツール -->
-            <div id="templateTab" class="tab-content active">
+            <!-- タブ0: 図鑑タブ -->
+            <div id="pictureBookTab" class="tab-content active">
+                <div class="screenshot-area" style="text-align: left; background: #fff;">
+                    <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">📖 図鑑データの一括追加・複数枚OCR取り込み</h3>
+                    <p style="font-size: 0.8rem; color: #666; margin-bottom: 8px;">複数枚の画像を選択してまとめてOCR解析し、図鑑アイテムとして一括登録できます。</p>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
+                        <select id="pbNewCategory" style="flex: 1; min-width: 130px;">
+                            <option value="none">💎 カテゴリ選択</option>
+                            <option value="genryo">💎 原料</option>
+                            <option value="hon">📖 本</option>
+                            <option value="kusuri">⚗️ 薬</option>
+                            <option value="ken">🗡️ 剣</option>
+                            <option value="yoroi">🛡️ 鎧</option>
+                            <option value="tate">🛡️ 盾</option>
+                            <option value="tsue">🪄 杖</option>
+                            <option value="accessory">💍 アクセサリ</option>
+                            <option value="chizu">🗺️ 地図</option>
+                            <option value="dougu">🔨 道具</option>
+                            <option value="seibutsu">🐉 生物</option>
+                            <option value="shokumotsu">☕ 食物</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom: 8px;">
+                        <label style="font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 4px;">📸 画像選択（複数選択可）:</label>
+                        <input type="file" id="pbMultiImageInput" accept="image/*" multiple>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button onclick="processBatchOCRForPictureBook()" style="background: #27ae60; flex: 1;">⚡ 複数画像からまとめてOCR取り込み実行</button>
+                        <button onclick="exportRecordTypeJSON('picturebook')" style="background: #8e44ad;">📤 図鑑JSON出力</button>
+                        <label style="background: #2980b9; color: #fff; font-size: 0.9rem; padding: 8px 12px; border-radius: 4px; cursor: pointer; text-align: center;">
+                            📥 図鑑JSONインポート
+                            <input type="file" accept=".json" style="display: none;" onchange="importRecordTypeJSON(event, 'picturebook')">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="action-bar">
+                    <input type="text" id="pbSearchInput" placeholder="🔍 図鑑を検索..." oninput="renderRecords('picturebook')" style="width: 100%;">
+                </div>
+                <div id="picturebookListContainer"></div>
+            </div>
+
+            <!-- タブ1: 定型文一覧＆作成ツール ＆ 品名一括登録 -->
+            <div id="templateTab" class="tab-content">
+                <!-- 定型文OCR取り込みパネル -->
+                <div class="generator-panel" style="background: #f0fdf4; border-color: #86efac; margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 6px 0; font-size: 0.9rem; color: #166534;">📸 定型文OCR取り込み（単語ごとの抽出対応）</h4>
+                    <p style="font-size: 0.8rem; color: #15803d; margin: 0 0 8px 0;">画像から文字を読み取り、単語チップから選択して定型文に組み込むことができます。</p>
+                    <input type="file" id="ocrTemplateImageInput" accept="image/*" style="margin-bottom: 6px;"><br>
+                    <button onclick="processTemplateOCR()" style="background: #16a34a; font-size: 0.85rem; margin-bottom: 8px;">🔍 画像からOCRして単語を抽出する</button>
+                    
+                    <div style="font-size: 0.8rem; font-weight: bold; color: #166534; margin-bottom: 4px;">抽出された単語（クリックで品名やジェネレーターにセット）:</div>
+                    <div id="ocrWordChips" style="display: flex; gap: 5px; flex-wrap: wrap; max-height: 80px; overflow-y: auto; background: #fff; padding: 6px; border: 1px solid #bbf7d0; border-radius: 4px; margin-bottom: 8px;">
+                        <span style="font-size: 0.75rem; color: #888;">ここに抽出された単語が表示されます</span>
+                    </div>
+                </div>
+
+                <!-- 掲示板要望用クイック誘導カード -->
                 <div class="generator-panel" style="background: #fffbeb; border-color: #fcd34d; margin-bottom: 15px;">
                     <h4 style="margin: 0 0 4px 0; font-size: 0.9rem; color: #b45309;">💬 公式掲示板（要望スレッド）への投稿支援</h4>
                     <p style="font-size: 0.8rem; color: #78350f; margin: 0 0 8px 0;">
@@ -143,14 +213,19 @@
 
                 <h3 style="margin-top: 0; font-size: 1rem; color: #2c3e50;">✨ トレード・宣伝ジェネレーター</h3>
                 <p style="font-size: 0.85rem; color: #666;">
-                    変数として <code>{name}</code>（品名）, <code>{price}</code>（価格）, <code>{qty}</code>（数量） が使えます。品名は自由に直接入力できます。
+                    変数として <code>{name}</code>（品名）, <code>{price}</code>（価格）, <code>{qty}</code>（数量） が使えます。
                 </p>
                 
-                <!-- ジェネレーター入力パネル（品名は自由入力テキスト） -->
+                <!-- ジェネレーター入力パネル -->
                 <div class="generator-panel">
                     <div class="generator-grid">
                         <div>
-                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">品名 (自由入力):</label>
+                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">品名 (選択or直接入力):</label>
+                            <div style="display: flex; gap: 4px;">
+                                <select id="genItemSelect" onchange="onItemSelectChange()" style="flex: 1;">
+                                    <option value="">-- 登録品名から選択 --</option>
+                                </select>
+                            </div>
                             <input type="text" id="genItemName" value="コッペパン" placeholder="例: コッペパン" style="margin-top: 4px;">
                         </div>
                         <div>
@@ -164,183 +239,288 @@
                     </div>
                 </div>
 
-                <!-- 新規テンプレート追加フォーム -->
+                <!-- 品名一括登録パネル -->
+                <div class="generator-panel" style="background: #fff; border-color: #e67e22; margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 6px 0; font-size: 0.9rem; color: #d35400;">📦 品名の一括登録・管理</h4>
+                    <p style="font-size: 0.8rem; color: #666; margin: 0 0 6px 0;">改行区切りで複数の品名をペーストして一括登録できます。</p>
+                    <textarea id="bulkItemInput" placeholder="例：&#10;鉄鉱石&#10;木材&#10;コッペパン&#10;薬草" style="height: 60px; margin-bottom: 6px;"></textarea>
+                    <button onclick="addBulkItems()" style="background: #e67e22; font-size: 0.85rem; margin-bottom: 8px;">➕ 改行区切りの品名一括登録</button>
+                    
+                    <div style="font-size: 0.8rem; font-weight: bold; color: #475569; margin-bottom: 4px;">登録済み品名一覧（クリックでジェネレーターにセット / ✕で削除）:</div>
+                    <div id="itemMasterChips" style="display: flex; gap: 5px; flex-wrap: wrap; max-height: 100px; overflow-y: auto; background: #f8fafc; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px;"></div>
+                </div>
+
+                <!-- 新規テンプレート追加フォーム ＆ データバックアップ -->
                 <div class="generator-panel" style="background: #fff; border-color: #3498db; margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 6px 0; font-size: 0.9rem; color: #2980b9;">➕ 新しい定型文フォーマットを追加</h4>
+                    <h4 style="margin: 0 0 6px 0; font-size: 0.9rem; color: #2980b9;">➕ 新しい定型文フォーマットを追加（マスター登録）</h4>
                     <div style="margin-bottom: 6px;">
-                        <input type="text" id="newTplLabel" placeholder="フォーマット名（例：最安値宣伝）" style="width: 100%; box-sizing: border-box;">
+                        <input type="text" id="newTplLabel" placeholder="フォーマット名（例：最安値宣伝 または 要望：〇〇機能について）" style="width: 100%; box-sizing: border-box;">
                     </div>
                     <div style="margin-bottom: 6px;">
                         <textarea id="newTplText" placeholder="テンプレート文面（例：{name} @1:{price} 最安値！在庫 {qty}）" style="height: 60px;"></textarea>
                     </div>
-                    <button onclick="addNewTemplate()" style="background: #27ae60; font-size: 0.85rem; width: 100%;">💾 このフォーマットを追加</button>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button onclick="addNewTemplate()" style="background: #27ae60; font-size: 0.85rem; flex: 1;">💾 このフォーマットを追加</button>
+                        <button onclick="exportTemplates()" style="background: #8e44ad; font-size: 0.85rem;">📤 定型文JSON出力</button>
+                        <label style="background: #2980b9; color: #fff; font-size: 0.85rem; padding: 8px 12px; border-radius: 4px; cursor: pointer; text-align: center;">
+                            📥 定型文JSONインポート
+                            <input type="file" accept=".json" style="display: none;" onchange="importTemplatesJSON(event)">
+                        </label>
+                    </div>
                 </div>
 
-                <h3 style="font-size: 1rem; color: #2c3e50; margin: 0 0 8px 0;">📌 登録済み定型文フォーマット一覧</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h3 style="font-size: 1rem; color: #2c3e50; margin: 0;">📌 あなたが登録した定型文一覧マスター</h3>
+                </div>
                 <div id="templateListArea"></div>
             </div>
 
-            <!-- タブ1: テキスト詳細 -->
+            <!-- タブ2: テキスト詳細 -->
             <div id="textTab" class="tab-content">
                 <div class="screenshot-area" style="text-align: left; background: #fff;">
                     <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しい詳細メモを追加</h3>
+                    
                     <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
                         <select id="textNewCategory" style="flex: 1; min-width: 130px;">
                             <option value="none">💎 カテゴリ（任意）</option>
-                            <option value="genryo">💎 原料</option><option value="hon">📖 本</option><option value="kusuri">⚗️ 薬</option><option value="ken">🗡️ 剣</option><option value="yoroi">🛡️ 鎧</option><option value="tate">🛡️ 盾</option><option value="tsue">🪄 杖</option><option value="accessory">💍 アクセサリ</option><option value="chizu">🗺️ 地図</option><option value="dougu">🔨 道具</option><option value="seibutsu">🐉 生物</option><option value="shokumotsu">☕ 食物</option>
+                            <option value="genryo">💎 原料</option>
+                            <option value="hon">📖 本</option>
+                            <option value="kusuri">⚗️ 薬</option>
+                            <option value="ken">🗡️ 剣</option>
+                            <option value="yoroi">🛡️ 鎧</option>
+                            <option value="tate">🛡️ 盾</option>
+                            <option value="tsue">🪄 杖</option>
+                            <option value="accessory">💍 アクセサリ</option>
+                            <option value="chizu">🗺️ 地図</option>
+                            <option value="dougu">🔨 道具</option>
+                            <option value="seibutsu">🐉 生物</option>
+                            <option value="shokumotsu">☕ 食物</option>
                         </select>
                         <select id="textNewClassification" style="flex: 1; min-width: 130px;">
                             <option value="none">📂 分類（任意）</option>
-                            <option value="work">作業</option><option value="transport">輸送</option><option value="order">注文</option><option value="purchase">購入</option><option value="other">その他</option>
+                            <option value="work">作業</option>
+                            <option value="transport">輸送</option>
+                            <option value="order">注文</option>
+                            <option value="purchase">購入</option>
+                            <option value="other">その他</option>
                         </select>
                     </div>
+
                     <input type="text" id="textTitleInput" placeholder="タイトル（例：〇〇の効率手順）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
+                    
                     <div class="template-box">
-                        <span style="font-weight: bold; color: #475569;">💡 定型文挿入:</span>
+                        <span style="font-weight: bold; color: #475569;">💡 個別定型文（クリックで内容に挿入）:</span>
                         <div class="template-chips" id="textTemplateContainer"></div>
                     </div>
+
                     <textarea id="textBodyInput" placeholder="内容を入力..."></textarea>
-                    <div style="display: flex; gap: 5px;">
+                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                         <button onclick="addRecord('text')" style="flex: 1;">💾 このメモを追加</button>
-                        <button onclick="clearInput('text')" style="background: #e74c3c;">🗑️ クリア</button>
+                        <button onclick="exportRecordTypeJSON('text')" style="background: #8e44ad;">📤 テキストメモJSON出力</button>
+                        <label style="background: #2980b9; color: #fff; font-size: 0.9rem; padding: 8px 12px; border-radius: 4px; cursor: pointer; text-align: center;">
+                            📥 テキストメモJSONインポート
+                            <input type="file" accept=".json" style="display: none;" onchange="importRecordTypeJSON(event, 'text')">
+                        </label>
+                        <button onclick="clearInput('text')" style="background: #e74c3c;" title="入力内容をクリア">🗑️</button>
                     </div>
                 </div>
+
                 <div class="action-bar">
                     <input type="text" id="textSearchInput" placeholder="🔍 メモを検索..." oninput="renderRecords('text')" style="width: 55%;">
                     <select id="textSortSelect" onchange="renderRecords('text')" style="width: 40%;">
-                        <option value="manual">カスタム並び順</option><option value="new">新しい順</option><option value="old">古い順</option>
+                        <option value="manual">カスタム並び順</option>
+                        <option value="new">新しい順</option>
+                        <option value="old">古い順</option>
                     </select>
                 </div>
                 <div id="textListContainer"></div>
             </div>
 
-            <!-- タブ2: 売買・価格メモ -->
+            <!-- タブ3: 売買・価格メモ -->
             <div id="priceTab" class="tab-content">
                 <div class="screenshot-area" style="text-align: left; background: #fff;">
-                    <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しい価格メモを追加</h3>
+                    <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しい価格・相場メモを追加</h3>
+                    
                     <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
                         <select id="priceNewCategory" style="flex: 1; min-width: 130px;">
                             <option value="none">💎 カテゴリ（任意）</option>
-                            <option value="genryo">💎 原料</option><option value="hon">📖 本</option><option value="kusuri">⚗️ 薬</option><option value="ken">🗡️ 剣</option><option value="yoroi">🛡️ 鎧</option><option value="tate">🛡️ 盾</option><option value="tsue">🪄 杖</option><option value="accessory">💍 アクセサリ</option><option value="chizu">🗺️ 地図</option><option value="dougu">🔨 道具</option><option value="seibutsu">🐉 生物</option><option value="shokumotsu">☕ 食物</option>
+                            <option value="genryo">💎 原料</option>
+                            <option value="hon">📖 本</option>
+                            <option value="kusuri">⚗️ 薬</option>
+                            <option value="ken">🗡️ 剣</option>
+                            <option value="yoroi">🛡️ 鎧</option>
+                            <option value="tate">🛡️ 盾</option>
+                            <option value="tsue">🪄 杖</option>
+                            <option value="accessory">💍 アクセサリ</option>
+                            <option value="chizu">🗺️ 地図</option>
+                            <option value="dougu">🔨 道具</option>
+                            <option value="seibutsu">🐉 生物</option>
+                            <option value="shokumotsu">☕ 食物</option>
                         </select>
                         <select id="priceNewClassification" style="flex: 1; min-width: 130px;">
                             <option value="none">📂 分類（任意）</option>
-                            <option value="work">作業</option><option value="transport">輸送</option><option value="order">注文</option><option value="purchase">購入</option><option value="other">その他</option>
+                            <option value="work">作業</option>
+                            <option value="transport">輸送</option>
+                            <option value="order">注文</option>
+                            <option value="purchase">購入</option>
+                            <option value="other">その他</option>
                         </select>
                     </div>
+
                     <input type="text" id="priceTitleInput" placeholder="品名・アイテム名（例：鉄鉱石）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
+                    
                     <div class="template-box">
-                        <span style="font-weight: bold; color: #475569;">💡 定型文挿入:</span>
+                        <span style="font-weight: bold; color: #475569;">💡 個別定型文（クリックで内容に挿入）:</span>
                         <div class="template-chips" id="priceTemplateContainer"></div>
                     </div>
+
                     <textarea id="priceBodyInput" placeholder="購入価格、目標売値、相場などを入力..."></textarea>
-                    <div style="display: flex; gap: 5px;">
+                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                         <button onclick="addRecord('price')" style="flex: 1;">💾 この価格メモを追加</button>
-                        <button onclick="clearInput('price')" style="background: #e74c3c;">🗑️ クリア</button>
+                        <button onclick="exportRecordTypeJSON('price')" style="background: #8e44ad;">📤 価格メモJSON出力</button>
+                        <label style="background: #2980b9; color: #fff; font-size: 0.9rem; padding: 8px 12px; border-radius: 4px; cursor: pointer; text-align: center;">
+                            📥 価格メモJSONインポート
+                            <input type="file" accept=".json" style="display: none;" onchange="importRecordTypeJSON(event, 'price')">
+                        </label>
+                        <button onclick="clearInput('price')" style="background: #e74c3c;" title="入力内容をクリア">🗑️</button>
                     </div>
                 </div>
+
                 <div class="action-bar">
                     <input type="text" id="priceSearchInput" placeholder="🔍 価格メモを検索..." oninput="renderRecords('price')" style="width: 55%;">
                     <select id="priceSortSelect" onchange="renderRecords('price')" style="width: 40%;">
-                        <option value="manual">カスタム並び順</option><option value="new">新しい順</option><option value="old">古い順</option>
+                        <option value="manual">カスタム並び順</option>
+                        <option value="new">新しい順</option>
+                        <option value="old">古い順</option>
                     </select>
                 </div>
                 <div id="priceListContainer"></div>
             </div>
 
-            <!-- タブ3: イベント情報タブ -->
+            <!-- タブ4: イベント情報タブ -->
             <div id="eventTab" class="tab-content">
+                <!-- イベントOCR取り込みパネル -->
+                <div class="screenshot-area" style="text-align: left; background: #fff; border-color: #3b82f6; background-color: #eff6ff;">
+                    <h3 style="margin: 0 0 6px 0; font-size: 0.95rem; color: #1e40af;">📸 イベント情報 OCR自動取り込み</h3>
+                    <p style="font-size: 0.8rem; color: #1e3a8a; margin-bottom: 8px;">イベント告知や結果の画像を選択すると、OCRで読み取ってタイトルと本文に自動セットします。</p>
+                    <input type="file" id="ocrEventImageInput" accept="image/*" style="margin-bottom: 6px;"><br>
+                    <button onclick="processEventOCR()" style="background: #2563eb; font-size: 0.85rem;">⚡ 画像からイベント情報をOCR抽出する</button>
+                </div>
+
                 <div class="screenshot-area" style="text-align: left; background: #fff;">
                     <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しいイベント記録を追加</h3>
+                    
                     <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
                         <select id="eventNewCategory" style="flex: 1; min-width: 130px;">
                             <option value="none">💎 カテゴリ（任意）</option>
-                            <option value="genryo">💎 原料</option><option value="hon">📖 本</option><option value="kusuri">⚗️ 薬</option><option value="ken">🗡️ 剣</option><option value="yoroi">🛡️ 鎧</option><option value="tate">🛡️ 盾</option><option value="tsue">🪄 杖</option><option value="accessory">💍 アクセサリ</option><option value="chizu">🗺️ 地図</option><option value="dougu">🔨 道具</option><option value="seibutsu">🐉 生物</option><option value="shokumotsu">☕ 食物</option>
+                            <option value="genryo">💎 原料</option>
+                            <option value="hon">📖 本</option>
+                            <option value="kusuri">⚗️ 薬</option>
+                            <option value="ken">🗡️ 剣</option>
+                            <option value="yoroi">🛡️ 鎧</option>
+                            <option value="tate">🛡️ 盾</option>
+                            <option value="tsue">🪄 杖</option>
+                            <option value="accessory">💍 アクセサリ</option>
+                            <option value="chizu">🗺️ 地図</option>
+                            <option value="dougu">🔨 道具</option>
+                            <option value="seibutsu">🐉 生物</option>
+                            <option value="shokumotsu">☕ 食物</option>
                         </select>
                         <select id="eventNewClassification" style="flex: 1; min-width: 130px;">
                             <option value="none">📂 分類（任意）</option>
-                            <option value="work">作業</option><option value="transport">輸送</option><option value="order">注文</option><option value="purchase">購入</option><option value="other">その他</option>
+                            <option value="work">作業</option>
+                            <option value="transport">輸送</option>
+                            <option value="order">注文</option>
+                            <option value="purchase">購入</option>
+                            <option value="other">その他</option>
                         </select>
                     </div>
-                    <input type="text" id="eventTitleInput" placeholder="イベント名" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
+
+                    <input type="text" id="eventTitleInput" placeholder="イベント名（例：第5回 〇〇コンテスト）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
+                    
                     <div class="template-box">
-                        <span style="font-weight: bold; color: #475569;">💡 定型文挿入:</span>
+                        <span style="font-weight: bold; color: #475569;">💡 個別定型文（クリックで内容に挿入）:</span>
                         <div class="template-chips" id="eventTemplateContainer"></div>
                     </div>
+
                     <textarea id="eventBodyInput" placeholder="【計画】&#13;&#10;【進捗】&#13;&#10;【結果】"></textarea>
                     <div style="margin-bottom: 8px;">
                         <label style="font-size: 0.85rem; display: block; margin-bottom: 4px;">📸 スクショ画像添付（任意）</label>
                         <input type="file" id="eventImageInput" accept="image/*">
                     </div>
-                    <div style="display: flex; gap: 5px;">
+                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                         <button onclick="addRecord('event')" style="flex: 1;">💾 このイベント記録を追加</button>
-                        <button onclick="clearInput('event')" style="background: #e74c3c;">🗑️ クリア</button>
+                        <button onclick="exportRecordTypeJSON('event')" style="background: #8e44ad;">📤 イベントJSON出力</button>
+                        <label style="background: #2980b9; color: #fff; font-size: 0.9rem; padding: 8px 12px; border-radius: 4px; cursor: pointer; text-align: center;">
+                            📥 イベントJSONインポート
+                            <input type="file" accept=".json" style="display: none;" onchange="importRecordTypeJSON(event, 'event')">
+                        </label>
+                        <button onclick="clearInput('event')" style="background: #e74c3c;" title="入力内容をクリア">🗑️</button>
                     </div>
                 </div>
+
                 <div class="action-bar">
                     <input type="text" id="eventSearchInput" placeholder="🔍 イベントを検索..." oninput="renderRecords('event')" style="width: 55%;">
                     <select id="eventSortSelect" onchange="renderRecords('event')" style="width: 40%;">
-                        <option value="manual">カスタム並び順</option><option value="new">新しい順</option><option value="old">古い順</option>
+                        <option value="manual">カスタム並び順</option>
+                        <option value="new">新しい順</option>
+                        <option value="old">古い順</option>
                     </select>
                 </div>
                 <div id="eventListContainer"></div>
             </div>
 
-            <!-- タブ4: スクショ・画像 -->
+            <!-- タブ5: スクショ・画像 -->
             <div id="imageTab" class="tab-content">
                 <div class="screenshot-area">
-                    <p style="margin: 0 0 8px 0; font-size: 0.9rem;">スクショ画像の追加</p>
+                    <p style="margin: 0 0 8px 0; font-size: 0.9rem;">スクショ画像の追加・複数枚一括OCR取り込み</p>
                     <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
                         <select id="imageNewCategory" style="flex: 1; min-width: 130px;">
                             <option value="none">💎 カテゴリ（任意）</option>
-                            <option value="genryo">💎 原料</option><option value="hon">📖 本</option><option value="kusuri">⚗️ 薬</option><option value="ken">🗡️ 剣</option><option value="yoroi">🛡️ 鎧</option><option value="tate">🛡️ 盾</option><option value="tsue">🪄 杖</option><option value="accessory">💍 アクセサリ</option><option value="chizu">🗺️ 地図</option><option value="dougu">🔨 道具</option><option value="seibutsu">🐉 生物</option><option value="shokumotsu">☕ 食物</option>
+                            <option value="genryo">💎 原料</option>
+                            <option value="hon">📖 本</option>
+                            <option value="kusuri">⚗️ 薬</option>
+                            <option value="ken">🗡️ 剣</option>
+                            <option value="yoroi">🛡️ 鎧</option>
+                            <option value="tate">🛡️ 盾</option>
+                            <option value="tsue">🪄 杖</option>
+                            <option value="accessory">💍 アクセサリ</option>
+                            <option value="chizu">🗺️ 地図</option>
+                            <option value="dougu">🔨 道具</option>
+                            <option value="seibutsu">🐉 生物</option>
+                            <option value="shokumotsu">☕ 食物</option>
                         </select>
                         <select id="imageNewClassification" style="flex: 1; min-width: 130px;">
                             <option value="none">📂 分類（任意）</option>
-                            <option value="work">作業</option><option value="transport">輸送</option><option value="order">注文</option><option value="purchase">購入</option><option value="other">other</option>
+                            <option value="work">作業</option>
+                            <option value="transport">輸送</option>
+                            <option value="order">注文</option>
+                            <option value="purchase">購入</option>
+                            <option value="other">その他</option>
                         </select>
                     </div>
-                    <input type="text" id="imageTitleInput" placeholder="画像の名前" style="width: 80%; margin-bottom: 8px;"><br>
+                    <input type="text" id="imageTitleInput" placeholder="画像の名前（例：相場画面）" style="width: 80%; margin-bottom: 8px;"><br>
                     <input type="file" id="imageInput" accept="image/*"><br>
-                    <button onclick="addImageData()" style="margin-top: 5px;">➕ この画像を追加保存</button>
+                    <div style="display: flex; gap: 8px; justify-content: center; margin-top: 6px; flex-wrap: wrap;">
+                        <button onclick="addImageData()">➕ この画像を追加保存</button>
+                        <button onclick="exportRecordTypeJSON('image')" style="background: #8e44ad;">📤 スクショJSON出力</button>
+                        <label style="background: #2980b9; color: #fff; font-size: 0.9rem; padding: 8px 12px; border-radius: 4px; cursor: pointer; text-align: center;">
+                            📥 スクショJSONインポート
+                            <input type="file" accept=".json" style="display: none;" onchange="importRecordTypeJSON(event, 'image')">
+                        </label>
+                    </div>
                 </div>
+
                 <div class="action-bar">
                     <input type="text" id="imageSearchInput" placeholder="🔍 画像を検索..." oninput="renderRecords('image')" style="width: 100%;">
                 </div>
                 <div id="imageListContainer"></div>
             </div>
 
-            <!-- タブ5: メンテナンス画面 (JSON取り込み機能などを集約) -->
-            <div id="adminTab" class="tab-content">
-                <h3 style="margin-top: 0; font-size: 1.1rem; color: #2c3e50;">⚙️ メンテナンス・データ管理画面</h3>
-                <p style="font-size: 0.85rem; color: #555; line-height: 1.4;">
-                    JSONファイルを用いて、定型文マスターや登録データのバックアップ（エクスポート）および復元・一括取り込み（インポート）を行えます。
-                </p>
-
-                <div class="generator-panel" style="background: #fff; border-color: #cbd5e1; margin-top: 15px;">
-                    <h4 style="margin: 0 0 8px 0; font-size: 0.95rem; color: #2c3e50;">📥 品名マスター・定型文のJSON取り込み（インポート）</h4>
-                    <p style="font-size: 0.8rem; color: #666; margin-bottom: 8px;">
-                        作成・編集したJSONファイルを選択して一括登録できます。
-                    </p>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                        <input type="file" id="jsonImportFile" accept=".json" style="flex: 1; min-width: 200px;">
-                        <button onclick="importTemplatesJSON()" style="background: #d35400; font-size: 0.85rem;">📂 JSONファイルを取り込む</button>
-                    </div>
-                </div>
-
-                <div class="generator-panel" style="background: #fff; border-color: #cbd5e1; margin-top: 15px;">
-                    <h4 style="margin: 0 0 8px 0; font-size: 0.95rem; color: #2c3e50;">📤 定型文のエクスポート（バックアップ）</h4>
-                    <p style="font-size: 0.8rem; color: #666; margin-bottom: 8px;">
-                        現在の定型文設定をJSONファイルとしてダウンロードします。
-                    </p>
-                    <button onclick="exportTemplates()" style="background: #8e44ad; font-size: 0.85rem;">💾 定型文をJSONで保存</button>
-                </div>
-            </div>
-
             <!-- タブ6: Wiki埋め込み -->
             <div id="wikiTab" class="tab-content">
                 <div class="link-bar">
-                    🔗 参考Wiki: <a href="https://wikiwiki.jp/sold2/" target="_blank">https://wikiwiki.jp/sold2/</a>
+                    🔗 参考Wiki: <a href="https://wikiwiki.jp/sold2/" target="_blank">https://wikiwiki.jp/sold2/</a> （別タブで開く）
                 </div>
                 <div class="frame-container">
                     <iframe src="https://wikiwiki.jp/sold2/" class="frame-box" title="Sold Out 2 Wiki"></iframe>
@@ -350,7 +530,7 @@
             <!-- タブ7: 掲示板埋め込み -->
             <div id="bbsTab" class="tab-content">
                 <div class="link-bar">
-                    🔗 公式掲示板: <a href="https://so2-bbs.mutoys.com/t/topic/8580" target="_blank">https://so2-bbs.mutoys.com/t/topic/8580</a>
+                    🔗 公式掲示板（要望スレッド）: <a href="https://so2-bbs.mutoys.com/t/topic/8580" target="_blank">https://so2-bbs.mutoys.com/t/topic/8580</a> （別タブで開く）
                 </div>
                 <div class="frame-container">
                     <iframe src="https://so2-bbs.mutoys.com/t/topic/8580" class="frame-box" title="Sold Out 2 BBS Topic 8580"></iframe>
@@ -360,6 +540,14 @@
     </div>
 
     <script>
+        function showLoading(msg) {
+            document.getElementById('loadingText').textContent = msg;
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
         function getCurrentUser() {
             let user = localStorage.getItem('hub_current_user');
             if (!user) {
@@ -374,6 +562,7 @@
             let val = input.value.trim();
             if (!val) val = 'default_user';
             localStorage.setItem('hub_current_user', val);
+            updateItemMasterUI();
             updateTemplates();
             loadAllData();
         }
@@ -384,6 +573,104 @@
             { id: 3, label: "宣伝・相場形式", text: "{name}@1:{price} 最安値" },
             { id: 4, label: "【要望】機能改善の提案", text: "【要望・フィードバック】\n要望内容：\n現状の課題：\n期待する動作：\n参考スレッド: https://so2-bbs.mutoys.com/t/topic/8580" }
         ];
+
+        const defaultItems = ["コッペパン", "鉄鉱石", "木材", "薬草"];
+
+        function getStoredItems() {
+            const user = getCurrentUser();
+            let stored = localStorage.getItem('hub_item_master_' + user);
+            if (!stored) {
+                stored = localStorage.getItem('hub_item_master_default_user');
+            }
+            if (!stored) return defaultItems;
+            try {
+                let parsed = JSON.parse(stored);
+                return parsed.map(item => (typeof item === 'string' ? item : item.name || '')).filter(name => name.length > 0);
+            } catch(e) {
+                return defaultItems;
+            }
+        }
+
+        function saveStoredItems(items) {
+            const user = getCurrentUser();
+            localStorage.setItem('hub_item_master_' + user, JSON.stringify(items));
+        }
+
+        function addBulkItems() {
+            const bulkInput = document.getElementById('bulkItemInput');
+            const lines = bulkInput.value.split('\n');
+            let items = getStoredItems();
+            let addedCount = 0;
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (trimmed && !items.includes(trimmed)) {
+                    items.push(trimmed);
+                    addedCount++;
+                }
+            });
+            saveStoredItems(items);
+            bulkInput.value = '';
+            updateItemMasterUI();
+            alert(`${addedCount}件の品名を追加しました！`);
+        }
+
+        function deleteItemMaster(itemName) {
+            if (!confirm(`品名「${itemName}」をマスターから削除しますか？`)) return;
+            let items = getStoredItems();
+            items = items.filter(i => i !== itemName);
+            saveStoredItems(items);
+            updateItemMasterUI();
+        }
+
+        function updateItemMasterUI() {
+            const user = getCurrentUser();
+            const nameInput = document.getElementById('usernameInput');
+            if (nameInput && nameInput.value !== user && nameInput.value === '') {
+                nameInput.value = user;
+            }
+
+            const items = getStoredItems();
+            const select = document.getElementById('genItemSelect');
+            if (select) {
+                const currentVal = document.getElementById('genItemName').value;
+                select.innerHTML = '<option value="">-- 登録品名から選択 --</option>';
+                items.forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item;
+                    opt.textContent = item;
+                    if (item === currentVal) opt.selected = true;
+                    select.appendChild(opt);
+                });
+            }
+
+            const chipsArea = document.getElementById('itemMasterChips');
+            if (chipsArea) {
+                chipsArea.innerHTML = '';
+                if (items.length === 0) {
+                    chipsArea.innerHTML = '<span style="font-size: 0.75rem; color: #888;">登録されている品名はありません</span>';
+                    return;
+                }
+                items.forEach(item => {
+                    const chip = document.createElement('span');
+                    chip.style.cssText = 'background: #fff; border: 1px solid #cbd5e1; padding: 2px 6px; border-radius: 10px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #334155;';
+                    chip.innerHTML = `${escapeHtml(item)} <button type="button" onclick="event.stopPropagation(); deleteItemMaster('${escapeJS(item)}')" style="background:none; border:none; color:#e74c3c; cursor:pointer; font-size:0.7rem; padding:0;">✕</button>`;
+                    chip.onclick = function() {
+                        document.getElementById('genItemName').value = item;
+                        document.getElementById('genItemSelect').value = item;
+                        updateTemplates();
+                    };
+                    chipsArea.appendChild(chip);
+                });
+            }
+        }
+
+        function onItemSelectChange() {
+            const select = document.getElementById('genItemSelect');
+            if (select.value) {
+                document.getElementById('genItemName').value = select.value;
+                updateTemplates();
+            }
+        }
 
         function getStoredTemplates() {
             const user = getCurrentUser();
@@ -402,19 +689,17 @@
             const textInput = document.getElementById('newTplText');
             const label = labelInput.value.trim();
             const text = textInput.value.trim();
-
             if (!label || !text) {
                 alert('フォーマット名とテンプレート文面の両方を入力してください。');
                 return;
             }
-
             let templates = getStoredTemplates();
             templates.push({ id: Date.now(), label: label, text: text });
             saveStoredTemplates(templates);
             labelInput.value = '';
             textInput.value = '';
             updateTemplates();
-            alert('新しいフォーマットを追加しました！');
+            alert('新しいフォーマットをマスターに登録しました！');
         }
 
         function deleteTemplate(id) {
@@ -431,33 +716,21 @@
             if (index === -1) return;
             const targetIndex = index + direction;
             if (targetIndex < 0 || targetIndex >= templates.length) return;
-
             const temp = templates[index];
             templates[index] = templates[targetIndex];
             templates[targetIndex] = temp;
-
             saveStoredTemplates(templates);
             updateTemplates();
         }
 
         function exportTemplates() {
             const templates = getStoredTemplates();
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(templates, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "templates_master_" + getCurrentUser() + ".json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
+            downloadJSON(templates, "templates_master_" + getCurrentUser() + ".json");
         }
 
-        function importTemplatesJSON() {
-            const fileInput = document.getElementById('jsonImportFile');
-            if (!fileInput.files || !fileInput.files[0]) {
-                alert('インポートするJSONファイルを選択してください。');
-                return;
-            }
-
+        function importTemplatesJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
@@ -465,16 +738,12 @@
                     if (Array.isArray(parsed)) {
                         saveStoredTemplates(parsed);
                         updateTemplates();
-                        alert('JSONファイルから定型文マスターを正常に取り込みました！');
-                        fileInput.value = '';
-                    } else {
-                        alert('データ形式が正しくありません（配列形式のJSONが必要です）。');
-                    }
-                } catch(err) {
-                    alert('JSONファイルの解析に失敗しました。');
-                }
+                        alert("定型文マスターを正常にインポートしました！");
+                    } else { alert("データ形式が正しくありません。"); }
+                } catch(err) { alert("JSONファイルのパースに失敗しました。"); }
+                event.target.value = '';
             };
-            reader.readAsText(fileInput.files[0], 'utf-8');
+            reader.readAsText(file);
         }
 
         function insertFeedbackTemplate() {
@@ -487,15 +756,12 @@
             const name = document.getElementById('genItemName').value.trim() || '品名';
             const price = document.getElementById('genPrice').value.trim() || '価格';
             const qty = document.getElementById('genQuantity').value.trim() || '数量';
-
             const rawTemplates = getStoredTemplates();
-            return rawTemplates.map(tpl => {
-                let replacedText = tpl.text
-                    .replace(/\{name\}/g, name)
-                    .replace(/\{price\}/g, price)
-                    .replace(/\{qty\}/g, qty);
-                return { id: tpl.id, label: tpl.label, text: replacedText };
-            });
+            return rawTemplates.map(tpl => ({
+                id: tpl.id,
+                label: tpl.label,
+                text: tpl.text.replace(/\{name\}/g, name).replace(/\{price\}/g, price).replace(/\{qty\}/g, qty)
+            }));
         }
 
         function switchTab(tabId, btnElement) {
@@ -509,11 +775,11 @@
         function getItemCategory() { return document.getElementById('itemCategorySelect').value; }
 
         const categoryLabels = {
-            'genryo': '💎 原料', 'hon': '📖 本', 'kusuri': '⚗️ 薬', 'ken': '🗡️ 剣', 'yoroi': '🛡️ 鎧', 'tate': '🛡️ 盾', 'tsue': '🪄 杖', 'accessory': '💍 アクセサリ', 'chizu': '🗺️ 地図', 'dougu': '🔨 道具', 'seibutsu': '🐉 生物', 'shokumotsu': '☕ 食物'
+            'genryo': '💎 原料', 'hon': '📖 本', 'kusuri': '⚗️ 薬', 'ken': '🗡️ 剣',
+            'yoroi': '🛡️ 鎧', 'tate': '🛡️ 盾', 'tsue': '🪄 杖', 'accessory': '💍 アクセサリ',
+            'chizu': '🗺️ 地図', 'dougu': '🔨 道具', 'seibutsu': '🐉 生物', 'shokumotsu': '☕ 食物'
         };
-        const classificationLabels = {
-            'work': '作業', 'transport': '輸送', 'order': '注文', 'purchase': '購入', 'other': 'その他'
-        };
+        const classificationLabels = { 'work': '作業', 'transport': '輸送', 'order': '注文', 'purchase': '購入', 'other': 'その他' };
 
         function onClassificationChange() {
             updateTemplates();
@@ -538,7 +804,9 @@
                             </div>
                         </div>
                         <div class="template-pre">${escapeHtml(tpl.text)}</div>
-                        <button onclick="copyToClipboard('${escapeJS(tpl.text)}')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick="copyToClipboard('${escapeJS(tpl.text)}')" style="flex: 1; font-size: 0.8rem;">📋 この定型文をコピー</button>
+                        </div>
                     `;
                     templateListArea.appendChild(card);
                 });
@@ -553,6 +821,7 @@
                     chip.type = 'button';
                     chip.className = 'template-chip';
                     chip.textContent = tpl.label;
+                    chip.title = tpl.text;
                     chip.onclick = function() {
                         const bodyInput = document.getElementById(type + 'BodyInput');
                         if (bodyInput) {
@@ -570,28 +839,271 @@
         });
 
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => alert('コピーしました！'));
+            navigator.clipboard.writeText(text).then(() => alert('定型文をコピーしました！'));
         }
 
         function clearInput(type) {
-            if (confirm('クリアしますか？')) {
-                document.getElementById(type + 'TitleInput').value = '';
-                document.getElementById(type + 'BodyInput').value = '';
+            if (confirm('入力中の内容をクリアしますか？')) {
+                const titleInput = document.getElementById(type + 'TitleInput');
+                const bodyInput = document.getElementById(type + 'BodyInput');
+                if (titleInput) titleInput.value = '';
+                if (bodyInput) bodyInput.value = '';
             }
         }
 
         function loadAllData() {
+            renderRecords('picturebook');
             renderRecords('text');
             renderRecords('price');
             renderRecords('event');
             renderRecords('image');
         }
 
+        // --- JSONファイル入出力機能 ---
+        function exportAllDataJSON() {
+            const user = getCurrentUser();
+            const allRecords = localStorage.getItem('hub_records_all_' + user) || '[]';
+            const itemMaster = localStorage.getItem('hub_item_master_' + user) || '[]';
+            const templates = localStorage.getItem('hub_custom_templates_' + user) || '[]';
+
+            const exportData = {
+                user: user,
+                exportDate: new Date().toISOString(),
+                itemMaster: JSON.parse(itemMaster),
+                customTemplates: JSON.parse(templates),
+                records: JSON.parse(allRecords)
+            };
+
+            downloadJSON(exportData, `hub_all_data_${user}.json`);
+        }
+
+        function importAllDataJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    const user = getCurrentUser();
+                    if (parsed.itemMaster) {
+                        localStorage.setItem('hub_item_master_' + user, JSON.stringify(parsed.itemMaster));
+                    }
+                    if (parsed.customTemplates) {
+                        localStorage.setItem('hub_custom_templates_' + user, JSON.stringify(parsed.customTemplates));
+                    }
+                    if (parsed.records) {
+                        localStorage.setItem('hub_records_all_' + user, JSON.stringify(parsed.records));
+                    }
+                    updateItemMasterUI();
+                    updateTemplates();
+                    loadAllData();
+                    alert("すべてのデータを正常にインポート（復元）しました！");
+                } catch(err) {
+                    alert("JSONファイルの解析に失敗しました。正しいデータ形式かご確認ください。");
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function exportRecordTypeJSON(type) {
+            const user = getCurrentUser();
+            let records = JSON.parse(localStorage.getItem('hub_records_all_' + user) || '[]');
+            records = records.filter(item => item.type === type);
+            downloadJSON(records, `hub_${type}_data_${user}.json`);
+        }
+
+        function importRecordTypeJSON(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (Array.isArray(parsed)) {
+                        const user = getCurrentUser();
+                        let allRecords = JSON.parse(localStorage.getItem('hub_records_all_' + user) || '[]');
+                        allRecords = allRecords.filter(item => item.type !== type);
+                        const merged = parsed.concat(allRecords);
+                        localStorage.setItem('hub_records_all_' + user, JSON.stringify(merged));
+                        loadAllData();
+                        alert(`${type} データのインポートが完了しました！`);
+                    } else {
+                        alert("データ形式が配列ではありません。");
+                    }
+                } catch(err) {
+                    alert("JSONファイルのパースに失敗しました。");
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function downloadJSON(dataObj, filename) {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataObj, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", filename);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        // --- 図鑑タブ & 複数枚画像OCR機能 ---
+        async function processBatchOCRForPictureBook() {
+            const fileInput = document.getElementById('pbMultiImageInput');
+            const categorySelect = document.getElementById('pbNewCategory').value;
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('OCRする画像ファイルを1枚以上選択してください。');
+                return;
+            }
+
+            showLoading(`OCR解析中 (0 / ${fileInput.files.length})...`);
+            const user = getCurrentUser();
+            let records = JSON.parse(localStorage.getItem('hub_records_all_' + user) || '[]');
+            
+            try {
+                const worker = await Tesseract.createWorker('jpn+eng');
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    const file = fileInput.files[i];
+                    showLoading(`OCR解析中 (${i + 1} / ${fileInput.files.length}): ${file.name}`);
+                    
+                    const base64Data = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.readAsDataURL(file);
+                    });
+
+                    const ret = await worker.recognize(base64Data);
+                    records.unshift({
+                        id: Date.now() + i,
+                        type: 'picturebook',
+                        classification: 'other',
+                        itemCategory: categorySelect,
+                        title: file.name.replace(/\.[^/.]+$/, ""),
+                        body: ret.data.text.trim(),
+                        image: base64Data,
+                        date: new Date().toLocaleString()
+                    });
+                }
+                await worker.terminate();
+                localStorage.setItem('hub_records_all_' + user, JSON.stringify(records));
+                fileInput.value = '';
+                loadAllData();
+                alert('複数画像のOCR取り込みが完了し、図鑑に保存しました！');
+            } catch (err) {
+                console.error(err);
+                alert('OCR処理中にエラーが発生しました。');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // --- イベント情報OCR取り込み機能 ---
+        async function processEventOCR() {
+            const fileInput = document.getElementById('ocrEventImageInput');
+            if (!fileInput.files || !fileInput.files[0]) {
+                alert('画像ファイルを1枚選択してください。');
+                return;
+            }
+
+            showLoading('イベント画像をOCR解析中...');
+            try {
+                const file = fileInput.files[0];
+                const base64Data = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+
+                const worker = await Tesseract.createWorker('jpn+eng');
+                const ret = await worker.recognize(base64Data);
+                await worker.terminate();
+
+                const textLines = ret.data.text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                if (textLines.length > 0) {
+                    document.getElementById('eventTitleInput').value = textLines[0];
+                    document.getElementById('eventBodyInput').value = textLines.slice(1).join('\n');
+                } else {
+                    document.getElementById('eventBodyInput').value = ret.data.text.trim();
+                }
+
+                // ついでに添付スクショ用にも同じ画像をセット（任意）
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                document.getElementById('eventImageInput').files = dt.files;
+
+                fileInput.value = '';
+                alert('イベント情報のOCR読み込みが完了しました！内容を確認して保存してください。');
+            } catch (err) {
+                console.error(err);
+                alert('イベントのOCR解析中にエラーが発生しました。');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // --- 定型文OCR取り込み ＆ 単語ごと抽出機能 ---
+        async function processTemplateOCR() {
+            const fileInput = document.getElementById('ocrTemplateImageInput');
+            if (!fileInput.files || !fileInput.files[0]) {
+                alert('画像を1枚選択してください。');
+                return;
+            }
+
+            showLoading('画像をOCR解析し、単語を抽出中...');
+            try {
+                const file = fileInput.files[0];
+                const base64Data = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+
+                const worker = await Tesseract.createWorker('jpn+eng');
+                const ret = await worker.recognize(base64Data);
+                await worker.terminate();
+
+                const words = ret.data.text.split(/[\s\n\r\t　,，.。・/／()（）「」『』]+/g).filter(w => w.trim().length > 0);
+                const chipsArea = document.getElementById('ocrWordChips');
+                chipsArea.innerHTML = '';
+
+                if (words.length === 0) {
+                    chipsArea.innerHTML = '<span style="font-size: 0.75rem; color: #888;">単語が検出されませんでした</span>';
+                } else {
+                    words.forEach(word => {
+                        const chip = document.createElement('span');
+                        chip.style.cssText = 'background: #f0fdf4; border: 1px solid #86efac; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; color: #166534; display: inline-flex; align-items: center; gap: 4px;';
+                        chip.textContent = word;
+                        chip.onclick = function() {
+                            document.getElementById('genItemName').value = word;
+                            document.getElementById('genItemSelect').value = '';
+                            updateTemplates();
+                            alert(`品名に「${word}」をセットしました！`);
+                        };
+                        chipsArea.appendChild(chip);
+                    });
+                }
+                alert('OCRによる単語抽出が完了しました！');
+            } catch (err) {
+                console.error(err);
+                alert('OCR単語抽出中にエラーが発生しました。');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // --- レコード管理共通 ---
         function addRecord(type) {
-            const itemCat = document.getElementById(type + 'NewCategory').value;
-            const classification = document.getElementById(type + 'NewClassification').value;
-            const title = document.getElementById(type + 'TitleInput').value.trim();
-            const body = document.getElementById(type + 'BodyInput').value.trim();
+            const catSelect = document.getElementById(type + 'NewCategory');
+            const classSelect = document.getElementById(type + 'NewClassification');
+            const itemCat = catSelect ? catSelect.value : 'none';
+            const classification = classSelect ? classSelect.value : 'none';
+
+            const titleInput = document.getElementById(type + 'TitleInput');
+            const bodyInput = document.getElementById(type + 'BodyInput');
+            const title = titleInput ? titleInput.value.trim() : '';
+            const body = bodyInput ? bodyInput.value.trim() : '';
 
             if (!title && !body) {
                 alert('タイトルか内容を入力してください。');
@@ -617,33 +1129,31 @@
             const user = getCurrentUser();
             let records = JSON.parse(localStorage.getItem('hub_records_all_' + user) || '[]');
             records.unshift({
-                id: Date.now(), type, classification, itemCategory: itemCat, title: title || '無題', body, image: imageData, date: new Date().toLocaleString()
+                id: Date.now(),
+                type: type,
+                classification: classification,
+                itemCategory: itemCat,
+                title: title || '無題',
+                body: body,
+                image: imageData,
+                date: new Date().toLocaleString()
             });
             localStorage.setItem('hub_records_all_' + user, JSON.stringify(records));
-            document.getElementById(type + 'TitleInput').value = '';
-            document.getElementById(type + 'BodyInput').value = '';
+
+            const titleInput = document.getElementById(type + 'TitleInput');
+            const bodyInput = document.getElementById(type + 'BodyInput');
+            if (titleInput) titleInput.value = '';
+            if (bodyInput) bodyInput.value = '';
             loadAllData();
         }
 
         function deleteRecord(id) {
-            if (!confirm('削除しますか？')) return;
+            if (!confirm('この項目を削除しますか？')) return;
             const user = getCurrentUser();
             let records = JSON.parse(localStorage.getItem('hub_records_all_' + user) || '[]');
             records = records.filter(item => item.id !== id);
             localStorage.setItem('hub_records_all_' + user, JSON.stringify(records));
             loadAllData();
-        }
-
-        function updateRecordMeta(id, newCat, newClass) {
-            const user = getCurrentUser();
-            let records = JSON.parse(localStorage.getItem('hub_records_all_' + user) || '[]');
-            const target = records.find(item => item.id === id);
-            if (target) {
-                target.itemCategory = newCat;
-                target.classification = newClass;
-                localStorage.setItem('hub_records_all_' + user, JSON.stringify(records));
-                loadAllData();
-            }
         }
 
         function moveRecord(id, direction) {
@@ -653,11 +1163,9 @@
             if (index === -1) return;
             const targetIndex = index + direction;
             if (targetIndex < 0 || targetIndex >= records.length) return;
-
             const temp = records[index];
             records[index] = records[targetIndex];
             records[targetIndex] = temp;
-
             localStorage.setItem('hub_records_all_' + user, JSON.stringify(records));
             loadAllData();
         }
@@ -670,37 +1178,54 @@
             if (!container) return;
             container.innerHTML = '';
 
-            let records = JSON.parse(localStorage.getItem('hub_records_all_' + user) || '[]').filter(item => item.type === type);
+            let records = JSON.parse(localStorage.getItem('hub_records_all_' + user) || '[]');
+            records = records.filter(item => item.type === type);
 
-            if (selectedClass !== 'all') records = records.filter(item => item.classification === selectedClass);
-            if (selectedItemCat !== 'all') records = records.filter(item => item.itemCategory === selectedItemCat);
-
-            const keyword = document.getElementById(type + 'SearchInput')?.value.toLowerCase() || '';
-            if (keyword) {
-                records = records.filter(item => item.title.toLowerCase().includes(keyword) || (item.body && item.body.toLowerCase().includes(keyword)));
+            if (selectedClass !== 'all' && type !== 'picturebook') {
+                records = records.filter(item => item.classification === selectedClass);
+            }
+            if (selectedItemCat !== 'all') {
+                records = records.filter(item => item.itemCategory === selectedItemCat);
             }
 
-            const sortVal = document.getElementById(type + 'SortSelect')?.value;
-            if (sortVal === 'new') records.sort((a, b) => b.id - a.id);
-            else if (sortVal === 'old') records.sort((a, b) => a.id - b.id);
+            const searchInput = document.getElementById(type + 'SearchInput');
+            const keyword = searchInput ? searchInput.value.toLowerCase() : '';
+            if (keyword) {
+                records = records.filter(item => 
+                    item.title.toLowerCase().includes(keyword) || 
+                    (item.body && item.body.toLowerCase().includes(keyword))
+                );
+            }
+
+            const sortSelect = document.getElementById(type + 'SortSelect');
+            if (sortSelect && type !== 'image' && type !== 'picturebook') {
+                const sortVal = sortSelect.value;
+                if (sortVal === 'new') records.sort((a, b) => b.id - a.id);
+                else if (sortVal === 'old') records.sort((a, b) => a.id - b.id);
+            }
 
             if (records.length === 0) {
-                container.innerHTML = '<p style="font-size: 0.85rem; color: #888; text-align: center;">記録はありません。</p>';
+                container.innerHTML = '<p style="font-size: 0.85rem; color: #888; text-align: center;">条件に一致する記録はありません。</p>';
                 return;
             }
 
-            if (type === 'image') {
+            if (type === 'image' || type === 'picturebook') {
                 const gridDiv = document.createElement('div');
                 gridDiv.className = 'image-grid';
+
                 records.forEach((item) => {
                     const card = document.createElement('div');
                     card.className = 'record-item';
                     card.style.margin = '0';
+                    const catBadge = item.itemCategory && item.itemCategory !== 'none' && categoryLabels[item.itemCategory] ? `<span class="badge">${categoryLabels[item.itemCategory]}</span>` : '';
+
                     card.innerHTML = `
-                        <div class="record-title" style="font-size: 0.85rem; margin-bottom: 4px;">🏷️ ${escapeHtml(item.title)}</div>
-                        <img src="${item.data}" class="preview-img" alt="スクショ">
-                        <div style="display: flex; justify-content: space-between; margin-top: 6px;">
-                            <a href="${item.data}" download="${item.title}.png" style="font-size: 0.75rem;">📥DL</a>
+                        <div style="margin-bottom: 4px;">${catBadge}</div>
+                        <div class="record-title" style="font-size: 0.85rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(item.title)}">🏷️ ${escapeHtml(item.title)}</div>
+                        ${item.image ? `<img src="${item.image}" class="preview-img" alt="画像">` : ''}
+                        ${type === 'picturebook' && item.body ? `<div style="font-size: 0.75rem; color:#444; max-height:60px; overflow-y:auto; background:#f8fafc; padding:4px; margin-top:4px;">${escapeHtml(item.body)}</div>` : ''}
+                        <div style="display: flex; justify-content: space-between; margin-top: 6px; align-items: center;">
+                            ${item.image ? `<a href="${item.image}" download="${item.title}.png" style="font-size: 0.75rem;">📥DL</a>` : ''}
                             <button onclick="deleteRecord(${item.id})" style="background: #e74c3c; font-size: 0.7rem; padding: 2px 5px;">🗑️</button>
                         </div>
                     `;
@@ -711,21 +1236,25 @@
                 records.forEach((item, index) => {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'record-item';
-                    const catBadge = item.itemCategory && item.itemCategory !== 'none' && categoryLabels[item.itemCategory] ? `<span class="badge">${categoryLabels[item.itemCategory]}</span>` : '';
-                    const classBadge = item.classification && item.classification !== 'none' && classificationLabels[item.classification] ? `<span class="badge" style="background:#e0f2fe; color:#0369a1;">${classificationLabels[item.classification]}</span>` : '';
+                    const catBadge = item.itemCategory && item.itemCategory !== 'none' && categoryLabels[item.itemCategory] ? `<span class="badge">${categoryLabels[item.itemCategory]}</span>` : '<span class="badge" style="background:#f1f5f9; color:#94a3b8;">カテゴリなし</span>';
+                    const classBadge = item.classification && item.classification !== 'none' && classificationLabels[item.classification] ? `<span class="badge" style="background:#e0f2fe; color:#0369a1;">${classificationLabels[item.classification]}</span>` : '<span class="badge" style="background:#f1f5f9; color:#94a3b8;">分類なし</span>';
+                    let imageHtml = item.image ? `<div style="margin-bottom: 8px;"><img src="${item.image}" class="preview-img" style="max-height: 160px; object-fit: contain; width: auto;" alt="添付スクショ"></div>` : '';
 
                     itemDiv.innerHTML = `
                         <div class="record-header">
-                            <div style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">${catBadge}${classBadge}<span class="record-title">📌 ${escapeHtml(item.title)}</span></div>
+                            <div style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
+                                ${catBadge}${classBadge}
+                                <span class="record-title">📌 ${escapeHtml(item.title)}</span>
+                            </div>
                             <div>
-                                <button class="order-btn" onclick="moveRecord(${item.id}, -1)" ${index === 0 ? 'disabled style="opacity:0.4;"' : ''}>▲</button>
-                                <button class="order-btn" onclick="moveRecord(${item.id}, 1)" ${index === records.length - 1 ? 'disabled style="opacity:0.4;"' : ''}>▼</button>
+                                <button class="order-btn" onclick="moveRecord(${item.id}, -1)" ${index === 0 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>▲</button>
+                                <button class="order-btn" onclick="moveRecord(${item.id}, 1)" ${index === records.length - 1 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>▼</button>
                                 <button onclick="deleteRecord(${item.id})" style="background: #e74c3c; font-size: 0.75rem; padding: 3px 8px; margin-left: 4px;">🗑️ 削除</button>
                             </div>
                         </div>
-                        ${item.image ? `<div style="margin-bottom: 8px;"><img src="${item.image}" class="preview-img" style="max-height: 160px; object-fit: contain; width: auto;" alt="画像"></div>` : ''}
+                        ${imageHtml}
                         <div class="record-body">${escapeHtml(item.body)}</div>
-                        <div style="font-size: 0.75rem; color: #888; text-align: right;">${item.date || ''}</div>
+                        <div style="font-size: 0.75rem; color: #888; text-align: right; margin-top: 4px;">保存日時: ${item.date || ''}</div>
                     `;
                     container.appendChild(itemDiv);
                 });
@@ -733,28 +1262,33 @@
         }
 
         function addImageData() {
+            const catSelect = document.getElementById('imageNewCategory');
+            const classSelect = document.getElementById('imageNewClassification');
+            const itemCat = catSelect ? catSelect.value : 'none';
+            const classification = classSelect ? classSelect.value : 'none';
+            const titleInput = document.getElementById('imageTitleInput');
             const fileInput = document.getElementById('imageInput');
+            
             if (!fileInput.files || !fileInput.files[0]) {
                 alert('画像ファイルを選択してください。');
                 return;
             }
+
+            const title = titleInput.value.trim() || '無題のスクショ';
             const reader = new FileReader();
             reader.onload = function(e) {
-                const user = getCurrentUser();
-                let records = JSON.parse(localStorage.getItem('hub_records_all_' + user) || '[]');
-                records.unshift({
-                    id: Date.now(), type: 'image', classification: 'none', itemCategory: 'none', title: document.getElementById('imageTitleInput').value.trim() || '無題', data: e.target.result, date: new Date().toLocaleString()
-                });
-                localStorage.setItem('hub_records_all_' + user, JSON.stringify(records));
+                saveRecordData('image', classification, itemCat, title, '', e.target.result);
+                titleInput.value = '';
                 fileInput.value = '';
-                loadAllData();
-            };
+            }
             reader.readAsDataURL(fileInput.files[0]);
         }
 
         function escapeHtml(str) {
             if (!str) return '';
-            return str.replace(/[&'`<>]/g, m => ({ '&': '&amp;', "'": '&#x27;', '`': '&#x60;', '<': '&lt;', '>': '&gt;' }[m]));
+            return str.replace(/[&'`<>]/g, function(match) {
+                return { '&': '&amp;', "'": '&#x27;', '`': '&#x60;', '<': '&lt;', '>': '&gt;' }[match];
+            });
         }
 
         function escapeJS(str) {
@@ -763,7 +1297,9 @@
         }
 
         window.onload = function() {
-            document.getElementById('usernameInput').value = getCurrentUser();
+            const user = getCurrentUser();
+            document.getElementById('usernameInput').value = user;
+            updateItemMasterUI();
             updateTemplates();
             loadAllData();
         };
