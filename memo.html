@@ -2,1307 +2,1008 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>マイ・ローカルデータベース＆Hub</title>
-    <!-- Tesseract.js (ブラウザ用OCRライブラリ) のCDN読み込み -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v5/dist/tesseract.min.js"></script>
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 15px; background: #f4f6f8; color: #333; box-sizing: border-box; }
-        h1 { font-size: 1.3rem; margin-bottom: 10px; color: #2c3e50; }
-        .card { background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 12px; }
-        .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 5px; align-items: center; }
-        .control-group { display: flex; align-items: center; gap: 5px; flex: 1; min-width: 200px; }
-        select, input, button { padding: 8px 10px; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px; }
-        button { background: #3498db; color: #fff; border: none; cursor: pointer; }
-        button:hover { background: #2980b9; }
-        
-        /* 縦タブレイアウトのスタイル */
-        .main-layout { display: flex; gap: 12px; align-items: flex-start; }
-        @media (max-width: 768px) {
-            .main-layout { flex-direction: column; }
+        :root {
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --sidebar-width: 220px;
         }
-        .tab-buttons { display: flex; flex-direction: column; gap: 4px; min-width: 150px; }
-        .tab-btn { background: #e0e0e0; color: #555; border: none; padding: 10px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; text-align: left; }
-        .tab-btn.active { background: #2c3e50; color: #fff; font-weight: bold; }
-        .tab-content-area { flex-grow: 1; width: 100%; background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        textarea { width: 100%; height: 100px; padding: 10px; font-family: monospace; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 8px; }
-        .screenshot-area { border: 2px dashed #ccc; padding: 15px; text-align: center; border-radius: 6px; background: #fafafa; margin-bottom: 10px; }
-        
-        /* 画像横並び用のスタイル */
-        .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-        .preview-img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; display: block; }
-        
-        .frame-container { width: 100%; }
-        .frame-box { width: 100%; height: 480px; border: 1px solid #ccc; border-radius: 4px; background: #fff; display: block; }
-        .link-bar { margin-bottom: 8px; font-size: 0.85rem; }
-        
-        /* リスト・カード用のスタイル */
-        .record-item { background: #fdfdfd; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-        .record-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 5px; }
-        .record-title { font-weight: bold; font-size: 0.95rem; color: #2c3e50; }
-        .record-body { font-size: 0.9rem; white-space: pre-wrap; word-break: break-all; color: #444; background: #f8fafc; padding: 8px; border-radius: 4px; border: 1px solid #edf2f7; margin-bottom: 8px; }
-        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: #f1f5f9; padding: 8px; border-radius: 6px; gap: 5px; flex-wrap: wrap; }
-        .order-btn { background: #7f8c8d; font-size: 0.75rem; padding: 3px 6px; }
-        .order-btn:hover { background: #616a6b; }
-        .badge { display: inline-block; background: #e2e8f0; color: #475569; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; margin-right: 4px; }
-        
-        /* 定型文エリアのスタイル */
-        .template-box { background: #eef2f7; padding: 8px; border-radius: 4px; margin-bottom: 8px; text-align: left; font-size: 0.85rem; }
-        .template-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
-        .template-chip { background: #fff; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; color: #334155; }
-        .template-chip:hover { background: #e2e8f0; }
 
-        /* 定型文タブ専用のカードスタイル */
-        .template-card { background: #fff; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 10px; text-align: left; }
-        .template-card h4 { margin: 0 0 6px 0; font-size: 0.95rem; color: #2c3e50; }
-        .template-pre { background: #f8fafc; padding: 8px; border-radius: 4px; border: 1px solid #e2e8f0; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap; margin-bottom: 8px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
 
-        /* ジェネレーター専用パネル */
-        .generator-panel { background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 12px; text-align: left; }
-        .generator-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 8px; }
-        .generator-grid input, .generator-grid select { width: 100%; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-        /* ローディングオーバーレイ */
-        #loadingOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; color: #fff; font-size: 1.2rem; flex-direction: column; gap: 10px; }
+        /* ヘルパー・共通スタイル */
+        button {
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        button:hover { background: #f9fafb; border-color: #d1d5db; }
+        button.primary { background: var(--primary-color); color: white; border: none; }
+        button.primary:hover { background: var(--primary-hover); }
+        button.danger { background: #ef4444; color: white; border: none; }
+        button.danger:hover { background: #dc2626; }
+
+        input, select, textarea {
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 100%;
+            outline: none;
+            background: white;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        /* ユーザープロファイル切替・グローバルフィルターバー */
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            z-index: 10;
+        }
+        .header-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-group label {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        /* メインコンテナ（縦タブレイアウト） */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* 左側：縦タブナビゲーション */
+        sidebar {
+            width: var(--sidebar-width);
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .tab-btn {
+            text-align: left;
+            padding: 14px 18px;
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            background: transparent;
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 0;
+        }
+        .tab-btn:hover { background: #f8fafc; color: var(--primary-color); }
+        .tab-btn.active {
+            background: #eff6ff;
+            color: var(--primary-color);
+            font-weight: 600;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* 右側：コンテンツエリア */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .tab-pane {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .tab-pane.active {
+            display: flex;
+        }
+
+        /* カードデザイン */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* チップコンポーネント */
+        .chip-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .chip {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .chip:hover { background: #e2e8f0; }
+        .chip .remove-chip {
+            color: #94a3b8;
+            font-weight: bold;
+        }
+        .chip .remove-chip:hover { color: #ef4444; }
+
+        /* グリッド・フォームレイアウト */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .memo-list, .grid-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        /* 個別メモアイテム */
+        .item-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .item-title {
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .item-body {
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .item-actions {
+            display: flex;
+            gap: 6px;
+            justify-content: flex-end;
+            margin-top: 4px;
+        }
+
+        /* スクショカード */
+        .screenshot-card {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+        .screenshot-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+        .screenshot-info {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        /* iframeエリア */
+        .iframe-wrapper {
+            flex: 1;
+            min-height: 500px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+        .iframe-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            flex: 1;
+        }
+
+        /* ユーティリティ */
+        .flex-row { display: flex; gap: 10px; align-items: center; }
+        .w-full { width: 100%; }
+        .text-right { text-align: right; }
     </style>
 </head>
 <body>
 
-    <div id="loadingOverlay">
-        <div id="loadingText">OCR処理中... しばらくお待ちください</div>
-    </div>
-
-    <h1>🗂️ マイ・ローカルデータベース＆Hub</h1>
-
-    <!-- 簡易ユーザー登録・切り替え・一括入出力用バー -->
-    <div class="card" style="background: #eef2f7; border: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 0.9rem; font-weight: bold; color: #2c3e50;">👤 プロファイル:</span>
-            <input type="text" id="usernameInput" placeholder="ユーザー名" style="padding: 5px 8px; font-size: 0.85rem; width: 120px;" onchange="saveCurrentUser()">
+    <!-- ヘルパー：ユーザープロファイル切替・グローバル選択フィルター -->
+    <header>
+        <div class="header-group">
+            <label for="profileSelect">👤 プロファイル:</label>
+            <select id="profileSelect" style="width: 130px;" onchange="switchProfile()">
+                <option value="default">デフォルト</option>
+                <option value="sub1">サブアカウント1</option>
+                <option value="sub2">サブアカウント2</option>
+            </select>
+            <button onclick="createNewProfile()">+ 追加</button>
         </div>
-        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-            <button onclick="exportAllDataJSON()" style="background: #27ae60; font-size: 0.8rem; padding: 5px 8px;">💾 全データJSON出力</button>
-            <label style="background: #2980b9; color: #fff; font-size: 0.8rem; padding: 6px 10px; border-radius: 4px; cursor: pointer; display: inline-block;">
-                📥 全データJSONインポート
-                <input type="file" id="allDataImportInput" accept=".json" style="display: none;" onchange="importAllDataJSON(event)">
-            </label>
+        <div class="header-group">
+            <label for="globalCategory">🏷️ グローバルカテゴリ:</label>
+            <select id="globalCategory" style="width: 150px;" onchange="applyGlobalFilter()">
+                <option value="">すべて表示</option>
+                <option value="general">一般・日常</option>
+                <option value="trade">トレード・素材</option>
+                <option value="gear">装備・アイテム</option>
+                <option value="quest">クエスト・攻略</option>
+            </select>
         </div>
-    </div>
+    </header>
 
-    <!-- カテゴリ＆分類 選択エリア（横並び） -->
-    <div class="card">
-        <div class="controls">
-            <div class="control-group">
-                <label for="itemCategorySelect"><strong>💎 カテゴリ:</strong></label>
-                <select id="itemCategorySelect" onchange="loadAllData()" style="flex: 1;">
-                    <option value="all">📁 すべてのカテゴリ（指定なし含む）</option>
-                    <option value="none">📂 （指定なし）</option>
-                    <option value="genryo">💎 原料</option>
-                    <option value="hon">📖 本</option>
-                    <option value="kusuri">⚗️ 薬</option>
-                    <option value="ken">🗡️ 剣</option>
-                    <option value="yoroi">🛡️ 鎧</option>
-                    <option value="tate">🛡️ 盾</option>
-                    <option value="tsue">🪄 杖</option>
-                    <option value="accessory">💍 アクセサリ</option>
-                    <option value="chizu">🗺️ 地図</option>
-                    <option value="dougu">🔨 道具</option>
-                    <option value="seibutsu">🐉 生物</option>
-                    <option value="shokumotsu">☕ 食物</option>
-                </select>
-            </div>
-            <div class="control-group">
-                <label for="classificationSelect"><strong>📂 分類:</strong></label>
-                <select id="classificationSelect" onchange="onClassificationChange()" style="flex: 1;">
-                    <option value="all">📂 すべての分類（指定なし含む）</option>
-                    <option value="none">📂 （指定なし）</option>
-                    <option value="work">作業</option>
-                    <option value="transport">輸送</option>
-                    <option value="order">注文</option>
-                    <option value="purchase">購入</option>
-                    <option value="other">その他</option>
-                </select>
-            </div>
-        </div>
-    </div>
+    <!-- メインコンテナ -->
+    <div class="main-container">
+        <!-- 左側：縦タブレイアウト -->
+        <sidebar>
+            <button class="tab-btn active" onclick="switchTab('tab-template', this)">📋 定型文・品名管理</button>
+            <button class="tab-btn" onclick="switchTab('tab-memo', this)">📝 詳細メモ</button>
+            <button class="tab-btn" onclick="switchTab('tab-price', this)">💰 売買・価格メモ</button>
+            <button class="tab-btn" onclick="switchTab('tab-event', this)">📅 イベント情報</button>
+            <button class="tab-btn" onclick="switchTab('tab-screenshot', this)">📸 スクショ保存</button>
+            <button class="tab-btn" onclick="switchTab('tab-wiki', this)">🌐 非公式Wiki</button>
+            <button class="tab-btn" onclick="switchTab('tab-bbs', this)">💬 公式掲示板</button>
+        </sidebar>
 
-    <!-- 詳細切替タブ（縦タブレイアウト） -->
-    <div class="main-layout">
-        <div class="tab-buttons" id="tabButtonContainer">
-            <button class="tab-btn active" onclick="switchTab('pictureBookTab', this)">📖 図鑑タブ</button>
-            <button class="tab-btn" onclick="switchTab('templateTab', this)">📋 定型文・品名管理</button>
-            <button class="tab-btn" onclick="switchTab('textTab', this)">📝 詳細メモ</button>
-            <button class="tab-btn" onclick="switchTab('priceTab', this)">💰 売買・価格メモ</button>
-            <button class="tab-btn" onclick="switchTab('eventTab', this)">📅 イベント情報</button>
-            <button class="tab-btn" onclick="switchTab('imageTab', this)">📸 スクショ保存</button>
-            <button class="tab-btn" onclick="switchTab('wikiTab', this)">🌐 非公式Wiki</button>
-            <button class="tab-btn" onclick="switchTab('bbsTab', this)">💬 公式掲示板</button>
-        </div>
+        <!-- 右側：コンテンツエリア -->
+        <div class="content-area">
 
-        <div class="tab-content-area">
-            <!-- タブ0: 図鑑タブ -->
-            <div id="pictureBookTab" class="tab-content active">
-                <div class="screenshot-area" style="text-align: left; background: #fff;">
-                    <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">📖 図鑑データの一括追加・複数枚OCR取り込み</h3>
-                    <p style="font-size: 0.8rem; color: #666; margin-bottom: 8px;">複数枚の画像を選択してまとめてOCR解析し、図鑑アイテムとして一括登録できます。</p>
-                    
-                    <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
-                        <select id="pbNewCategory" style="flex: 1; min-width: 130px;">
-                            <option value="none">💎 カテゴリ選択</option>
-                            <option value="genryo">💎 原料</option>
-                            <option value="hon">📖 本</option>
-                            <option value="kusuri">⚗️ 薬</option>
-                            <option value="ken">🗡️ 剣</option>
-                            <option value="yoroi">🛡️ 鎧</option>
-                            <option value="tate">🛡️ 盾</option>
-                            <option value="tsue">🪄 杖</option>
-                            <option value="accessory">💍 アクセサリ</option>
-                            <option value="chizu">🗺️ 地図</option>
-                            <option value="dougu">🔨 道具</option>
-                            <option value="seibutsu">🐉 生物</option>
-                            <option value="shokumotsu">☕ 食物</option>
-                        </select>
-                    </div>
-
-                    <div style="margin-bottom: 8px;">
-                        <label style="font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 4px;">📸 画像選択（複数選択可）:</label>
-                        <input type="file" id="pbMultiImageInput" accept="image/*" multiple>
-                    </div>
-
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button onclick="processBatchOCRForPictureBook()" style="background: #27ae60; flex: 1;">⚡ 複数画像からまとめてOCR取り込み実行</button>
-                        <button onclick="exportRecordTypeJSON('picturebook')" style="background: #8e44ad;">📤 図鑑JSON出力</button>
-                        <label style="background: #2980b9; color: #fff; font-size: 0.9rem; padding: 8px 12px; border-radius: 4px; cursor: pointer; text-align: center;">
-                            📥 図鑑JSONインポート
-                            <input type="file" accept=".json" style="display: none;" onchange="importRecordTypeJSON(event, 'picturebook')">
-                        </label>
-                    </div>
-                </div>
-
-                <div class="action-bar">
-                    <input type="text" id="pbSearchInput" placeholder="🔍 図鑑を検索..." oninput="renderRecords('picturebook')" style="width: 100%;">
-                </div>
-                <div id="picturebookListContainer"></div>
-            </div>
-
-            <!-- タブ1: 定型文一覧＆作成ツール ＆ 品名一括登録 -->
-            <div id="templateTab" class="tab-content">
-                <!-- 定型文OCR取り込みパネル -->
-                <div class="generator-panel" style="background: #f0fdf4; border-color: #86efac; margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 6px 0; font-size: 0.9rem; color: #166534;">📸 定型文OCR取り込み（単語ごとの抽出対応）</h4>
-                    <p style="font-size: 0.8rem; color: #15803d; margin: 0 0 8px 0;">画像から文字を読み取り、単語チップから選択して定型文に組み込むことができます。</p>
-                    <input type="file" id="ocrTemplateImageInput" accept="image/*" style="margin-bottom: 6px;"><br>
-                    <button onclick="processTemplateOCR()" style="background: #16a34a; font-size: 0.85rem; margin-bottom: 8px;">🔍 画像からOCRして単語を抽出する</button>
-                    
-                    <div style="font-size: 0.8rem; font-weight: bold; color: #166534; margin-bottom: 4px;">抽出された単語（クリックで品名やジェネレーターにセット）:</div>
-                    <div id="ocrWordChips" style="display: flex; gap: 5px; flex-wrap: wrap; max-height: 80px; overflow-y: auto; background: #fff; padding: 6px; border: 1px solid #bbf7d0; border-radius: 4px; margin-bottom: 8px;">
-                        <span style="font-size: 0.75rem; color: #888;">ここに抽出された単語が表示されます</span>
-                    </div>
-                </div>
-
-                <!-- 掲示板要望用クイック誘導カード -->
-                <div class="generator-panel" style="background: #fffbeb; border-color: #fcd34d; margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 4px 0; font-size: 0.9rem; color: #b45309;">💬 公式掲示板（要望スレッド）への投稿支援</h4>
-                    <p style="font-size: 0.8rem; color: #78350f; margin: 0 0 8px 0;">
-                        対象スレッド: <a href="https://so2-bbs.mutoys.com/t/topic/8580" target="_blank" style="color: #2563eb; text-decoration: underline;">https://so2-bbs.mutoys.com/t/topic/8580</a>
-                    </p>
-                    <button onclick="insertFeedbackTemplate()" style="background: #d97706; font-size: 0.8rem;">📥 下の新規追加フォームに「要望テンプレート」をセットする</button>
-                </div>
-
-                <h3 style="margin-top: 0; font-size: 1rem; color: #2c3e50;">✨ トレード・宣伝ジェネレーター</h3>
-                <p style="font-size: 0.85rem; color: #666;">
-                    変数として <code>{name}</code>（品名）, <code>{price}</code>（価格）, <code>{qty}</code>（数量） が使えます。
-                </p>
-                
-                <!-- ジェネレーター入力パネル -->
-                <div class="generator-panel">
-                    <div class="generator-grid">
+            <!-- 1. 定型文・品名管理タブ -->
+            <div id="tab-template" class="tab-pane active">
+                <div class="card">
+                    <div class="card-title">トレード・宣伝ジェネレーター</div>
+                    <div class="form-grid">
                         <div>
-                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">品名 (選択or直接入力):</label>
-                            <div style="display: flex; gap: 4px;">
-                                <select id="genItemSelect" onchange="onItemSelectChange()" style="flex: 1;">
-                                    <option value="">-- 登録品名から選択 --</option>
-                                </select>
-                            </div>
-                            <input type="text" id="genItemName" value="コッペパン" placeholder="例: コッペパン" style="margin-top: 4px;">
+                            <label>品名</label>
+                            <select id="genItemSelect" onchange="updateGenerator()">
+                                <option value="">-- 品名を選択 --</option>
+                            </select>
                         </div>
                         <div>
-                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">価格:</label>
-                            <input type="text" id="genPrice" value="200" placeholder="例: 200" style="margin-top: 4px;">
+                            <label>価格 (price)</label>
+                            <input type="text" id="genPrice" placeholder="例: 5000" oninput="updateGenerator()">
                         </div>
                         <div>
-                            <label style="font-size: 0.75rem; font-weight: bold; color: #475569;">数量:</label>
-                            <input type="text" id="genQuantity" value="3口無言可" placeholder="例: 3口無言可" style="margin-top: 4px;">
+                            <label>数量 (qty)</label>
+                            <input type="text" id="genQty" placeholder="例: 10" oninput="updateGenerator()">
                         </div>
                     </div>
-                </div>
-
-                <!-- 品名一括登録パネル -->
-                <div class="generator-panel" style="background: #fff; border-color: #e67e22; margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 6px 0; font-size: 0.9rem; color: #d35400;">📦 品名の一括登録・管理</h4>
-                    <p style="font-size: 0.8rem; color: #666; margin: 0 0 6px 0;">改行区切りで複数の品名をペーストして一括登録できます。</p>
-                    <textarea id="bulkItemInput" placeholder="例：&#10;鉄鉱石&#10;木材&#10;コッペパン&#10;薬草" style="height: 60px; margin-bottom: 6px;"></textarea>
-                    <button onclick="addBulkItems()" style="background: #e67e22; font-size: 0.85rem; margin-bottom: 8px;">➕ 改行区切りの品名一括登録</button>
-                    
-                    <div style="font-size: 0.8rem; font-weight: bold; color: #475569; margin-bottom: 4px;">登録済み品名一覧（クリックでジェネレーターにセット / ✕で削除）:</div>
-                    <div id="itemMasterChips" style="display: flex; gap: 5px; flex-wrap: wrap; max-height: 100px; overflow-y: auto; background: #f8fafc; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px;"></div>
-                </div>
-
-                <!-- 新規テンプレート追加フォーム ＆ データバックアップ -->
-                <div class="generator-panel" style="background: #fff; border-color: #3498db; margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 6px 0; font-size: 0.9rem; color: #2980b9;">➕ 新しい定型文フォーマットを追加（マスター登録）</h4>
-                    <div style="margin-bottom: 6px;">
-                        <input type="text" id="newTplLabel" placeholder="フォーマット名（例：最安値宣伝 または 要望：〇〇機能について）" style="width: 100%; box-sizing: border-box;">
-                    </div>
-                    <div style="margin-bottom: 6px;">
-                        <textarea id="newTplText" placeholder="テンプレート文面（例：{name} @1:{price} 最安値！在庫 {qty}）" style="height: 60px;"></textarea>
-                    </div>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button onclick="addNewTemplate()" style="background: #27ae60; font-size: 0.85rem; flex: 1;">💾 このフォーマットを追加</button>
-                        <button onclick="exportTemplates()" style="background: #8e44ad; font-size: 0.85rem;">📤 定型文JSON出力</button>
-                        <label style="background: #2980b9; color: #fff; font-size: 0.85rem; padding: 8px 12px; border-radius: 4px; cursor: pointer; text-align: center;">
-                            📥 定型文JSONインポート
-                            <input type="file" accept=".json" style="display: none;" onchange="importTemplatesJSON(event)">
-                        </label>
-                    </div>
-                </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <h3 style="font-size: 1rem; color: #2c3e50; margin: 0;">📌 あなたが登録した定型文一覧マスター</h3>
-                </div>
-                <div id="templateListArea"></div>
-            </div>
-
-            <!-- タブ2: テキスト詳細 -->
-            <div id="textTab" class="tab-content">
-                <div class="screenshot-area" style="text-align: left; background: #fff;">
-                    <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しい詳細メモを追加</h3>
-                    
-                    <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
-                        <select id="textNewCategory" style="flex: 1; min-width: 130px;">
-                            <option value="none">💎 カテゴリ（任意）</option>
-                            <option value="genryo">💎 原料</option>
-                            <option value="hon">📖 本</option>
-                            <option value="kusuri">⚗️ 薬</option>
-                            <option value="ken">🗡️ 剣</option>
-                            <option value="yoroi">🛡️ 鎧</option>
-                            <option value="tate">🛡️ 盾</option>
-                            <option value="tsue">🪄 杖</option>
-                            <option value="accessory">💍 アクセサリ</option>
-                            <option value="chizu">🗺️ 地図</option>
-                            <option value="dougu">🔨 道具</option>
-                            <option value="seibutsu">🐉 生物</option>
-                            <option value="shokumotsu">☕ 食物</option>
-                        </select>
-                        <select id="textNewClassification" style="flex: 1; min-width: 130px;">
-                            <option value="none">📂 分類（任意）</option>
-                            <option value="work">作業</option>
-                            <option value="transport">輸送</option>
-                            <option value="order">注文</option>
-                            <option value="purchase">購入</option>
-                            <option value="other">その他</option>
+                    <div style="margin-top: 10px;">
+                        <label>定型文テンプレート選択</label>
+                        <select id="genTemplateSelect" style="margin-top: 4px; margin-bottom: 10px;" onchange="selectTemplateToGen()">
+                            <option value="">-- テンプレートを選択 --</option>
                         </select>
                     </div>
-
-                    <input type="text" id="textTitleInput" placeholder="タイトル（例：〇〇の効率手順）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
-                    
-                    <div class="template-box">
-                        <span style="font-weight: bold; color: #475569;">💡 個別定型文（クリックで内容に挿入）:</span>
-                        <div class="template-chips" id="textTemplateContainer"></div>
+                    <div>
+                        <label>プレビュー / 出力結果</label>
+                        <textarea id="genOutput" rows="4" style="margin-top: 4px; font-family: monospace;"></textarea>
                     </div>
-
-                    <textarea id="textBodyInput" placeholder="内容を入力..."></textarea>
-                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                        <button onclick="addRecord('text')" style="flex: 1;">💾 このメモを追加</button>
-                        <button onclick="exportRecordTypeJSON('text')" style="background: #8e44ad;">📤 テキストメモJSON出力</button>
-                        <label style="background: #2980b9; color: #fff; font-size: 0.9rem; padding: 8px 12px; border-radius: 4px; cursor: pointer; text-align: center;">
-                            📥 テキストメモJSONインポート
-                            <input type="file" accept=".json" style="display: none;" onchange="importRecordTypeJSON(event, 'text')">
-                        </label>
-                        <button onclick="clearInput('text')" style="background: #e74c3c;" title="入力内容をクリア">🗑️</button>
+                    <div class="flex-row" style="margin-top: 10px;">
+                        <button class="primary" onclick="copyGeneratorOutput()">クリップボードにコピー</button>
+                        <button onclick="setBbsTemplateToGen()">公式掲示板用テンプレートをセット</button>
                     </div>
                 </div>
 
-                <div class="action-bar">
-                    <input type="text" id="textSearchInput" placeholder="🔍 メモを検索..." oninput="renderRecords('text')" style="width: 55%;">
-                    <select id="textSortSelect" onchange="renderRecords('text')" style="width: 40%;">
-                        <option value="manual">カスタム並び順</option>
-                        <option value="new">新しい順</option>
-                        <option value="old">古い順</option>
-                    </select>
-                </div>
-                <div id="textListContainer"></div>
-            </div>
-
-            <!-- タブ3: 売買・価格メモ -->
-            <div id="priceTab" class="tab-content">
-                <div class="screenshot-area" style="text-align: left; background: #fff;">
-                    <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しい価格・相場メモを追加</h3>
-                    
-                    <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
-                        <select id="priceNewCategory" style="flex: 1; min-width: 130px;">
-                            <option value="none">💎 カテゴリ（任意）</option>
-                            <option value="genryo">💎 原料</option>
-                            <option value="hon">📖 本</option>
-                            <option value="kusuri">⚗️ 薬</option>
-                            <option value="ken">🗡️ 剣</option>
-                            <option value="yoroi">🛡️ 鎧</option>
-                            <option value="tate">🛡️ 盾</option>
-                            <option value="tsue">🪄 杖</option>
-                            <option value="accessory">💍 アクセサリ</option>
-                            <option value="chizu">🗺️ 地図</option>
-                            <option value="dougu">🔨 道具</option>
-                            <option value="seibutsu">🐉 生物</option>
-                            <option value="shokumotsu">☕ 食物</option>
-                        </select>
-                        <select id="priceNewClassification" style="flex: 1; min-width: 130px;">
-                            <option value="none">📂 分類（任意）</option>
-                            <option value="work">作業</option>
-                            <option value="transport">輸送</option>
-                            <option value="order">注文</option>
-                            <option value="purchase">購入</option>
-                            <option value="other">その他</option>
-                        </select>
+                <div class="card">
+                    <div class="card-title">品名の一括登録 & マスター管理</div>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">改行区切りで複数の品名をペーストして一括登録できます。</p>
+                    <textarea id="bulkItemsInput" rows="3" placeholder="例:\n鉄鉱石\n高級木材\n神秘の水"></textarea>
+                    <div style="margin-top: 10px;">
+                        <button class="primary" onclick="bulkAddItems()">一括登録を実行</button>
                     </div>
-
-                    <input type="text" id="priceTitleInput" placeholder="品名・アイテム名（例：鉄鉱石）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
-                    
-                    <div class="template-box">
-                        <span style="font-weight: bold; color: #475569;">💡 個別定型文（クリックで内容に挿入）:</span>
-                        <div class="template-chips" id="priceTemplateContainer"></div>
-                    </div>
-
-                    <textarea id="priceBodyInput" placeholder="購入価格、目標売値、相場などを入力..."></textarea>
-                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                        <button onclick="addRecord('price')" style="flex: 1;">💾 この価格メモを追加</button>
-                        <button onclick="exportRecordTypeJSON('price')" style="background: #8e44ad;">📤 価格メモJSON出力</button>
-                        <label style="background: #2980b9; color: #fff; font-size: 0.9rem; padding: 8px 12px; border-radius: 4px; cursor: pointer; text-align: center;">
-                            📥 価格メモJSONインポート
-                            <input type="file" accept=".json" style="display: none;" onchange="importRecordTypeJSON(event, 'price')">
-                        </label>
-                        <button onclick="clearInput('price')" style="background: #e74c3c;" title="入力内容をクリア">🗑️</button>
+                    <div style="margin-top: 14px;">
+                        <label style="font-size: 13px; font-weight: 600;">登録済み品名一覧（クリックでジェネレーターに反映）</label>
+                        <div id="masterItemChips" class="chip-container"></div>
                     </div>
                 </div>
 
-                <div class="action-bar">
-                    <input type="text" id="priceSearchInput" placeholder="🔍 価格メモを検索..." oninput="renderRecords('price')" style="width: 55%;">
-                    <select id="priceSortSelect" onchange="renderRecords('price')" style="width: 40%;">
-                        <option value="manual">カスタム並び順</option>
-                        <option value="new">新しい順</option>
-                        <option value="old">古い順</option>
-                    </select>
-                </div>
-                <div id="priceListContainer"></div>
-            </div>
-
-            <!-- タブ4: イベント情報タブ -->
-            <div id="eventTab" class="tab-content">
-                <!-- イベントOCR取り込みパネル -->
-                <div class="screenshot-area" style="text-align: left; background: #fff; border-color: #3b82f6; background-color: #eff6ff;">
-                    <h3 style="margin: 0 0 6px 0; font-size: 0.95rem; color: #1e40af;">📸 イベント情報 OCR自動取り込み</h3>
-                    <p style="font-size: 0.8rem; color: #1e3a8a; margin-bottom: 8px;">イベント告知や結果の画像を選択すると、OCRで読み取ってタイトルと本文に自動セットします。</p>
-                    <input type="file" id="ocrEventImageInput" accept="image/*" style="margin-bottom: 6px;"><br>
-                    <button onclick="processEventOCR()" style="background: #2563eb; font-size: 0.85rem;">⚡ 画像からイベント情報をOCR抽出する</button>
-                </div>
-
-                <div class="screenshot-area" style="text-align: left; background: #fff;">
-                    <h3 style="margin: 0 0 8px 0; font-size: 0.95rem;">➕ 新しいイベント記録を追加</h3>
-                    
-                    <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
-                        <select id="eventNewCategory" style="flex: 1; min-width: 130px;">
-                            <option value="none">💎 カテゴリ（任意）</option>
-                            <option value="genryo">💎 原料</option>
-                            <option value="hon">📖 本</option>
-                            <option value="kusuri">⚗️ 薬</option>
-                            <option value="ken">🗡️ 剣</option>
-                            <option value="yoroi">🛡️ 鎧</option>
-                            <option value="tate">🛡️ 盾</option>
-                            <option value="tsue">🪄 杖</option>
-                            <option value="accessory">💍 アクセサリ</option>
-                            <option value="chizu">🗺️ 地図</option>
-                            <option value="dougu">🔨 道具</option>
-                            <option value="seibutsu">🐉 生物</option>
-                            <option value="shokumotsu">☕ 食物</option>
-                        </select>
-                        <select id="eventNewClassification" style="flex: 1; min-width: 130px;">
-                            <option value="none">📂 分類（任意）</option>
-                            <option value="work">作業</option>
-                            <option value="transport">輸送</option>
-                            <option value="order">注文</option>
-                            <option value="purchase">購入</option>
-                            <option value="other">その他</option>
-                        </select>
+                <div class="card">
+                    <div class="card-title">カスタム定型文の個別追加</div>
+                    <div class="form-grid">
+                        <input type="text" id="customTemplateTitle" placeholder="テンプレート名（例: 買取募集文）">
                     </div>
-
-                    <input type="text" id="eventTitleInput" placeholder="イベント名（例：第5回 〇〇コンテスト）" style="width: 100%; margin-bottom: 8px; box-sizing: border-box;">
-                    
-                    <div class="template-box">
-                        <span style="font-weight: bold; color: #475569;">💡 個別定型文（クリックで内容に挿入）:</span>
-                        <div class="template-chips" id="eventTemplateContainer"></div>
+                    <textarea id="customTemplateBody" rows="3" placeholder="本文（{name}, {price}, {qty} が利用可能）" style="margin-top: 8px;"></textarea>
+                    <div style="margin-top: 10px;">
+                        <button class="primary" onclick="addCustomTemplate()">テンプレートを保存</button>
                     </div>
-
-                    <textarea id="eventBodyInput" placeholder="【計画】&#13;&#10;【進捗】&#13;&#10;【結果】"></textarea>
-                    <div style="margin-bottom: 8px;">
-                        <label style="font-size: 0.85rem; display: block; margin-bottom: 4px;">📸 スクショ画像添付（任意）</label>
-                        <input type="file" id="eventImageInput" accept="image/*">
-                    </div>
-                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                        <button onclick="addRecord('event')" style="flex: 1;">💾 このイベント記録を追加</button>
-                        <button onclick="exportRecordTypeJSON('event')" style="background: #8e44ad;">📤 イベントJSON出力</button>
-                        <label style="background: #2980b9; color: #fff; font-size: 0.9rem; padding: 8px 12px; border-radius: 4px; cursor: pointer; text-align: center;">
-                            📥 イベントJSONインポート
-                            <input type="file" accept=".json" style="display: none;" onchange="importRecordTypeJSON(event, 'event')">
-                        </label>
-                        <button onclick="clearInput('event')" style="background: #e74c3c;" title="入力内容をクリア">🗑️</button>
-                    </div>
-                </div>
-
-                <div class="action-bar">
-                    <input type="text" id="eventSearchInput" placeholder="🔍 イベントを検索..." oninput="renderRecords('event')" style="width: 55%;">
-                    <select id="eventSortSelect" onchange="renderRecords('event')" style="width: 40%;">
-                        <option value="manual">カスタム並び順</option>
-                        <option value="new">新しい順</option>
-                        <option value="old">古い順</option>
-                    </select>
-                </div>
-                <div id="eventListContainer"></div>
-            </div>
-
-            <!-- タブ5: スクショ・画像 -->
-            <div id="imageTab" class="tab-content">
-                <div class="screenshot-area">
-                    <p style="margin: 0 0 8px 0; font-size: 0.9rem;">スクショ画像の追加・複数枚一括OCR取り込み</p>
-                    <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
-                        <select id="imageNewCategory" style="flex: 1; min-width: 130px;">
-                            <option value="none">💎 カテゴリ（任意）</option>
-                            <option value="genryo">💎 原料</option>
-                            <option value="hon">📖 本</option>
-                            <option value="kusuri">⚗️ 薬</option>
-                            <option value="ken">🗡️ 剣</option>
-                            <option value="yoroi">🛡️ 鎧</option>
-                            <option value="tate">🛡️ 盾</option>
-                            <option value="tsue">🪄 杖</option>
-                            <option value="accessory">💍 アクセサリ</option>
-                            <option value="chizu">🗺️ 地図</option>
-                            <option value="dougu">🔨 道具</option>
-                            <option value="seibutsu">🐉 生物</option>
-                            <option value="shokumotsu">☕ 食物</option>
-                        </select>
-                        <select id="imageNewClassification" style="flex: 1; min-width: 130px;">
-                            <option value="none">📂 分類（任意）</option>
-                            <option value="work">作業</option>
-                            <option value="transport">輸送</option>
-                            <option value="order">注文</option>
-                            <option value="purchase">購入</option>
-                            <option value="other">その他</option>
-                        </select>
-                    </div>
-                    <input type="text" id="imageTitleInput" placeholder="画像の名前（例：相場画面）" style="width: 80%; margin-bottom: 8px;"><br>
-                    <input type="file" id="imageInput" accept="image/*"><br>
-                    <div style="display: flex; gap: 8px; justify-content: center; margin-top: 6px; flex-wrap: wrap;">
-                        <button onclick="addImageData()">➕ この画像を追加保存</button>
-                        <button onclick="exportRecordTypeJSON('image')" style="background: #8e44ad;">📤 スクショJSON出力</button>
-                        <label style="background: #2980b9; color: #fff; font-size: 0.9rem; padding: 8px 12px; border-radius: 4px; cursor: pointer; text-align: center;">
-                            📥 スクショJSONインポート
-                            <input type="file" accept=".json" style="display: none;" onchange="importRecordTypeJSON(event, 'image')">
-                        </label>
-                    </div>
-                </div>
-
-                <div class="action-bar">
-                    <input type="text" id="imageSearchInput" placeholder="🔍 画像を検索..." oninput="renderRecords('image')" style="width: 100%;">
-                </div>
-                <div id="imageListContainer"></div>
-            </div>
-
-            <!-- タブ6: Wiki埋め込み -->
-            <div id="wikiTab" class="tab-content">
-                <div class="link-bar">
-                    🔗 参考Wiki: <a href="https://wikiwiki.jp/sold2/" target="_blank">https://wikiwiki.jp/sold2/</a> （別タブで開く）
-                </div>
-                <div class="frame-container">
-                    <iframe src="https://wikiwiki.jp/sold2/" class="frame-box" title="Sold Out 2 Wiki"></iframe>
+                    <div id="customTemplateList" class="memo-list"></div>
                 </div>
             </div>
 
-            <!-- タブ7: 掲示板埋め込み -->
-            <div id="bbsTab" class="tab-content">
-                <div class="link-bar">
-                    🔗 公式掲示板（要望スレッド）: <a href="https://so2-bbs.mutoys.com/t/topic/8580" target="_blank">https://so2-bbs.mutoys.com/t/topic/8580</a> （別タブで開く）
+            <!-- 2. 詳細メモタブ -->
+            <div id="tab-memo" class="tab-pane" data-storage-key="memo_items">
+                <div class="card">
+                    <div class="card-title">詳細メモの作成・編集</div>
+                    <div class="form-grid">
+                        <select id="memoCategory">
+                            <option value="general">一般・日常</option>
+                            <option value="trade">トレード・素材</option>
+                            <option value="gear">装備・アイテム</option>
+                            <option value="quest">クエスト・攻略</option>
+                        </select>
+                        <input type="text" id="memoTitle" placeholder="タイトル">
+                    </div>
+                    <textarea id="memoContent" rows="4" placeholder="メモの内容を入力... 定型文チップをクリックして挿入できます" style="margin-top: 8px;"></textarea>
+                    <div style="margin-top: 8px;">
+                        <label style="font-size: 12px; color: var(--text-muted);">挿入用定型文チップ:</label>
+                        <div id="memoSnippetChips" class="chip-container"></div>
+                    </div>
+                    <div style="margin-top: 12px;" class="flex-row">
+                        <button class="primary" onclick="saveItem('memo')">メモを保存</button>
+                        <button onclick="resetForm('memo')">クリア</button>
+                    </div>
                 </div>
-                <div class="frame-container">
-                    <iframe src="https://so2-bbs.mutoys.com/t/topic/8580" class="frame-box" title="Sold Out 2 BBS Topic 8580"></iframe>
+
+                <div class="card">
+                    <div class="card-title">メモ一覧・検索</div>
+                    <div class="form-grid">
+                        <input type="text" id="memoSearch" placeholder="🔍 リアルタイムキーワード検索..." oninput="renderItems('memo')">
+                        <select id="memoSort" onchange="renderItems('memo')">
+                            <option value="custom">カスタム並び順 (▲▼)</option>
+                            <option value="newest">新しい順</option>
+                            <option value="oldest">古い順</option>
+                        </select>
+                    </div>
+                    <div class="chip-container" id="memoKeywordChips">
+                        <!-- 優先検索キーワードチップがここに入ります -->
+                        <span class="chip" onclick="setSearchKeyword('memo', '重要')">#重要</span>
+                        <span class="chip" onclick="setSearchKeyword('memo', '金策')">#金策</span>
+                        <span class="chip" onclick="setSearchKeyword('memo', 'メモ')">#メモ</span>
+                    </div>
+                    <div id="memoList" class="memo-list"></div>
                 </div>
             </div>
+
+            <!-- 3. 売買・価格メモタブ -->
+            <div id="tab-price" class="tab-pane" data-storage-key="price_items">
+                <div class="card">
+                    <div class="card-title">売買・価格メモの作成</div>
+                    <div class="form-grid">
+                        <select id="priceCategory">
+                            <option value="general">一般・日常</option>
+                            <option value="trade">トレード・素材</option>
+                            <option value="gear">装備・アイテム</option>
+                            <option value="quest">クエスト・攻略</option>
+                        </select>
+                        <input type="text" id="priceTitle" placeholder="アイテム名・相場タイトル">
+                    </div>
+                    <textarea id="priceContent" rows="4" placeholder="価格、購入先、売却先、メモなど..." style="margin-top: 8px;"></textarea>
+                    <div style="margin-top: 8px;">
+                        <label style="font-size: 12px; color: var(--text-muted);">挿入用定型文チップ:</label>
+                        <div id="priceSnippetChips" class="chip-container"></div>
+                    </div>
+                    <div style="margin-top: 12px;" class="flex-row">
+                        <button class="primary" onclick="saveItem('price')">価格メモを保存</button>
+                        <button onclick="resetForm('price')">クリア</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">価格メモ一覧・検索</div>
+                    <div class="form-grid">
+                        <input type="text" id="priceSearch" placeholder="🔍 相場を検索..." oninput="renderItems('price')">
+                        <select id="priceSort" onchange="renderItems('price')">
+                            <option value="custom">カスタム並び順 (▲▼)</option>
+                            <option value="newest">新しい順</option>
+                            <option value="oldest">古い順</option>
+                        </select>
+                    </div>
+                    <div class="chip-container">
+                        <span class="chip" onclick="setSearchKeyword('price', '最安値')">#最安値</span>
+                        <span class="chip" onclick="setSearchKeyword('price', '高騰')">#高騰</span>
+                    </div>
+                    <div id="priceList" class="memo-list"></div>
+                </div>
+            </div>
+
+            <!-- 4. イベント情報タブ -->
+            <div id="tab-event" class="tab-pane" data-storage-key="event_items">
+                <div class="card">
+                    <div class="card-title">イベント情報・計画の記録</div>
+                    <div class="form-grid">
+                        <select id="eventCategory">
+                            <option value="general">一般・日常</option>
+                            <option value="trade">トレード・素材</option>
+                            <option value="gear">装備・アイテム</option>
+                            <option value="quest">クエスト・攻略</option>
+                        </select>
+                        <input type="text" id="eventTitle" placeholder="イベント名・タイトル">
+                    </div>
+                    <textarea id="eventContent" rows="3" placeholder="計画、進捗、結果などを記入..." style="margin-top: 8px;"></textarea>
+                    <div style="margin-top: 10px;">
+                        <label style="font-size: 13px;">スクショ添付（任意）</label>
+                        <input type="file" id="eventImageFile" accept="image/*" style="margin-top: 4px;">
+                    </div>
+                    <div style="margin-top: 12px;" class="flex-row">
+                        <button class="primary" onclick="saveEventItem()">イベント情報を保存</button>
+                        <button onclick="resetForm('event')">クリア</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">イベント一覧</div>
+                    <div class="form-grid">
+                        <input type="text" id="eventSearch" placeholder="🔍 イベントを検索..." oninput="renderItems('event')">
+                        <select id="eventSort" onchange="renderItems('event')">
+                            <option value="custom">カスタム並び順 (▲▼)</option>
+                            <option value="newest">新しい順</option>
+                            <option value="oldest">古い順</option>
+                        </select>
+                    </div>
+                    <div id="eventList" class="memo-list"></div>
+                </div>
+            </div>
+
+            <!-- 5. スクショ保存タブ -->
+            <div id="tab-screenshot" class="tab-pane">
+                <div class="card">
+                    <div class="card-title">スクリーンショット保存</div>
+                    <div class="form-grid">
+                        <input type="text" id="ssTitle" placeholder="スクショのタイトル・説明">
+                        <input type="file" id="ssFile" accept="image/*">
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <button class="primary" onclick="saveScreenshot()">保存する</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">保存済みスクショ一覧</div>
+                    <div id="screenshotGrid" class="grid-cards"></div>
+                </div>
+            </div>
+
+            <!-- 6. 非公式Wikiタブ -->
+            <div id="tab-wiki" class="tab-pane" style="height: 100%;">
+                <div class="card" style="display: flex; flex-direction: column; height: 100%; flex: 1;">
+                    <div class="card-title">
+                        非公式Wiki Hub
+                        <div class="flex-row">
+                            <input type="text" id="wikiUrlInput" value="https://wikipedia.org" style="width: 250px; font-size: 13px;">
+                            <button onclick="updateIframe('wiki')">移動</button>
+                        </div>
+                    </div>
+                    <div class="iframe-wrapper">
+                        <iframe id="wikiIframe" src="https://wikipedia.org"></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. 公式掲示板タブ -->
+            <div id="tab-bbs" class="tab-pane" style="height: 100%;">
+                <div class="card" style="display: flex; flex-direction: column; height: 100%; flex: 1;">
+                    <div class="card-title">
+                        公式掲示板 Hub
+                        <div class="flex-row">
+                            <input type="text" id="bbsUrlInput" value="https://example.com" style="width: 250px; font-size: 13px;">
+                            <button onclick="updateIframe('bbs')">移動</button>
+                        </div>
+                    </div>
+                    <div class="iframe-wrapper">
+                        <iframe id="bbsIframe" src="about:blank"></iframe>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
+    <!-- アプリケーション・ロジック -->
     <script>
-        function showLoading(msg) {
-            document.getElementById('loadingText').textContent = msg;
-            document.getElementById('loadingOverlay').style.display = 'flex';
-        }
-        function hideLoading() {
-            document.getElementById('loadingOverlay').style.display = 'none';
-        }
-
-        function getCurrentUser() {
-            let user = localStorage.getItem('hub_current_user');
-            if (!user) {
-                user = 'default_user';
-                localStorage.setItem('hub_current_user', user);
-            }
-            return user;
-        }
-
-        function saveCurrentUser() {
-            const input = document.getElementById('usernameInput');
-            let val = input.value.trim();
-            if (!val) val = 'default_user';
-            localStorage.setItem('hub_current_user', val);
-            updateItemMasterUI();
-            updateTemplates();
-            loadAllData();
-        }
-
-        const defaultTemplates = [
-            { id: 1, label: "求・出形式 (単体)", text: "{name}）求　{name}）出" },
-            { id: 2, label: "トレード用 (求/出)", text: "<トレード>\n求) {name} （{qty}）\n出) {name} @1:{price}\n無言可です。よろしくお願いします。" },
-            { id: 3, label: "宣伝・相場形式", text: "{name}@1:{price} 最安値" },
-            { id: 4, label: "【要望】機能改善の提案", text: "【要望・フィードバック】\n要望内容：\n現状の課題：\n期待する動作：\n参考スレッド: https://so2-bbs.mutoys.com/t/topic/8580" }
-        ];
-
-        const defaultItems = ["コッペパン", "鉄鉱石", "木材", "薬草"];
-
-        function getStoredItems() {
-            const user = getCurrentUser();
-            let stored = localStorage.getItem('hub_item_master_' + user);
-            if (!stored) {
-                stored = localStorage.getItem('hub_item_master_default_user');
-            }
-            if (!stored) return defaultItems;
-            try {
-                let parsed = JSON.parse(stored);
-                return parsed.map(item => (typeof item === 'string' ? item : item.name || '')).filter(name => name.length > 0);
-            } catch(e) {
-                return defaultItems;
-            }
-        }
-
-        function saveStoredItems(items) {
-            const user = getCurrentUser();
-            localStorage.setItem('hub_item_master_' + user, JSON.stringify(items));
-        }
-
-        function addBulkItems() {
-            const bulkInput = document.getElementById('bulkItemInput');
-            const lines = bulkInput.value.split('\n');
-            let items = getStoredItems();
-            let addedCount = 0;
-            lines.forEach(line => {
-                const trimmed = line.trim();
-                if (trimmed && !items.includes(trimmed)) {
-                    items.push(trimmed);
-                    addedCount++;
-                }
-            });
-            saveStoredItems(items);
-            bulkInput.value = '';
-            updateItemMasterUI();
-            alert(`${addedCount}件の品名を追加しました！`);
-        }
-
-        function deleteItemMaster(itemName) {
-            if (!confirm(`品名「${itemName}」をマスターから削除しますか？`)) return;
-            let items = getStoredItems();
-            items = items.filter(i => i !== itemName);
-            saveStoredItems(items);
-            updateItemMasterUI();
-        }
-
-        function updateItemMasterUI() {
-            const user = getCurrentUser();
-            const nameInput = document.getElementById('usernameInput');
-            if (nameInput && nameInput.value !== user && nameInput.value === '') {
-                nameInput.value = user;
-            }
-
-            const items = getStoredItems();
-            const select = document.getElementById('genItemSelect');
-            if (select) {
-                const currentVal = document.getElementById('genItemName').value;
-                select.innerHTML = '<option value="">-- 登録品名から選択 --</option>';
-                items.forEach(item => {
-                    const opt = document.createElement('option');
-                    opt.value = item;
-                    opt.textContent = item;
-                    if (item === currentVal) opt.selected = true;
-                    select.appendChild(opt);
-                });
-            }
-
-            const chipsArea = document.getElementById('itemMasterChips');
-            if (chipsArea) {
-                chipsArea.innerHTML = '';
-                if (items.length === 0) {
-                    chipsArea.innerHTML = '<span style="font-size: 0.75rem; color: #888;">登録されている品名はありません</span>';
-                    return;
-                }
-                items.forEach(item => {
-                    const chip = document.createElement('span');
-                    chip.style.cssText = 'background: #fff; border: 1px solid #cbd5e1; padding: 2px 6px; border-radius: 10px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #334155;';
-                    chip.innerHTML = `${escapeHtml(item)} <button type="button" onclick="event.stopPropagation(); deleteItemMaster('${escapeJS(item)}')" style="background:none; border:none; color:#e74c3c; cursor:pointer; font-size:0.7rem; padding:0;">✕</button>`;
-                    chip.onclick = function() {
-                        document.getElementById('genItemName').value = item;
-                        document.getElementById('genItemSelect').value = item;
-                        updateTemplates();
-                    };
-                    chipsArea.appendChild(chip);
-                });
-            }
-        }
-
-        function onItemSelectChange() {
-            const select = document.getElementById('genItemSelect');
-            if (select.value) {
-                document.getElementById('genItemName').value = select.value;
-                updateTemplates();
-            }
-        }
-
-        function getStoredTemplates() {
-            const user = getCurrentUser();
-            const stored = localStorage.getItem('hub_custom_templates_' + user);
-            if (!stored) return defaultTemplates;
-            try { return JSON.parse(stored); } catch(e) { return defaultTemplates; }
-        }
-
-        function saveStoredTemplates(templates) {
-            const user = getCurrentUser();
-            localStorage.setItem('hub_custom_templates_' + user, JSON.stringify(templates));
-        }
-
-        function addNewTemplate() {
-            const labelInput = document.getElementById('newTplLabel');
-            const textInput = document.getElementById('newTplText');
-            const label = labelInput.value.trim();
-            const text = textInput.value.trim();
-            if (!label || !text) {
-                alert('フォーマット名とテンプレート文面の両方を入力してください。');
-                return;
-            }
-            let templates = getStoredTemplates();
-            templates.push({ id: Date.now(), label: label, text: text });
-            saveStoredTemplates(templates);
-            labelInput.value = '';
-            textInput.value = '';
-            updateTemplates();
-            alert('新しいフォーマットをマスターに登録しました！');
-        }
-
-        function deleteTemplate(id) {
-            if (!confirm('この定型文フォーマットを削除しますか？')) return;
-            let templates = getStoredTemplates();
-            templates = templates.filter(t => t.id !== id);
-            saveStoredTemplates(templates);
-            updateTemplates();
-        }
-
-        function moveTemplate(id, direction) {
-            let templates = getStoredTemplates();
-            const index = templates.findIndex(t => t.id === id);
-            if (index === -1) return;
-            const targetIndex = index + direction;
-            if (targetIndex < 0 || targetIndex >= templates.length) return;
-            const temp = templates[index];
-            templates[index] = templates[targetIndex];
-            templates[targetIndex] = temp;
-            saveStoredTemplates(templates);
-            updateTemplates();
-        }
-
-        function exportTemplates() {
-            const templates = getStoredTemplates();
-            downloadJSON(templates, "templates_master_" + getCurrentUser() + ".json");
-        }
-
-        function importTemplatesJSON(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const parsed = JSON.parse(e.target.result);
-                    if (Array.isArray(parsed)) {
-                        saveStoredTemplates(parsed);
-                        updateTemplates();
-                        alert("定型文マスターを正常にインポートしました！");
-                    } else { alert("データ形式が正しくありません。"); }
-                } catch(err) { alert("JSONファイルのパースに失敗しました。"); }
-                event.target.value = '';
-            };
-            reader.readAsText(file);
-        }
-
-        function insertFeedbackTemplate() {
-            document.getElementById('newTplLabel').value = '【要望】UIや機能の改善提案';
-            document.getElementById('newTplText').value = '【要望内容】\n\n【現状の困りごと・改善案】\n\n【参考スレッド】\nhttps://so2-bbs.mutoys.com/t/topic/8580';
-            alert('新規追加フォームに「要望テンプレート」をセットしました！');
-        }
-
-        function getGeneratedTemplates() {
-            const name = document.getElementById('genItemName').value.trim() || '品名';
-            const price = document.getElementById('genPrice').value.trim() || '価格';
-            const qty = document.getElementById('genQuantity').value.trim() || '数量';
-            const rawTemplates = getStoredTemplates();
-            return rawTemplates.map(tpl => ({
-                id: tpl.id,
-                label: tpl.label,
-                text: tpl.text.replace(/\{name\}/g, name).replace(/\{price\}/g, price).replace(/\{qty\}/g, qty)
-            }));
-        }
-
-        function switchTab(tabId, btnElement) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            if (btnElement) btnElement.classList.add('active');
-        }
-
-        function getClassification() { return document.getElementById('classificationSelect').value; }
-        function getItemCategory() { return document.getElementById('itemCategorySelect').value; }
-
-        const categoryLabels = {
-            'genryo': '💎 原料', 'hon': '📖 本', 'kusuri': '⚗️ 薬', 'ken': '🗡️ 剣',
-            'yoroi': '🛡️ 鎧', 'tate': '🛡️ 盾', 'tsue': '🪄 杖', 'accessory': '💍 アクセサリ',
-            'chizu': '🗺️ 地図', 'dougu': '🔨 道具', 'seibutsu': '🐉 生物', 'shokumotsu': '☕ 食物'
+        // 状態管理
+        let currentProfile = 'default';
+        let db = {
+            masterItems: [],
+            customTemplates: [],
+            memo_items: [],
+            price_items: [],
+            event_items: [],
+            screenshots: []
         };
-        const classificationLabels = { 'work': '作業', 'transport': '輸送', 'order': '注文', 'purchase': '購入', 'other': 'その他' };
 
-        function onClassificationChange() {
-            updateTemplates();
-            loadAllData();
+        // 初期ロード
+        window.addEventListener('DOMContentLoaded', () => {
+            loadProfileData();
+            initDefaultTemplates();
+            updateAllUI();
+        });
+
+        // プロファイル切替
+        function switchProfile() {
+            currentProfile = document.getElementById('profileSelect').value;
+            loadProfileData();
+            updateAllUI();
         }
 
-        function updateTemplates() {
-            const currentTemplates = getGeneratedTemplates();
-            const templateListArea = document.getElementById('templateListArea');
-            if (templateListArea) {
-                templateListArea.innerHTML = '';
-                currentTemplates.forEach((tpl, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'template-card';
-                    card.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                            <h4 style="margin: 0; font-size: 0.95rem; color: #2c3e50;">📝 ${escapeHtml(tpl.label)}</h4>
-                            <div>
-                                <button class="order-btn" onclick="moveTemplate(${tpl.id}, -1)" ${index === 0 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>▲</button>
-                                <button class="order-btn" onclick="moveTemplate(${tpl.id}, 1)" ${index === currentTemplates.length - 1 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>▼</button>
-                                <button onclick="deleteTemplate(${tpl.id})" style="background: #e74c3c; font-size: 0.75rem; padding: 2px 6px; margin-left: 4px;">🗑️ 削除</button>
-                            </div>
-                        </div>
-                        <div class="template-pre">${escapeHtml(tpl.text)}</div>
-                        <div style="display: flex; gap: 5px;">
-                            <button onclick="copyToClipboard('${escapeJS(tpl.text)}')" style="flex: 1; font-size: 0.8rem;">📋 この定型文をコピー</button>
-                        </div>
-                    `;
-                    templateListArea.appendChild(card);
-                });
+        function createNewProfile() {
+            const name = prompt('新しいプロファイル名（半角英数推奨）を入力してください:');
+            if (name && name.trim()) {
+                const select = document.getElementById('profileSelect');
+                const opt = document.createElement('option');
+                opt.value = name.trim();
+                opt.textContent = name.trim();
+                select.appendChild(opt);
+                select.value = name.trim();
+                switchProfile();
             }
+        }
 
-            ['text', 'price', 'event'].forEach(type => {
-                const container = document.getElementById(type + 'TemplateContainer');
-                if (!container) return;
+        function getStorageKey(key) {
+            return `local_db_${currentProfile}_${key}`;
+        }
+
+        function loadProfileData() {
+            db.masterItems = JSON.parse(localStorage.getItem(getStorageKey('masterItems'))) || ['サンプルアイテムA', 'サンプルアイテムB'];
+            db.customTemplates = JSON.parse(localStorage.getItem(getStorageKey('customTemplates'))) || [
+                { id: 1, title: '基本トレード募集', body: '【求む】{name} x{qty} / 【価格】{price}G でお願いします！' }
+            ];
+            db.memo_items = JSON.parse(localStorage.getItem(getStorageKey('memo_items'))) || [];
+            db.price_items = JSON.parse(localStorage.getItem(getStorageKey('price_items'))) || [];
+            db.event_items = JSON.parse(localStorage.getItem(getStorageKey('event_items'))) || [];
+            db.screenshots = JSON.parse(localStorage.getItem(getStorageKey('screenshots'))) || [];
+        }
+
+        function saveProfileData(key) {
+            localStorage.setItem(getStorageKey(key), JSON.stringify(db[key]));
+        }
+
+        // タブ切替
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if(btnElement) btnElement.classList.add('active');
+        }
+
+        // グローバルフィルター適用
+        function applyGlobalFilter() {
+            renderItems('memo');
+            renderItems('price');
+            renderItems('event');
+        }
+
+        function getGlobalCategoryFilter() {
+            return document.getElementById('globalCategory').value;
+        }
+
+        // --- 1. 定型文・品名管理ロジック ---
+        function initDefaultTemplates() {
+            updateMasterItemSelects();
+            updateTemplateSelects();
+            renderMasterChips();
+            renderCustomTemplates();
+            renderSnippetChips();
+        }
+
+        function updateMasterItemSelects() {
+            const sel = document.getElementById('genItemSelect');
+            const currentVal = sel.value;
+            sel.innerHTML = '<option value="">-- 品名を選択 --</option>';
+            db.masterItems.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item;
+                opt.textContent = item;
+                sel.appendChild(opt);
+            });
+            sel.value = currentVal;
+        }
+
+        function updateTemplateSelects() {
+            const sel = document.getElementById('genTemplateSelect');
+            sel.innerHTML = '<option value="">-- テンプレートを選択 --</option>';
+            db.customTemplates.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.body;
+                opt.textContent = t.title;
+                sel.appendChild(opt);
+            });
+        }
+
+        function renderMasterChips() {
+            const container = document.getElementById('masterItemChips');
+            container.innerHTML = '';
+            db.masterItems.forEach((item, index) => {
+                const chip = document.createElement('span');
+                chip.className = 'chip';
+                chip.innerHTML = `${item} <span class="remove-chip" onclick="removeMasterItem(event, ${index})">&times;</span>`;
+                chip.onclick = () => {
+                    document.getElementById('genItemSelect').value = item;
+                    updateGenerator();
+                };
+                container.appendChild(chip);
+            });
+        }
+
+        function bulkAddItems() {
+            const text = document.getElementById('bulkItemsInput').value;
+            if(!text) return;
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+            lines.forEach(l => {
+                if(!db.masterItems.includes(l)) db.masterItems.push(l);
+            });
+            document.getElementById('bulkItemsInput').value = '';
+            saveProfileData('masterItems');
+            initDefaultTemplates();
+        }
+
+        function removeMasterItem(e, index) {
+            e.stopPropagation();
+            db.masterItems.splice(index, 1);
+            saveProfileData('masterItems');
+            initDefaultTemplates();
+        }
+
+        function updateGenerator() {
+            const name = document.getElementById('genItemSelect').value || '{name}';
+            const price = document.getElementById('genPrice').value || '{price}';
+            const qty = document.getElementById('genQty').value || '{qty}';
+            
+            const selTpl = document.getElementById('genTemplateSelect').value;
+            let template = selTpl || '【品名】{name}\n【価格】{price}G\n【数量】{qty}個';
+            
+            let result = template
+                .replace(/{name}/g, name)
+                .replace(/{price}/g, price)
+                .replace(/{qty}/g, qty);
+            
+            document.getElementById('genOutput').value = result;
+        }
+
+        function selectTemplateToGen() {
+            updateGenerator();
+        }
+
+        function setBbsTemplateToGen() {
+            document.getElementById('genTemplateSelect').value = '';
+            document.getElementById('genOutput').value = `【要望・スレッド投稿用テンプレート】\n対象品名: {name}\n希望価格帯: {price}\n数量: {qty}\n備考: 要望詳細をここに記載`;
+        }
+
+        function copyGeneratorOutput() {
+            const output = document.getElementById('genOutput');
+            output.select();
+            navigator.clipboard.writeText(output.value).then(() => {
+                alert('クリップボードにコピーしました！');
+            });
+        }
+
+        function addCustomTemplate() {
+            const title = document.getElementById('customTemplateTitle').value;
+            const body = document.getElementById('customTemplateBody').value;
+            if(!title || !body) return alert('タイトルと本文を入力してください。');
+            
+            db.customTemplates.push({ id: Date.now(), title, body });
+            saveProfileData('customTemplates');
+            document.getElementById('customTemplateTitle').value = '';
+            document.getElementById('customTemplateBody').value = '';
+            initDefaultTemplates();
+        }
+
+        function renderCustomTemplates() {
+            const list = document.getElementById('customTemplateList');
+            list.innerHTML = '';
+            db.customTemplates.forEach((t, idx) => {
+                const div = document.createElement('div');
+                div.className = 'item-card';
+                div.innerHTML = `
+                    <div class="item-title">${t.title}</div>
+                    <div class="item-body">${t.body}</div>
+                    <div class="item-actions">
+                        <button class="danger" onclick="deleteCustomTemplate(${idx})">削除</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function deleteCustomTemplate(idx) {
+            db.customTemplates.splice(idx, 1);
+            saveProfileData('customTemplates');
+            initDefaultTemplates();
+        }
+
+        function renderSnippetChips() {
+            ['memo', 'price'].forEach(type => {
+                const container = document.getElementById(`${type}SnippetChips`);
+                if(!container) return;
                 container.innerHTML = '';
-                currentTemplates.forEach(tpl => {
-                    const chip = document.createElement('button');
-                    chip.type = 'button';
-                    chip.className = 'template-chip';
-                    chip.textContent = tpl.label;
-                    chip.title = tpl.text;
-                    chip.onclick = function() {
-                        const bodyInput = document.getElementById(type + 'BodyInput');
-                        if (bodyInput) {
-                            bodyInput.value = bodyInput.value ? bodyInput.value + "\n" + tpl.text : tpl.text;
-                        }
+                db.customTemplates.forEach(t => {
+                    const chip = document.createElement('span');
+                    chip.className = 'chip';
+                    chip.textContent = `+ ${t.title}`;
+                    chip.onclick = () => {
+                        const textarea = document.getElementById(`${type}Content`);
+                        textarea.value += (textarea.value ? '\n' : '') + t.body;
                     };
                     container.appendChild(chip);
                 });
             });
         }
 
-        ['genItemName', 'genPrice', 'genQuantity'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.addEventListener('input', updateTemplates);
-        });
+        // --- 2, 3, 4. メモ・価格・イベント共通ロジック ---
+        function saveItem(type) {
+            const category = document.getElementById(`${type}Category`).value;
+            const title = document.getElementById(`${type}Title`).value;
+            const content = document.getElementById(`${type}Content`).value;
 
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => alert('定型文をコピーしました！'));
-        }
+            if(!title || !content) return alert('タイトルと内容を入力してください。');
 
-        function clearInput(type) {
-            if (confirm('入力中の内容をクリアしますか？')) {
-                const titleInput = document.getElementById(type + 'TitleInput');
-                const bodyInput = document.getElementById(type + 'BodyInput');
-                if (titleInput) titleInput.value = '';
-                if (bodyInput) bodyInput.value = '';
-            }
-        }
-
-        function loadAllData() {
-            renderRecords('picturebook');
-            renderRecords('text');
-            renderRecords('price');
-            renderRecords('event');
-            renderRecords('image');
-        }
-
-        // --- JSONファイル入出力機能 ---
-        function exportAllDataJSON() {
-            const user = getCurrentUser();
-            const allRecords = localStorage.getItem('hub_records_all_' + user) || '[]';
-            const itemMaster = localStorage.getItem('hub_item_master_' + user) || '[]';
-            const templates = localStorage.getItem('hub_custom_templates_' + user) || '[]';
-
-            const exportData = {
-                user: user,
-                exportDate: new Date().toISOString(),
-                itemMaster: JSON.parse(itemMaster),
-                customTemplates: JSON.parse(templates),
-                records: JSON.parse(allRecords)
-            };
-
-            downloadJSON(exportData, `hub_all_data_${user}.json`);
-        }
-
-        function importAllDataJSON(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const parsed = JSON.parse(e.target.result);
-                    const user = getCurrentUser();
-                    if (parsed.itemMaster) {
-                        localStorage.setItem('hub_item_master_' + user, JSON.stringify(parsed.itemMaster));
-                    }
-                    if (parsed.customTemplates) {
-                        localStorage.setItem('hub_custom_templates_' + user, JSON.stringify(parsed.customTemplates));
-                    }
-                    if (parsed.records) {
-                        localStorage.setItem('hub_records_all_' + user, JSON.stringify(parsed.records));
-                    }
-                    updateItemMasterUI();
-                    updateTemplates();
-                    loadAllData();
-                    alert("すべてのデータを正常にインポート（復元）しました！");
-                } catch(err) {
-                    alert("JSONファイルの解析に失敗しました。正しいデータ形式かご確認ください。");
-                }
-                event.target.value = '';
-            };
-            reader.readAsText(file);
-        }
-
-        function exportRecordTypeJSON(type) {
-            const user = getCurrentUser();
-            let records = JSON.parse(localStorage.getItem('hub_records_all_' + user) || '[]');
-            records = records.filter(item => item.type === type);
-            downloadJSON(records, `hub_${type}_data_${user}.json`);
-        }
-
-        function importRecordTypeJSON(event, type) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const parsed = JSON.parse(e.target.result);
-                    if (Array.isArray(parsed)) {
-                        const user = getCurrentUser();
-                        let allRecords = JSON.parse(localStorage.getItem('hub_records_all_' + user) || '[]');
-                        allRecords = allRecords.filter(item => item.type !== type);
-                        const merged = parsed.concat(allRecords);
-                        localStorage.setItem('hub_records_all_' + user, JSON.stringify(merged));
-                        loadAllData();
-                        alert(`${type} データのインポートが完了しました！`);
-                    } else {
-                        alert("データ形式が配列ではありません。");
-                    }
-                } catch(err) {
-                    alert("JSONファイルのパースに失敗しました。");
-                }
-                event.target.value = '';
-            };
-            reader.readAsText(file);
-        }
-
-        function downloadJSON(dataObj, filename) {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataObj, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", filename);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        // --- 図鑑タブ & 複数枚画像OCR機能 ---
-        async function processBatchOCRForPictureBook() {
-            const fileInput = document.getElementById('pbMultiImageInput');
-            const categorySelect = document.getElementById('pbNewCategory').value;
-            if (!fileInput.files || fileInput.files.length === 0) {
-                alert('OCRする画像ファイルを1枚以上選択してください。');
-                return;
-            }
-
-            showLoading(`OCR解析中 (0 / ${fileInput.files.length})...`);
-            const user = getCurrentUser();
-            let records = JSON.parse(localStorage.getItem('hub_records_all_' + user) || '[]');
-            
-            try {
-                const worker = await Tesseract.createWorker('jpn+eng');
-                for (let i = 0; i < fileInput.files.length; i++) {
-                    const file = fileInput.files[i];
-                    showLoading(`OCR解析中 (${i + 1} / ${fileInput.files.length}): ${file.name}`);
-                    
-                    const base64Data = await new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onload = (e) => resolve(e.target.result);
-                        reader.readAsDataURL(file);
-                    });
-
-                    const ret = await worker.recognize(base64Data);
-                    records.unshift({
-                        id: Date.now() + i,
-                        type: 'picturebook',
-                        classification: 'other',
-                        itemCategory: categorySelect,
-                        title: file.name.replace(/\.[^/.]+$/, ""),
-                        body: ret.data.text.trim(),
-                        image: base64Data,
-                        date: new Date().toLocaleString()
-                    });
-                }
-                await worker.terminate();
-                localStorage.setItem('hub_records_all_' + user, JSON.stringify(records));
-                fileInput.value = '';
-                loadAllData();
-                alert('複数画像のOCR取り込みが完了し、図鑑に保存しました！');
-            } catch (err) {
-                console.error(err);
-                alert('OCR処理中にエラーが発生しました。');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // --- イベント情報OCR取り込み機能 ---
-        async function processEventOCR() {
-            const fileInput = document.getElementById('ocrEventImageInput');
-            if (!fileInput.files || !fileInput.files[0]) {
-                alert('画像ファイルを1枚選択してください。');
-                return;
-            }
-
-            showLoading('イベント画像をOCR解析中...');
-            try {
-                const file = fileInput.files[0];
-                const base64Data = await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => resolve(e.target.result);
-                    reader.readAsDataURL(file);
-                });
-
-                const worker = await Tesseract.createWorker('jpn+eng');
-                const ret = await worker.recognize(base64Data);
-                await worker.terminate();
-
-                const textLines = ret.data.text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                if (textLines.length > 0) {
-                    document.getElementById('eventTitleInput').value = textLines[0];
-                    document.getElementById('eventBodyInput').value = textLines.slice(1).join('\n');
-                } else {
-                    document.getElementById('eventBodyInput').value = ret.data.text.trim();
-                }
-
-                // ついでに添付スクショ用にも同じ画像をセット（任意）
-                const dt = new DataTransfer();
-                dt.items.add(file);
-                document.getElementById('eventImageInput').files = dt.files;
-
-                fileInput.value = '';
-                alert('イベント情報のOCR読み込みが完了しました！内容を確認して保存してください。');
-            } catch (err) {
-                console.error(err);
-                alert('イベントのOCR解析中にエラーが発生しました。');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // --- 定型文OCR取り込み ＆ 単語ごと抽出機能 ---
-        async function processTemplateOCR() {
-            const fileInput = document.getElementById('ocrTemplateImageInput');
-            if (!fileInput.files || !fileInput.files[0]) {
-                alert('画像を1枚選択してください。');
-                return;
-            }
-
-            showLoading('画像をOCR解析し、単語を抽出中...');
-            try {
-                const file = fileInput.files[0];
-                const base64Data = await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => resolve(e.target.result);
-                    reader.readAsDataURL(file);
-                });
-
-                const worker = await Tesseract.createWorker('jpn+eng');
-                const ret = await worker.recognize(base64Data);
-                await worker.terminate();
-
-                const words = ret.data.text.split(/[\s\n\r\t　,，.。・/／()（）「」『』]+/g).filter(w => w.trim().length > 0);
-                const chipsArea = document.getElementById('ocrWordChips');
-                chipsArea.innerHTML = '';
-
-                if (words.length === 0) {
-                    chipsArea.innerHTML = '<span style="font-size: 0.75rem; color: #888;">単語が検出されませんでした</span>';
-                } else {
-                    words.forEach(word => {
-                        const chip = document.createElement('span');
-                        chip.style.cssText = 'background: #f0fdf4; border: 1px solid #86efac; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; color: #166534; display: inline-flex; align-items: center; gap: 4px;';
-                        chip.textContent = word;
-                        chip.onclick = function() {
-                            document.getElementById('genItemName').value = word;
-                            document.getElementById('genItemSelect').value = '';
-                            updateTemplates();
-                            alert(`品名に「${word}」をセットしました！`);
-                        };
-                        chipsArea.appendChild(chip);
-                    });
-                }
-                alert('OCRによる単語抽出が完了しました！');
-            } catch (err) {
-                console.error(err);
-                alert('OCR単語抽出中にエラーが発生しました。');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // --- レコード管理共通 ---
-        function addRecord(type) {
-            const catSelect = document.getElementById(type + 'NewCategory');
-            const classSelect = document.getElementById(type + 'NewClassification');
-            const itemCat = catSelect ? catSelect.value : 'none';
-            const classification = classSelect ? classSelect.value : 'none';
-
-            const titleInput = document.getElementById(type + 'TitleInput');
-            const bodyInput = document.getElementById(type + 'BodyInput');
-            const title = titleInput ? titleInput.value.trim() : '';
-            const body = bodyInput ? bodyInput.value.trim() : '';
-
-            if (!title && !body) {
-                alert('タイトルか内容を入力してください。');
-                return;
-            }
-
-            if (type === 'event') {
-                const imgFileInput = document.getElementById('eventImageInput');
-                if (imgFileInput && imgFileInput.files && imgFileInput.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        saveRecordData(type, classification, itemCat, title, body, e.target.result);
-                        imgFileInput.value = '';
-                    };
-                    reader.readAsDataURL(imgFileInput.files[0]);
-                    return;
-                }
-            }
-            saveRecordData(type, classification, itemCat, title, body, null);
-        }
-
-        function saveRecordData(type, classification, itemCat, title, body, imageData) {
-            const user = getCurrentUser();
-            let records = JSON.parse(localStorage.getItem('hub_records_all_' + user) || '[]');
-            records.unshift({
+            const newItem = {
                 id: Date.now(),
-                type: type,
-                classification: classification,
-                itemCategory: itemCat,
-                title: title || '無題',
-                body: body,
-                image: imageData,
-                date: new Date().toLocaleString()
-            });
-            localStorage.setItem('hub_records_all_' + user, JSON.stringify(records));
+                category,
+                title,
+                content,
+                createdAt: Date.now()
+            };
 
-            const titleInput = document.getElementById(type + 'TitleInput');
-            const bodyInput = document.getElementById(type + 'BodyInput');
-            if (titleInput) titleInput.value = '';
-            if (bodyInput) bodyInput.value = '';
-            loadAllData();
+            db[`${type}_items`].push(newItem);
+            saveProfileData(`${type}_items`);
+            resetForm(type);
+            renderItems(type);
         }
 
-        function deleteRecord(id) {
-            if (!confirm('この項目を削除しますか？')) return;
-            const user = getCurrentUser();
-            let records = JSON.parse(localStorage.getItem('hub_records_all_' + user) || '[]');
-            records = records.filter(item => item.id !== id);
-            localStorage.setItem('hub_records_all_' + user, JSON.stringify(records));
-            loadAllData();
-        }
+        function saveEventItem() {
+            const category = document.getElementById('eventCategory').value;
+            const title = document.getElementById('eventTitle').value;
+            const content = document.getElementById('eventContent').value;
+            const fileInput = document.getElementById('eventImageFile');
 
-        function moveRecord(id, direction) {
-            const user = getCurrentUser();
-            let records = JSON.parse(localStorage.getItem('hub_records_all_' + user) || '[]');
-            const index = records.findIndex(item => item.id === id);
-            if (index === -1) return;
-            const targetIndex = index + direction;
-            if (targetIndex < 0 || targetIndex >= records.length) return;
-            const temp = records[index];
-            records[index] = records[targetIndex];
-            records[targetIndex] = temp;
-            localStorage.setItem('hub_records_all_' + user, JSON.stringify(records));
-            loadAllData();
-        }
+            if(!title || !content) return alert('タイトルと内容を入力してください。');
 
-        function renderRecords(type) {
-            const user = getCurrentUser();
-            const selectedClass = getClassification();
-            const selectedItemCat = getItemCategory();
-            const container = document.getElementById(type + 'ListContainer');
-            if (!container) return;
-            container.innerHTML = '';
+            const processSave = (imgData = '') => {
+                const newItem = {
+                    id: Date.now(),
+                    category,
+                    title,
+                    content,
+                    image: imgData,
+                    createdAt: Date.now()
+                };
+                db.event_items.push(newItem);
+                saveProfileData('event_items');
+                resetForm('event');
+                renderItems('event');
+            };
 
-            let records = JSON.parse(localStorage.getItem('hub_records_all_' + user) || '[]');
-            records = records.filter(item => item.type === type);
-
-            if (selectedClass !== 'all' && type !== 'picturebook') {
-                records = records.filter(item => item.classification === selectedClass);
-            }
-            if (selectedItemCat !== 'all') {
-                records = records.filter(item => item.itemCategory === selectedItemCat);
-            }
-
-            const searchInput = document.getElementById(type + 'SearchInput');
-            const keyword = searchInput ? searchInput.value.toLowerCase() : '';
-            if (keyword) {
-                records = records.filter(item => 
-                    item.title.toLowerCase().includes(keyword) || 
-                    (item.body && item.body.toLowerCase().includes(keyword))
-                );
-            }
-
-            const sortSelect = document.getElementById(type + 'SortSelect');
-            if (sortSelect && type !== 'image' && type !== 'picturebook') {
-                const sortVal = sortSelect.value;
-                if (sortVal === 'new') records.sort((a, b) => b.id - a.id);
-                else if (sortVal === 'old') records.sort((a, b) => a.id - b.id);
-            }
-
-            if (records.length === 0) {
-                container.innerHTML = '<p style="font-size: 0.85rem; color: #888; text-align: center;">条件に一致する記録はありません。</p>';
-                return;
-            }
-
-            if (type === 'image' || type === 'picturebook') {
-                const gridDiv = document.createElement('div');
-                gridDiv.className = 'image-grid';
-
-                records.forEach((item) => {
-                    const card = document.createElement('div');
-                    card.className = 'record-item';
-                    card.style.margin = '0';
-                    const catBadge = item.itemCategory && item.itemCategory !== 'none' && categoryLabels[item.itemCategory] ? `<span class="badge">${categoryLabels[item.itemCategory]}</span>` : '';
-
-                    card.innerHTML = `
-                        <div style="margin-bottom: 4px;">${catBadge}</div>
-                        <div class="record-title" style="font-size: 0.85rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(item.title)}">🏷️ ${escapeHtml(item.title)}</div>
-                        ${item.image ? `<img src="${item.image}" class="preview-img" alt="画像">` : ''}
-                        ${type === 'picturebook' && item.body ? `<div style="font-size: 0.75rem; color:#444; max-height:60px; overflow-y:auto; background:#f8fafc; padding:4px; margin-top:4px;">${escapeHtml(item.body)}</div>` : ''}
-                        <div style="display: flex; justify-content: space-between; margin-top: 6px; align-items: center;">
-                            ${item.image ? `<a href="${item.image}" download="${item.title}.png" style="font-size: 0.75rem;">📥DL</a>` : ''}
-                            <button onclick="deleteRecord(${item.id})" style="background: #e74c3c; font-size: 0.7rem; padding: 2px 5px;">🗑️</button>
-                        </div>
-                    `;
-                    gridDiv.appendChild(card);
-                });
-                container.appendChild(gridDiv);
+            if(fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) { processSave(e.target.result); };
+                reader.readAsDataURL(fileInput.files[0]);
             } else {
-                records.forEach((item, index) => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'record-item';
-                    const catBadge = item.itemCategory && item.itemCategory !== 'none' && categoryLabels[item.itemCategory] ? `<span class="badge">${categoryLabels[item.itemCategory]}</span>` : '<span class="badge" style="background:#f1f5f9; color:#94a3b8;">カテゴリなし</span>';
-                    const classBadge = item.classification && item.classification !== 'none' && classificationLabels[item.classification] ? `<span class="badge" style="background:#e0f2fe; color:#0369a1;">${classificationLabels[item.classification]}</span>` : '<span class="badge" style="background:#f1f5f9; color:#94a3b8;">分類なし</span>';
-                    let imageHtml = item.image ? `<div style="margin-bottom: 8px;"><img src="${item.image}" class="preview-img" style="max-height: 160px; object-fit: contain; width: auto;" alt="添付スクショ"></div>` : '';
-
-                    itemDiv.innerHTML = `
-                        <div class="record-header">
-                            <div style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
-                                ${catBadge}${classBadge}
-                                <span class="record-title">📌 ${escapeHtml(item.title)}</span>
-                            </div>
-                            <div>
-                                <button class="order-btn" onclick="moveRecord(${item.id}, -1)" ${index === 0 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>▲</button>
-                                <button class="order-btn" onclick="moveRecord(${item.id}, 1)" ${index === records.length - 1 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>▼</button>
-                                <button onclick="deleteRecord(${item.id})" style="background: #e74c3c; font-size: 0.75rem; padding: 3px 8px; margin-left: 4px;">🗑️ 削除</button>
-                            </div>
-                        </div>
-                        ${imageHtml}
-                        <div class="record-body">${escapeHtml(item.body)}</div>
-                        <div style="font-size: 0.75rem; color: #888; text-align: right; margin-top: 4px;">保存日時: ${item.date || ''}</div>
-                    `;
-                    container.appendChild(itemDiv);
-                });
+                processSave('');
             }
         }
 
-        function addImageData() {
-            const catSelect = document.getElementById('imageNewCategory');
-            const classSelect = document.getElementById('imageNewClassification');
-            const itemCat = catSelect ? catSelect.value : 'none';
-            const classification = classSelect ? classSelect.value : 'none';
-            const titleInput = document.getElementById('imageTitleInput');
-            const fileInput = document.getElementById('imageInput');
-            
-            if (!fileInput.files || !fileInput.files[0]) {
-                alert('画像ファイルを選択してください。');
+        function resetForm(type) {
+            if(document.getElementById(`${type}Title`)) document.getElementById(`${type}Title`).value = '';
+            if(document.getElementById(`${type}Content`)) document.getElementById(`${type}Content`).value = '';
+            if(type === 'event' && document.getElementById('eventImageFile')) document.getElementById('eventImageFile').value = '';
+        }
+
+        function setSearchKeyword(type, keyword) {
+            const searchInput = document.getElementById(`${type}Search`);
+            searchInput.value = keyword;
+            renderItems(type);
+        }
+
+        function renderItems(type) {
+            const listEl = document.getElementById(`${type}List`);
+            const searchVal = document.getElementById(`${type}Search`).value.toLowerCase();
+            const sortVal = document.getElementById(`${type}Sort`).value;
+            const globalCat = getGlobalCategoryFilter();
+
+            let items = [...db[`${type}_items`]];
+
+            // フィルター (グローバルカテゴリ ＆ 検索キーワード)
+            items = items.filter(item => {
+                const matchCat = !globalCat || item.category === globalCat;
+                const matchSearch = !searchVal || item.title.toLowerCase().includes(searchVal) || item.content.toLowerCase().includes(searchVal);
+                return matchCat && matchSearch;
+            });
+
+            // ソート
+            if(sortVal === 'newest') {
+                items.sort((a, b) => b.createdAt - a.createdAt);
+            } else if(sortVal === 'oldest') {
+                items.sort((a, b) => a.createdAt - b.createdAt);
+            } // 'custom' の場合は配列の順序をそのまま保持
+
+            listEl.innerHTML = '';
+            if(items.length === 0) {
+                listEl.innerHTML = '<div style="font-size: 13px; color: var(--text-muted); text-align: center; padding: 20px;">データがありません</div>';
                 return;
             }
 
-            const title = titleInput.value.trim() || '無題のスクショ';
+            items.forEach((item, index) => {
+                const originalIndex = db[`${type}_items`].findIndex(i => i.id === item.id);
+                const div = document.createElement('div');
+                div.className = 'item-card';
+                
+                let imgHtml = item.image ? `<img src="${item.image}" style="max-height: 120px; object-fit: contain; border-radius: 4px; border: 1px solid var(--border-color); margin-top: 6px;">` : '';
+
+                div.innerHTML = `
+                    <div class="item-header">
+                        <span>[${item.category}]</span>
+                        <span>${new Date(item.createdAt).toLocaleString()}</span>
+                    </div>
+                    <div class="item-title">${item.title}</div>
+                    <div class="item-body">${item.content}</div>
+                    ${imgHtml}
+                    <div class="item-actions">
+                        ${sortVal === 'custom' ? `
+                            <button onclick="moveItem('${type}', ${originalIndex}, -1)">▲ 上へ</button>
+                            <button onclick="moveItem('${type}', ${originalIndex}, 1)">▼ 下へ</button>
+                        ` : ''}
+                        <button class="danger" onclick="deleteItem('${type}', ${originalIndex})">削除</button>
+                    </div>
+                `;
+                listEl.appendChild(div);
+            });
+        }
+
+        function moveItem(type, index, direction) {
+            const arr = db[`${type}_items`];
+            const targetIndex = index + direction;
+            if(targetIndex < 0 || targetIndex >= arr.length) return;
+            const temp = arr[index];
+            arr[index] = arr[targetIndex];
+            arr[targetIndex] = temp;
+            saveProfileData(`${type}_items`);
+            renderItems(type);
+        }
+
+        function deleteItem(type, index) {
+            db[`${type}_items`].splice(index, 1);
+            saveProfileData(`${type}_items`);
+            renderItems(type);
+        }
+
+        // --- 5. スクショ保存ロジック ---
+        function saveScreenshot() {
+            const title = document.getElementById('ssTitle').value;
+            const fileInput = document.getElementById('ssFile');
+
+            if(!fileInput.files || !fileInput.files[0]) return alert('画像ファイルを選択してください。');
+
             const reader = new FileReader();
             reader.onload = function(e) {
-                saveRecordData('image', classification, itemCat, title, '', e.target.result);
-                titleInput.value = '';
-                fileInput.value = '';
-            }
+                db.screenshots.push({
+                    id: Date.now(),
+                    title: title || '無題のスクショ',
+                    data: e.target.result,
+                    createdAt: Date.now()
+                });
+                saveProfileData('screenshots');
+                document.getElementById('ssTitle').value = '';
+                document.getElementById('ssFile').value = '';
+                renderScreenshots();
+            };
             reader.readAsDataURL(fileInput.files[0]);
         }
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&'`<>]/g, function(match) {
-                return { '&': '&amp;', "'": '&#x27;', '`': '&#x60;', '<': '&lt;', '>': '&gt;' }[match];
+        function renderScreenshots() {
+            const grid = document.getElementById('screenshotGrid');
+            grid.innerHTML = '';
+            if(db.screenshots.length === 0) {
+                grid.innerHTML = '<div style="font-size: 13px; color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 20px;">保存されたスクショはありません</div>';
+                return;
+            }
+
+            db.screenshots.forEach((ss, index) => {
+                const card = document.createElement('div');
+                card.className = 'screenshot-card';
+                card.innerHTML = `
+                    <img src="${ss.data}" class="screenshot-img" onclick="window.open('${ss.data}')" title="クリックで拡大">
+                    <div class="screenshot-info">
+                        <div style="font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ss.title}</div>
+                        <div style="display: flex; gap: 6px; justify-content: flex-end;">
+                            <a href="${ss.data}" download="screenshot_${ss.id}.png"><button>ダウンロード</button></a>
+                            <button class="danger" onclick="deleteScreenshot(${index})">削除</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
             });
         }
 
-        function escapeJS(str) {
-            if (!str) return '';
-            return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+        function deleteScreenshot(index) {
+            db.screenshots.splice(index, 1);
+            saveProfileData('screenshots');
+            renderScreenshots();
         }
 
-        window.onload = function() {
-            const user = getCurrentUser();
-            document.getElementById('usernameInput').value = user;
-            updateItemMasterUI();
-            updateTemplates();
-            loadAllData();
-        };
+        // --- 6, 7. iframe Hub ロジック ---
+        function updateIframe(type) {
+            const url = document.getElementById(`${type}UrlInput`).value;
+            if(url) {
+                document.getElementById(`${type}Iframe`).src = url;
+            }
+        }
+
+        // --- 総合UI更新 ---
+        function updateAllUI() {
+            initDefaultTemplates();
+            renderItems('memo');
+            renderItems('price');
+            renderItems('event');
+            renderScreenshots();
+        }
     </script>
 </body>
 </html>
