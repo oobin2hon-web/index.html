@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>oobin2hon-web ファイル管理 Hub（完全安定・保存修正版）</title>
+    <title>oobin2hon-web ファイル管理 Hub（完全修正・構造安定版）</title>
     <!-- OCR用ライブラリ -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
@@ -62,7 +62,7 @@
         button.download-btn { background: #007bff; color: white; border: none; }
         
         .history-area { margin-top: 8px; display: flex; gap: 8px; align-items: center; font-size: 13px; }
-        .save-status { font-size: 12px; font-weight: bold; color: #28a745; margin-left: 5px; opacity: 0; transition: opacity 0.3s ease; }
+        .save-status { font-size: 13px; font-weight: bold; color: #28a745; margin-left: 5px; opacity: 0; transition: opacity 0.2s ease-in-out; }
 
         .wiki-ocr-box { background: #fdf8f4; border: 1px solid #e67e22; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
         .frame-box { width: 100%; height: 400px; border: 1px solid #ccc; border-radius: 4px; background: #fff; display: block; margin-top: 8px; }
@@ -77,7 +77,7 @@
 <body>
 
 <div class="header">
-    <h1>🚀 oobin2hon-web ファイル管理 Hub（完全安定・保存修正版）</h1>
+    <h1>🚀 oobin2hon-web ファイル管理 Hub（構造修正・完全版）</h1>
 </div>
 
 <div class="container">
@@ -106,16 +106,18 @@
     <div class="main-layout">
         <!-- 左側にタブ中身表示エリア -->
         <div class="tab-content-area">
-            <div class="file-action-bar">
-                <span style="font-size:13px; font-weight:bold; color:#0056b3;">📌 ファイル操作:</span>
-                <a id="open_page_active" href="#" target="_blank" class="open-file-btn">🌐 ページを直接開く</a>
-            </div>
-            <label style="font-size:12px; font-weight:bold; color:#666;">ファイル名:</label>
-            <input type="text" id="active_filename" class="file-name-input" value="" oninput="autoSaveCurrentContent()">
             
-            <!-- 1. 通常のエディター -->
+            <!-- 1. 通常のエディター（ファイル名入力もエディターコンテナ内に統合して常時確実に制御） -->
             <div id="editor_container">
-                <textarea id="active_textarea" placeholder="ここにコードやJSONデータを自由に入力・変更できます..." oninput="autoSaveCurrentContent()"></textarea>
+                <div class="file-action-bar">
+                    <span style="font-size:13px; font-weight:bold; color:#0056b3;">📌 ファイル操作:</span>
+                    <a id="open_page_active" href="#" target="_blank" class="open-file-btn">🌐 ページを直接开く</a>
+                </div>
+                <label style="font-size:12px; font-weight:bold; color:#666;">ファイル名:</label>
+                <input type="text" id="active_filename" class="file-name-input" value="" oninput="triggerAutoSave()">
+                
+                <textarea id="active_textarea" placeholder="ここにコードやJSONデータを自由に入力・変更できます..." oninput="triggerAutoSave()"></textarea>
+                
                 <div class="toolbar">
                     <button type="button" class="save" onclick="saveActiveDataExplicit()">💾 保存</button>
                     <span id="saveStatusMsg" class="save-status">✔ 保存しました！</span>
@@ -125,6 +127,7 @@
                     <button type="button" class="clear-btn" onclick="clearActiveCode()">🗑️ 消去</button>
                     <button type="button" class="download-btn" onclick="downloadActiveFile()" style="margin-left:auto;">⬇️ 出力</button>
                 </div>
+                
                 <div class="history-area">
                     <span style="font-weight:bold; color:#555;">履歴:</span>
                     <select id="active_history" style="flex-grow:1;" onchange="loadActiveHistory()">
@@ -358,6 +361,7 @@
     const wikiCategories = ["原料", "本", "薬", "剣", "鎧", "盾", "杖", "アクセサリ", "地図", "道具", "生物", "食物", "図鑑"];
     let currentActiveTabId = "tab_0";
     let currentFileName = defaultFileNames[0];
+    let autoSaveTimer = null;
 
     const tabButtonsContainer = document.getElementById('tabButtons');
 
@@ -381,6 +385,7 @@
         btn.innerText = defaultName;
         
         btn.onclick = function() {
+            triggerAutoSaveImmediate();
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             switchTab(tabId, defaultName);
@@ -437,10 +442,17 @@
         }
     }
 
-    // 入力時の自動同期（安全に実施）
-    function autoSaveCurrentContent() {
+    function triggerAutoSave() {
+        if (autoSaveTimer) clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(() => {
+            triggerAutoSaveImmediate();
+        }, 400);
+    }
+
+    function triggerAutoSaveImmediate() {
         const filename = document.getElementById('active_filename').value.trim() || 'unnamed.html';
         const textarea = document.getElementById('active_textarea');
+        if (!textarea) return;
         const currentText = textarea.value;
 
         let histories = JSON.parse(localStorage.getItem(`history_${currentActiveTabId}`) || '[]');
@@ -453,36 +465,39 @@
         localStorage.setItem(`history_${currentActiveTabId}`, JSON.stringify(histories));
     }
 
-    // 💾 確実な手動保存処理（インジケーター表示付き）
     function saveActiveDataExplicit() {
+        triggerAutoSaveImmediate();
+
         const filename = document.getElementById('active_filename').value.trim() || 'unnamed.html';
         const textarea = document.getElementById('active_textarea');
         const currentText = textarea.value;
 
         let histories = JSON.parse(localStorage.getItem(`history_${currentActiveTabId}`) || '[]');
+        
         if (histories.length > 0) {
             textarea.setAttribute('data-previous', histories[0].text);
         }
         
-        // 常に最新の手動保存を先頭に追加
         histories.unshift({ time: new Date().toLocaleString(), filename, text: currentText });
-        if (histories.length > 15) histories.pop();
+        if (histories.length > 20) histories.pop();
         
         localStorage.setItem(`history_${currentActiveTabId}`, JSON.stringify(histories));
         updateHistorySelectForTab(currentActiveTabId);
         
-        // 視覚的な「保存しました！」フィードバックを表示
         const statusMsg = document.getElementById('saveStatusMsg');
         if (statusMsg) {
+            statusMsg.style.opacity = '0';
+            void statusMsg.offsetWidth; 
             statusMsg.style.opacity = '1';
+            
             setTimeout(() => {
                 statusMsg.style.opacity = '0';
-            }, 2000);
+            }, 2500);
         }
     }
 
     function downloadActiveFile() {
-        autoSaveCurrentContent();
+        triggerAutoSaveImmediate();
         const filename = document.getElementById('active_filename').value.trim() || 'unnamed.html';
         const textarea = document.getElementById('active_textarea');
         const currentText = textarea.value;
@@ -507,12 +522,12 @@
         
         const snippet = `\n<!-- 追加したJSONデータ -->\n<script>\nconst embeddedItemMaster = ${savedJson};\n<\/script>\n`;
         textarea.value += snippet;
-        autoSaveCurrentContent();
+        triggerAutoSaveImmediate();
         alert('エディターに保存されている図鑑JSONデータを埋め込みました！');
     }
 
     function runActiveTest() {
-        autoSaveCurrentContent();
+        triggerAutoSaveImmediate();
         const text = document.getElementById('active_textarea').value;
         if (!text.trim()) { alert('コードがありません。'); return; }
         window.open(URL.createObjectURL(new Blob([text], { type: 'text/html' })), '_blank');
@@ -521,7 +536,7 @@
     function clearActiveCode() {
         if (confirm('すべて消去しますか？')) {
             document.getElementById('active_textarea').value = '';
-            autoSaveCurrentContent();
+            triggerAutoSaveImmediate();
         }
     }
 
@@ -545,7 +560,7 @@
         if (histories[index]) {
             document.getElementById('active_filename').value = histories[index].filename;
             document.getElementById('active_textarea').value = histories[index].text;
-            autoSaveCurrentContent();
+            triggerAutoSaveImmediate();
         }
     }
 
@@ -554,7 +569,7 @@
         const prevText = textarea.getAttribute('data-previous');
         if (prevText) {
             textarea.value = prevText;
-            autoSaveCurrentContent();
+            triggerAutoSaveImmediate();
             alert('直前に戻しました。');
         } else { alert('戻せる履歴がありません。'); }
     }
@@ -714,7 +729,7 @@
         }
 
         let html = '';
-        items.forEach((item, index) => {
+        items.forEach((item) => {
             const allItems = getStoredMasterItems();
             const realIndex = allItems.findIndex(i => i.name === item.name && i.category === item.category);
             html += `
