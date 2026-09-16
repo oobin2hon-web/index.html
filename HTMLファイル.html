@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>oobin2hon-web ファイル管理 Hub（完全確認・修正版）</title>
+    <title>oobin2hon-web ファイル管理 Hub（完全同期・修正版）</title>
     <!-- OCR用ライブラリ -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
@@ -59,6 +59,7 @@
         button.test { background: #17a2b8; color: white; border: none; }
         button.clear-btn { background: #e74c3c; color: white; border: none; }
         button.json-btn { background: #6f42c1; color: white; border: none; }
+        button.download-btn { background: #007bff; color: white; border: none; }
         
         .history-area { margin-top: 8px; display: flex; gap: 8px; align-items: center; font-size: 13px; }
 
@@ -75,7 +76,7 @@
 <body>
 
 <div class="header">
-    <h1>🚀 oobin2hon-web ファイル管理 Hub（自動出力連動版）</h1>
+    <h1>🚀 oobin2hon-web ファイル管理 Hub（完全同期・修正版）</h1>
 </div>
 
 <div class="container">
@@ -109,18 +110,18 @@
                 <a id="open_page_active" href="#" target="_blank" class="open-file-btn">🌐 ページを直接開く</a>
             </div>
             <label style="font-size:12px; font-weight:bold; color:#666;">ファイル名:</label>
-            <input type="text" id="active_filename" class="file-name-input" value="" oninput="updateActiveDownloadLink()">
+            <input type="text" id="active_filename" class="file-name-input" value="" oninput="autoSaveCurrentContent()">
             
             <!-- 1. 通常のエディター -->
             <div id="editor_container">
-                <textarea id="active_textarea" placeholder="ここにコードやJSONデータを自由に入力・変更できます..." oninput="updateActiveDownloadLink()"></textarea>
+                <textarea id="active_textarea" placeholder="ここにコードやJSONデータを自由に入力・変更できます..." oninput="autoSaveCurrentContent()"></textarea>
                 <div class="toolbar">
-                    <button type="button" class="save" onclick="saveActiveData()">💾 保存</button>
+                    <button type="button" class="save" onclick="saveActiveDataExplicit()">💾 保存</button>
                     <button type="button" class="json-btn" onclick="insertJsonDataIntoEditor()">📦 JSONデータを挿入</button>
                     <button type="button" class="restore" onclick="restoreActivePrevious()">↩️ 戻す</button>
                     <button type="button" class="test" onclick="runActiveTest()">▶️ テスト</button>
                     <button type="button" class="clear-btn" onclick="clearActiveCode()">🗑️ 消去</button>
-                    <a id="active_download" style="font-size:13px; color:#007bff; text-decoration:none; font-weight:bold; margin-left:auto;" download="">⬇️ 出力</a>
+                    <button type="button" class="download-btn" onclick="downloadActiveFile()" style="margin-left:auto;">⬇️ 出力</button>
                 </div>
                 <div class="history-area">
                     <span style="font-weight:bold; color:#555;">履歴:</span>
@@ -418,19 +419,6 @@
         }
     }
 
-    // 🌟 出力リンクを常に最新の内容に自動更新する関数
-    function updateActiveDownloadLink() {
-        const filename = document.getElementById('active_filename').value.trim() || 'unnamed.html';
-        const textarea = document.getElementById('active_textarea');
-        const dlEl = document.getElementById('active_download');
-        if (!textarea || !dlEl) return;
-
-        const currentText = textarea.value;
-        const fileType = filename.endsWith('.json') ? 'application/json' : 'text/html';
-        dlEl.href = URL.createObjectURL(new Blob([currentText], { type: fileType }));
-        dlEl.download = filename;
-    }
-
     function loadLatestDataForTab(tabId, defaultName) {
         const textEl = document.getElementById('active_textarea');
         const filenameEl = document.getElementById('active_filename');
@@ -445,10 +433,26 @@
             textEl.value = "";
             textEl.removeAttribute('data-previous');
         }
-        updateActiveDownloadLink(); // 読み込み時にもリンクを同期
     }
 
-    function saveActiveData() {
+    // 🌟 入力時に自動で最新状態をストレージに反映（これで上書き消失を防ぐ）
+    function autoSaveCurrentContent() {
+        const filename = document.getElementById('active_filename').value.trim() || 'unnamed.html';
+        const textarea = document.getElementById('active_textarea');
+        const currentText = textarea.value;
+
+        let histories = JSON.parse(localStorage.getItem(`history_${currentActiveTabId}`) || '[]');
+        if (histories.length === 0) {
+            histories.unshift({ time: new Date().toLocaleString(), filename, text: currentText });
+        } else {
+            histories[0].text = currentText;
+            histories[0].filename = filename;
+        }
+        localStorage.setItem(`history_${currentActiveTabId}`, JSON.stringify(histories));
+    }
+
+    // 💾 明示的な保存ボタン（履歴を新しく1件追加する）
+    function saveActiveDataExplicit() {
         const filename = document.getElementById('active_filename').value.trim() || 'unnamed.html';
         const textarea = document.getElementById('active_textarea');
         const currentText = textarea.value;
@@ -460,8 +464,28 @@
         localStorage.setItem(`history_${currentActiveTabId}`, JSON.stringify(histories));
         updateHistorySelectForTab(currentActiveTabId);
         
-        updateActiveDownloadLink();
         alert(`「${filename}」を保存しました！`);
+    }
+
+    // ⬇️ 常に最新のエディターテキストをそのままファイル化して出力
+    function downloadActiveFile() {
+        autoSaveCurrentContent(); // 出力直前にも確実に自動同期
+        const filename = document.getElementById('active_filename').value.trim() || 'unnamed.html';
+        const textarea = document.getElementById('active_textarea');
+        const currentText = textarea.value;
+
+        const fileType = filename.endsWith('.json') ? 'application/json' : 'text/html';
+        const blob = new Blob([currentText], { type: fileType });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
     function insertJsonDataIntoEditor() {
@@ -470,25 +494,21 @@
         
         const snippet = `\n<!-- 追加したJSONデータ -->\n<script>\nconst embeddedItemMaster = ${savedJson};\n<\/script>\n`;
         textarea.value += snippet;
-        updateActiveDownloadLink();
+        autoSaveCurrentContent();
         alert('エディターに保存されている図鑑JSONデータを埋め込みました！');
     }
 
     function runActiveTest() {
-        updateActiveTestLink(); // テスト前にリンクも最新化
+        autoSaveCurrentContent(); // テスト直前にも確実に同期
         const text = document.getElementById('active_textarea').value;
         if (!text.trim()) { alert('コードがありません。'); return; }
         window.open(URL.createObjectURL(new Blob([text], { type: 'text/html' })), '_blank');
-    }
-    
-    function updateActiveTestLink() {
-        updateActiveDownloadLink();
     }
 
     function clearActiveCode() {
         if (confirm('すべて消去しますか？')) {
             document.getElementById('active_textarea').value = '';
-            updateActiveDownloadLink();
+            autoSaveCurrentContent();
         }
     }
 
@@ -512,7 +532,7 @@
         if (histories[index]) {
             document.getElementById('active_filename').value = histories[index].filename;
             document.getElementById('active_textarea').value = histories[index].text;
-            updateActiveDownloadLink();
+            autoSaveCurrentContent();
         }
     }
 
@@ -521,7 +541,7 @@
         const prevText = textarea.getAttribute('data-previous');
         if (prevText) {
             textarea.value = prevText;
-            updateActiveDownloadLink();
+            autoSaveCurrentContent();
             alert('直前に戻しました。');
         } else { alert('戻せる履歴がありません。'); }
     }
