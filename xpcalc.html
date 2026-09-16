@@ -1,265 +1,48 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>xpcalc</title>
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SOLDOUT2 経験値計算</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#f4f4f7;color:#222;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif}
-.wrap{max-width:760px;margin:auto;padding:12px}
-h1{text-align:center;font-size:22px;margin:8px 0 12px}
-.card{background:#fff;border-radius:16px;padding:16px;margin:10px 0;box-shadow:0 2px 10px #0001}
-.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;position:sticky;top:0;background:#f4f4f7;padding:4px 0;z-index:5}
-.tabs button{margin:0;padding:10px 4px;background:#ddd;color:#222}
-.tabs button.active{background:#333;color:#fff}
-.section{display:none}.section.active{display:block}
-label{display:block;font-weight:700;margin:10px 0 5px}
-input,select,textarea{width:100%;padding:11px;border:1px solid #ccc;border-radius:9px;font-size:16px;background:#fff}
-textarea{min-height:150px;resize:vertical}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-button{width:100%;border:0;border-radius:10px;padding:12px;margin-top:12px;font-size:16px;font-weight:700;background:#333;color:#fff}
-button.sub{background:#eee;color:#222}
-button.del{background:#b3261e;color:#fff;padding:7px;margin:0;font-size:13px}
-button.edit{background:#eee;color:#222;padding:7px;margin:0;font-size:13px}
-.result{line-height:1.8;margin-top:12px}.big{text-align:center;font-size:25px;font-weight:800;margin:8px 0 14px}
-.note{font-size:13px;color:#666;line-height:1.5}
-.tablewrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px;min-width:680px}
-th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:top}
-.memo{border:1px solid #ddd;border-radius:12px;padding:12px;margin:10px 0;background:#fafafa}
-.memo.expired{opacity:.6}
-.memohead{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
-.memoTitle{font-weight:800;font-size:17px}
-.badge{display:inline-block;padding:3px 8px;border-radius:999px;background:#e8e8e8;font-size:12px;margin:3px 3px 3px 0}
-.badge.want{background:#fff0f0}.badge.offer{background:#f0f7ff}.badge.deadline{background:#fff8df}
-.memoText{white-space:pre-wrap;line-height:1.6;margin:10px 0}
-.actions{display:flex;gap:6px}.actions button{width:auto}
-.search{margin-bottom:8px}
-.smallgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-@media(max-width:520px){.tabs{grid-template-columns:repeat(2,1fr)}.smallgrid{grid-template-columns:1fr}}
+*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f4f5f7;margin:0;padding:10px;color:#222}.wrap{max-width:760px;margin:auto}h1{font-size:21px;margin:4px 0}.sub,.note{font-size:12px;color:#666;line-height:1.5}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}.tab,button{border:0;border-radius:8px;padding:10px;font-size:15px;font-weight:700;background:#333;color:#fff}.tab{background:#ddd;color:#333}.tab.on{background:#333;color:#fff}.panel{display:none}.panel.on{display:block}.card{background:#fff;border-radius:12px;padding:13px;margin-bottom:10px;box-shadow:0 1px 5px #ddd}h2{font-size:17px;margin:0 0 10px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}label{font-size:13px;font-weight:700;display:block;margin-bottom:4px}input,textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:16px}textarea{min-height:85px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}.light{background:#eee;color:#222}.result{margin-top:10px;padding:10px;background:#f7f7f7;border-radius:8px;line-height:1.75}.big{font-size:21px;font-weight:800}.warn{background:#fff5d8;padding:9px;border-radius:8px;font-size:12px;line-height:1.5;margin-top:8px}.history{border:1px solid #ddd;border-radius:8px;padding:8px;margin-top:7px}@media(max-width:520px){.grid,.actions{grid-template-columns:1fr}}
+</style></head><body><div class="wrap">
+<h1>SOLDOUT2 経験値計算</h1><p class="sub">経験値計算と販売経験値の減衰計算を分離しています。</p>
+<div class="tabs"><button class="tab on" onclick="tab('exp',this)">経験値計算</button><button class="tab" onclick="tab('decay',this)">減衰計算</button></div>
 
-.book{border:1px solid #ddd;border-radius:14px;padding:14px;margin:10px 0;background:#fafafa}.bookTitle{font-size:18px;font-weight:800;margin-bottom:7px}.bookGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.bookImg{width:100%;max-height:240px;object-fit:contain;border-radius:10px;background:#eee;margin:8px 0}.bookRow{margin:5px 0;white-space:pre-wrap}.bookLabel{font-weight:700}.bookActions{display:flex;gap:6px;margin-top:10px}.bookActions button{flex:1}.badge.bookcat{background:#eee}
+<section id="exp" class="panel on">
+<div class="card"><h2>データ取り込み</h2><textarea id="imp" placeholder="例：19個販売　経験値 +0.01%&#10;50回作業　経験値 +0.25%"></textarea><div class="actions"><button onclick="parse('sale')">販売へ取り込む</button><button onclick="parse('work')">作業へ取り込む</button></div><p id="imsg" class="note"></p></div>
 
-.optional{font-size:.8em;opacity:.7;margin-left:6px;font-weight:normal}
-.warning{border-left:4px solid #d98c00;padding:8px 10px}
+<div class="card"><h2>作業経験値</h2><div class="grid">
+<div><label>現在Lv</label><input id="wl" type="number" min="1" value="8"></div><div><label>現在経験値（%）</label><input id="wc" type="number" min="0" max="99.999999" step="0.0000001" value="99.92"></div>
+<div><label>基礎作業時間（分）</label><input id="wb" type="number" min="0" step="0.001" placeholder="例：30"></div><div><label>作業速度（%）</label><input id="ws" type="number" min="0.001" value="100" step="0.001"></div>
+<div><label>基準作業回数</label><input id="wn" type="number" min="1" value="1"></div><div><label>実測経験値（任意）</label><input id="wg" type="number" min="0" step="0.0000001" placeholder="例：0.0147"></div></div>
+<div class="actions"><button onclick="work()">作業を計算</button><button class="light" onclick="copy('wr')">結果をコピー</button></div><div id="wr" class="result"></div>
+<p class="note">実測経験値があればそれを使用。なければ「基礎作業時間÷作業速度」から予想作業時間を出し、1分=1ポイントとして計算する構成です。内部値は0.01%未満も保持します。</p></div>
 
-/* ===== 機能の色分け・番号・連動表示 ===== */
-.feature-map{background:#fff;border-radius:16px;padding:14px;margin:10px 0;box-shadow:0 2px 10px #0001}
-.feature-map-title{font-size:16px;font-weight:800;margin-bottom:8px}
-.feature-legend{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
-.feature-chip{border-radius:10px;padding:8px 9px;font-size:12px;font-weight:700;border-left:5px solid #777;background:#f7f7f7}
-.feature-chip b{margin-right:4px}
-.feature-card{position:relative;border-top:4px solid #777}
-.feature-head{display:flex;align-items:center;gap:7px;margin:0 0 8px}
-.feature-num{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:9px;color:#fff;font-size:13px;font-weight:800}
-.feature-title{font-size:18px;font-weight:800}
-.feature-links{font-size:12px;line-height:1.45;margin:0 0 10px;padding:7px 9px;border-radius:9px;background:#f7f7f7;color:#555}
-.feature-links b{color:#222}
-.feature-xp{border-top-color:#4b6cb7}.feature-xp .feature-num{background:#4b6cb7}.feature-chip.xp{border-left-color:#4b6cb7}
-.feature-sale{border-top-color:#d47b00}.feature-sale .feature-num{background:#d47b00}.feature-chip.sale{border-left-color:#d47b00}
-.feature-import{border-top-color:#8e5ab7}.feature-import .feature-num{background:#8e5ab7}.feature-chip.import{border-left-color:#8e5ab7}
-.feature-work{border-top-color:#3d8b5b}.feature-work .feature-num{background:#3d8b5b}.feature-chip.work{border-left-color:#3d8b5b}
-.feature-output{border-top-color:#138a9e}.feature-output .feature-num{background:#138a9e}.feature-chip.output{border-left-color:#138a9e}
-.feature-record{border-top-color:#65707a}.feature-record .feature-num{background:#65707a}.feature-chip.record{border-left-color:#65707a}
-.feature-memo{border-top-color:#b04a79}.feature-memo .feature-num{background:#b04a79}.feature-chip.memo{border-left-color:#b04a79}
-.feature-book{border-top-color:#7560a8}.feature-book .feature-num{background:#7560a8}.feature-chip.book{border-left-color:#7560a8}
-.feature-profit{border-top-color:#b44b3c}.feature-profit .feature-num{background:#b44b3c}.feature-chip.profit{border-left-color:#b44b3c}
-.feature-recipe{border-top-color:#8a6b25}.feature-recipe .feature-num{background:#8a6b25}.feature-chip.recipe{border-left-color:#8a6b25}
-@media(max-width:520px){.feature-legend{grid-template-columns:1fr}.feature-head{align-items:flex-start}}
+<div class="card"><h2>販売経験値</h2><div class="grid">
+<div><label>現在Lv</label><input id="sl" type="number" min="1" value="8"></div><div><label>現在経験値（%）</label><input id="sc" type="number" min="0" max="99.999999" step="0.0000001" value="99.92"></div>
+<div><label>販売数</label><input id="sn" type="number" min="1" value="19"></div><div><label>今回の売上（g）</label><input id="sr" type="number" min="0" placeholder="例：100000"></div>
+<div><label>実測経験値（%）</label><input id="sg" type="number" min="0" step="0.0000001" placeholder="例：0.01"></div><div><label>販売物</label><input id="sname" placeholder="例：ハイポーション"></div></div>
+<div class="actions"><button onclick="sale()">販売を計算</button><button class="light" onclick="copy('rr')">結果をコピー</button></div><div id="rr" class="result"></div><p class="note">ここでは減衰を勝手に適用しません。減衰は右のタブで管理します。</p></div>
+</section>
 
-/* ===== 機能ごとの視認性をさらに強化 ===== */
-.feature-card{border-top-width:5px;background:linear-gradient(180deg,rgba(0,0,0,.025),#fff 34px);overflow:hidden}
-.feature-card .feature-head{padding:2px 2px 0}
-.feature-card .feature-title{letter-spacing:.01em}
-.feature-card .feature-links{border-left:4px solid currentColor;background:rgba(0,0,0,.035)}
-.feature-card input,.feature-card select,.feature-card textarea{background:rgba(0,0,0,.018)}
-.feature-card button:not(.sub):not(.del):not(.edit){background:var(--feature-color,#333)}
-.feature-card button.sub{border:1px solid currentColor;background:rgba(0,0,0,.025)}
-.feature-xp{--feature-color:#4b6cb7;background:linear-gradient(180deg,#eef3ff 0,#fff 42px)}
-.feature-sale{--feature-color:#d47b00;background:linear-gradient(180deg,#fff5e6 0,#fff 42px)}
-.feature-import{--feature-color:#8e5ab7;background:linear-gradient(180deg,#f6effb 0,#fff 42px)}
-.feature-work{--feature-color:#3d8b5b;background:linear-gradient(180deg,#edf8f1 0,#fff 42px)}
-.feature-output{--feature-color:#138a9e;background:linear-gradient(180deg,#eaf8fa 0,#fff 42px)}
-.feature-record{--feature-color:#65707a;background:linear-gradient(180deg,#f0f2f3 0,#fff 42px)}
-.feature-memo{--feature-color:#b04a79;background:linear-gradient(180deg,#fbeef4 0,#fff 42px)}
-.feature-book{--feature-color:#7560a8;background:linear-gradient(180deg,#f2effa 0,#fff 42px)}
-.feature-profit{--feature-color:#b44b3c;background:linear-gradient(180deg,#fff0ed 0,#fff 42px)}
-.feature-recipe{--feature-color:#8a6b25;background:linear-gradient(180deg,#faf5e7 0,#fff 42px)}
-.feature-xp .feature-links{color:#38558f}.feature-sale .feature-links{color:#9a5b00}.feature-import .feature-links{color:#71458f}.feature-work .feature-links{color:#2e6c47}.feature-output .feature-links{color:#0b6878}.feature-record .feature-links{color:#4e5960}.feature-memo .feature-links{color:#8d3a60}.feature-book .feature-links{color:#5c4a87}.feature-profit .feature-links{color:#8d382d}.feature-recipe .feature-links{color:#6f571e}
-.feature-card .feature-num{box-shadow:0 1px 3px #0002}
-.feature-chip.xp{background:#eef3ff}.feature-chip.sale{background:#fff5e6}.feature-chip.import{background:#f6effb}.feature-chip.work{background:#edf8f1}.feature-chip.output{background:#eaf8fa}.feature-chip.record{background:#f0f2f3}.feature-chip.memo{background:#fbeef4}.feature-chip.book{background:#f2effa}.feature-chip.profit{background:#fff0ed}.feature-chip.recipe{background:#faf5e7}
-/* ===== 入力欄・小さい文字の視認性を強化 ===== */
-label{font-size:14px;margin:7px 0 4px}
-input,select,textarea{font-size:16px;padding:9px 10px;min-height:40px}
-textarea{min-height:115px}
-.note{font-size:13px;line-height:1.5}
-.feature-links{font-size:12px;line-height:1.4}
-.feature-chip{font-size:12px}
-table{font-size:14px}
-th,td{padding:7px}
-.badge{font-size:13px}
-.optional{font-size:.85em}
-.memoText{font-size:14px;line-height:1.55}
-.search{font-size:16px}
-.feature-card input,.feature-card select,.feature-card textarea{background:rgba(255,255,255,.72);border-width:1px}
-
-/* ===== コンパクト表示 ===== */
-body{font-size:14px}
-.wrap{max-width:720px;padding:7px}
-h1{font-size:19px;margin:4px 0 7px}
-.card{border-radius:11px;padding:10px;margin:6px 0;box-shadow:0 1px 6px #0001}
-.tabs{gap:4px;margin-bottom:6px;padding:3px 0}
-.tabs button{padding:7px 3px;font-size:13px}
-label{margin:6px 0 3px;font-size:13px}
-input,select,textarea{padding:8px;border-radius:7px;font-size:15px}
-textarea{min-height:100px}
-.grid2{gap:6px}
-button{border-radius:8px;padding:8px;margin-top:7px;font-size:14px}
-button.del,button.edit{padding:5px;font-size:12px}
-.result{line-height:1.55;margin-top:7px}.big{font-size:21px;margin:6px 0 9px}
-.note{font-size:12px;line-height:1.35}
-.feature-map{border-radius:11px;padding:9px;margin:6px 0;box-shadow:0 1px 6px #0001}
-.feature-map-title{font-size:14px;margin-bottom:5px}
-.feature-legend{gap:4px}
-.feature-chip{padding:5px 6px;font-size:11px;border-radius:7px}
-.feature-links{font-size:11px;line-height:1.3;margin:0 0 6px;padding:5px 7px;border-radius:7px}
-.feature-head{gap:5px;margin-bottom:5px}
-.feature-num{min-width:24px;height:24px;border-radius:7px;font-size:12px}
-.feature-title{font-size:16px}
-.smallgrid{gap:5px}
-.book{border-radius:10px;padding:9px;margin:6px 0}.bookTitle{font-size:16px}.bookGrid{gap:5px;margin:5px 0}.bookImg{max-height:180px;margin:5px 0}.bookRow{margin:3px 0}.bookActions{gap:4px;margin-top:6px}
-.memo{border-radius:9px;padding:8px;margin:6px 0}.memoTitle{font-size:15px}.memoText{line-height:1.4;margin:6px 0}
-.badge{padding:2px 6px;font-size:11px;margin:2px}
-table{font-size:12px}.tablewrap{margin:0 -2px}th,td{padding:5px}
-summary{font-size:13px}
-.optional{font-size:.75em}
-@media(max-width:520px){.wrap{padding:5px}.tabs button{font-size:12px;padding:6px 2px}.card{padding:8px}.feature-legend{grid-template-columns:1fr 1fr}.feature-chip{font-size:10px}.feature-links{font-size:10px}}
-@media(max-width:360px){.feature-legend{grid-template-columns:1fr}.grid2{grid-template-columns:1fr 1fr;gap:5px}}
-</style>
-</head>
-<body data-mode="simple">
-<div class="wrap">
-<h1>経験値・成果量・備忘録 (Salesフォーマット版)</h1>
-
-<div class="tabs">
-<button id="tabxp" class="active" onclick="show('xp')">経験値</button>
-<button id="tabout" onclick="show('out')">成果量</button>
-<button id="tablog" onclick="show('log')">記録</button>
-<button id="tabmemo" onclick="show('memo')">備忘録</button>
-<button id="tabbook" onclick="show('book')">図鑑</button>
-</div>
-
-<div id="xp" class="section active">
-<div class="card">
-<h2>経験値計算</h2>
-<div class="grid2"><div><label>現在Lv</label><input id="level" type="number" min="1" placeholder=""></div><div><label>現在の経験値（%）</label><input id="current" type="number" min="0" max="100" step="any" placeholder=""></div></div>
-<div class="grid2"><div><label>1回で増える経験値（%）</label><input id="gain" type="number" min="0" step="any" placeholder=""></div><div><label>取得回数</label><input id="count" type="number" min="1" value="1"></div></div>
-<button onclick="calcXP()">計算する</button>
-<div id="xpResult" class="result"></div>
-</div>
-</div>
-
-<div id="out" class="section">
-<div class="card">
-<h2>成果量の記録</h2>
-<div class="grid2"><div><label>職種・職業</label><input id="ojob" placeholder=""></div><div><label>成果物</label><input id="oitem" placeholder=""></div></div>
-<label>成果量</label><input id="oqty" type="number" min="0" step="any" placeholder="">
-<label>作業回数</label><input id="ocount" type="number" min="1" value="50">
-<button onclick="calcOut()">成果量を計算</button>
-<div id="or" class="result"></div>
-</div>
-</div>
-
-<div id="log" class="section">
-<div class="card"><h2>保存した記録</h2><div id="salesLog"></div><hr><div id="workLog"></div><hr><div id="outLog"></div></div>
-</div>
-
-<div id="memo" class="section">
-<div class="card">
-<h2>📝 備忘録</h2>
-<label>タイトル</label><input id="mtitle" placeholder="">
-<label>内容</label><textarea id="mtext" placeholder=""></textarea>
-</div>
-</div>
-
-<div id="book" class="section">
-<div class="card">
-<h2>📖 図鑑登録</h2>
-<label>名前・項目名</label><input id="bname" placeholder="">
-</div>
-</div>
-
-</div>
-
+<section id="decay" class="panel">
+<div class="card"><h2>販売経験値・減衰計算</h2><div class="grid">
+<div><label>現在Lv</label><input id="dl" type="number" min="1" value="8"></div><div><label>現在経験値（%）</label><input id="dc" type="number" min="0" max="99.999999" step="0.0000001" value="99.92"></div>
+<div><label>本日受け取り済み売上（g）</label><input id="dr" type="number" min="0" value="0"></div><div><label>次に受け取る売上（g）</label><input id="dn" type="number" min="0" placeholder="例：100000"></div></div>
+<div class="actions"><button onclick="decay()">減衰を計算</button><button class="light" onclick="add()">受取履歴に追加</button></div><div id="dres" class="result"></div>
+<div class="warn">正確な減衰式を確認できるまでは、未確認の式を自動適用しません。ここでは「受取済み＋次回受取」を正確に記録・整理します。</div></div>
+<div class="card"><h2>本日の受取履歴</h2><div id="hist"></div><div class="actions"><button class="light" onclick="sum()">合計を反映</button><button class="light" onclick="clearH()">履歴を消去</button></div></div>
+</section></div>
 <script>
-// 未入力時にエラーを出さず、安全に数値化・処理するためのラッパー関数
-function num(id){
-  const el = document.getElementById(id);
-  if(!el || el.value === '' || el.value === null) return 0;
-  const n = Number(el.value);
-  return Number.isFinite(n) ? n : 0;
-}
-
-function val(id){
-  const el = document.getElementById(id);
-  return el ? el.value : '';
-}
-
-function f(n){
-  if(!Number.isFinite(n)) return '未入力';
-  return Number(n).toLocaleString('ja-JP', {maximumFractionDigits: 6});
-}
-
-function show(id){
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-  const target = document.getElementById(id);
-  if(target) target.classList.add('active');
-  // タブの切り替え制御（簡易版）
-  if(id === 'xp') document.getElementById('tabxp')?.classList.add('active');
-  if(id === 'out') document.getElementById('tabout')?.classList.add('active');
-  if(id === 'log') document.getElementById('tablog')?.classList.add('active');
-  if(id === 'memo') document.getElementById('tabmemo')?.classList.add('active');
-  if(id === 'book') document.getElementById('tabbook')?.classList.add('active');
-}
-
-function calcXP(){
-  const lv = num('level');
-  const cur = num('current');
-  const gain = num('gain');
-  const count = num('count') || 1;
-  
-  const totalGain = gain * count;
-  const afterCur = cur + totalGain;
-  
-  let res = '<div>計算結果</div>';
-  res += '<div>取得合計経験値: +' + f(totalGain) + '%</div>';
-  if(cur > 0 || gain > 0){
-    res += '<div>推定事後経験値: ' + f(afterCur) + '%</div>';
-  } else {
-    res += '<div class="note">※未入力の項目があるため、基本データのみで計算しました（エラーなし）。</div>';
-  }
-  
-  const xpRes = document.getElementById('xpResult');
-  if(xpRes) xpRes.innerHTML = res;
-}
-
-function calcOut(){
-  const q = num('oqty');
-  const c = num('ocount') || 1;
-  const or = document.getElementById('or');
-  
-  if(q === 0 && c === 1){
-    if(or) or.innerHTML = '<div class="note">数値が未入力です。</div>';
-    return;
-  }
-  
-  const avg = q / c;
-  if(or) {
-    or.innerHTML = '<div>1回あたり平均: <b>' + f(avg) + '</b></div><div class="big">50回期待値: ' + f(avg * 50) + '</div>';
-  }
-}
-</script>
-</body>
-</html>
+const $=id=>document.getElementById(id),N=id=>Number($(id).value)||0,F=x=>Number(x).toLocaleString('ja-JP',{maximumFractionDigits:8});
+function tab(id,b){document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));$(id).classList.add('on');b.classList.add('on')}
+function work(){let c=N('wc'),n=N('wn'),g=N('wg'),t=N('wb')/(N('ws')/100);if(!g&&t>0)g=t/100;if(c<0||c>=100||n<=0||g<=0){$('wr').innerHTML='<div class="warn">現在経験値・回数・経験値を確認してください。</div>';return}let p=g/n,r=100-c,q=r/p;$('wr').innerHTML=`現在Lv：${N('wl')}<br>現在経験値：${F(c)}%<br>LVアップまで：${F(r)}%<hr>${t?`予想作業時間：${F(t)}分<br>`:''}1回あたり：+${F(p)}%<br>理論上あと：${F(q)}回<div class="big">あと ${Math.ceil(q).toLocaleString()}回でLVアップ（推定）</div>`}
+function sale(){let c=N('sc'),n=N('sn'),g=N('sg');if(c<0||c>=100||n<=0||g<=0){$('rr').innerHTML='<div class="warn">販売数・現在経験値・実測経験値を確認してください。</div>';return}let p=g/n,r=100-c,q=r/p;$('rr').innerHTML=`現在Lv：${N('sl')}<br>現在経験値：${F(c)}%<br>LVアップまで：${F(r)}%<hr>${N('sr')?`今回の売上：${F(N('sr'))}g<br>`:''}1販売あたり：+${F(p)}%<br>理論上あと：${F(q)}販売<div class="big">あと ${Math.ceil(q).toLocaleString()}販売でLVアップ（推定）</div>`}
+function parse(k){let t=$('imp').value,m=t.match(/([\d,]+)\s*個?\s*販売/),w=t.match(/([\d,]+)\s*回/),g=t.match(/(?:経験値|EXP)[^\d]*([0-9]+(?:\.[0-9]+)?)/i),num=k==='sale'?(m?m[1]:0):(w?w[1]:0),gain=g?g[1]:0;if(k==='sale'){if(num)$('sn').value=String(num).replace(/,/g,'');if(gain)$('sg').value=gain}else{if(num)$('wn').value=String(num).replace(/,/g,'');if(gain)$('wg').value=gain}$('imsg').textContent=`${k==='sale'?'販売':'作業'}へ取り込み：${num||'未検出'} / ${gain||'未検出'}%。確認してから計算してください。`}
+function hist(){try{return JSON.parse(localStorage.xph||'[]')}catch(e){return[]}}
+function show(){let h=hist();$('hist').innerHTML=h.length?h.map((x,i)=>`<div class="history">${x.time}　<b>${F(x.a)}g</b>　<button class="light" onclick="del(${i})">削除</button></div>`).join(''):'<p class="note">受取履歴なし</p>'}
+function add(){let a=N('dn');if(a<=0)return;let h=hist();h.push({a,time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})});localStorage.xph=JSON.stringify(h);$('dn').value='';show();sum()}
+function sum(){$('dr').value=hist().reduce((a,x)=>a+Number(x.a),0)}
+function del(i){let h=hist();h.splice(i,1);localStorage.xph=JSON.stringify(h);show();sum()}
+function clearH(){localStorage.removeItem('xph');show();sum()}
+function decay(){let a=N('dr'),b=N('dn');$('dres').innerHTML=`現在Lv：${N('dl')}<br>現在経験値：${F(N('dc'))}%<hr>本日受取済み：${F(a)}g<br>次回受取：${F(b)}g<br><b>次回受取後の累計：${F(a+b)}g</b><div class="big">減衰計算の入力状態を確認しました</div>`}
+function copy(id){navigator.clipboard?.writeText($(id).innerText);alert('コピーしました')}
+work();sale();show();
+</script></body></html>
