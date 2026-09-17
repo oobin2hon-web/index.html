@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>マイ・ローカルデータベース＆Hub</title>
+    <!-- 👇 ここに結合されたデータが埋め込まれます -->
+    <script id="embedded-data" type="application/json">{"templates":[{"name":"紙束","category":"原料"},{"name":"サンフラワーオイル","category":"原料"},{"name":"ツッツジ","category":"原料"},{"name":"トゥバアァアキ","category":"原料"},{"name":"オタクサ","category":"原料"},{"name":"テューリップ","category":"原料"},{"name":"ハ八バネロの種","category":"原料"},{"name":"ビン","category":"原料"},{"name":"清水","category":"原料"},{"name":"肥料","category":"原料"},{"name":"ハイ肥料","category":"原料"},{"name":"薬草","category":"原料"},{"name":"木の枝","category":"原料"},{"name":"世界樹の枝","category":"原料"},{"name":"丸太","category":"原料"},{"name":"とんがった木","category":"原料"},{"name":"桃色の木","category":"原料"},{"name":"ササ","category":"原料"},{"name":"色草","category":"原料"},{"name":"鳥の羽根","category":"原料"},{"name":"色石","category":"原料"},{"name":"魔石","category":"原料"},{"name":"ガラス","category":"原料"},{"name":"鉄鉱石","category":"原料"},{"name":"ミスリル原石","category":"原料"},{"name":"オリハルコン原石","category":"原料"},{"name":"アダマンチウム原石","category":"原料"},{"name":"ミューナイト鉱石","category":"原料"},{"name":"宝石貝","category":"原料"},{"name":"オパール原石","category":"原料"},{"name":"ミューナイト結晶","category":"原料"},{"name":"鉄インゴット","category":"原料"},{"name":"ミスリルインゴット","category":"原料"},{"name":"オリハルコンインゴット","category":"原料"},{"name":"エメラルド","category":"原料"},{"name":"ルビー","category":"原料"},{"name":"サファイア","category":"原料"},{"name":"アメジスト","category":"原料"},{"name":"ガーネット","category":"原料"},{"name":"トパーズ","category":"原料"},{"name":"パール","category":"原料"},{"name":"ブルーダイヤ","category":"原料"},{"name":"レッドダイヤ","category":"原料"},{"name":"オパール","category":"原料"},{"name":"ロイヤルジュエリー","category":"原料"},{"name":"獣の皮","category":"原料"},{"name":"獣の骨","category":"原料"},{"name":"鋭い牙","category":"原料"},{"name":"カイコの葵","category":"原料"},{"name":"羊毛","category":"原料"},{"name":"純白綿","category":"原料"},{"name":"ふさふさ毛皮","category":"原料"},{"name":"顔料","category":"原料"},{"name":"高級染料","category":"原料"},{"name":"ライトレザー","category":"原料"},{"name":"龍の鱗","category":"原料"},{"name":"ユニコーンの角","category":"原料"},{"name":"&Wiki表示ビューア","category":"本"},{"name":"薬調合入門","category":"本"},{"name":"革細工入門","category":"本"},{"name":"木工細工入門","category":"本"},{"name":"装飾細工入門","category":"本"},{"name":"剣の鍛え方","category":"本"},{"name":"盾の作り方","category":"本"},{"name":"鎧の作り方","category":"本"},{"name":"杖の作り方","category":"本"},{"name":"指南書","category":"本"},{"name":"匠への道","category":"本"},{"name":"絵本","category":"本"},{"name":"わんこのすべて","category":"本"},{"name":"にゃんこのすべて","category":"本"},{"name":"うさこのすべて","category":"本"},{"name":"ひつじのすべて","category":"本"},{"name":"楽譜","category":"本"},{"name":"グリモワール","category":"本"},{"name":"真・グリモワール","category":"本"},{"name":"生物図鑑","category":"本"},{"name":"禁断の書","category":"本"},{"name":"ルタバガの教え","category":"本"},{"name":"スクロールオブフェイス","category":"本"},{"name":"申請書","category":"本"},{"name":"駆け出し店舗の設計図","category":"本"},{"name":"移動販売の設計図","category":"本"},{"name":"蔵の設計図","category":"本"},{"name":"露天商の設計図","category":"本"},{"name":"作業場の設計図","category":"本"},{"name":"ベースキャンプの設計図","category":"本"},{"name":"運び屋の設計図","category":"本"},{"name":"倉庫の設計図","category":"本"},{"name":"よろるず屋の設計図","category":"本"},{"name":"アトリエの設計図","category":"本"},{"name":"山小屋の設計図","category":"本"},{"name":"便利屋の設計図","category":"本"},{"name":"卸売問屋の設計図","category":"本"},{"name":"テナントの設計図","category":"本"},{"name":"工房の設計図","category":"本"},{"name":"ログハハウスの設計図","category":"本"},{"name":"運送屋の設計図","category":"本"},{"name":"宝くじ","category":"本"},{"name":"ポーション","category":"薬"},{"name":"八イポーション","category":"薬"},{"name":"エーテル","category":"薬"},{"name":"ハハイエーテル","category":"薬"},{"name":"キュアポーション","category":"薬"},{"name":"マインドポーション","category":"薬"},{"name":"レジストポーション","category":"薬"},{"name":"パワーポーション","category":"薬"},{"name":"八アイポーション","category":"薬"},{"name":"ロイヤルポーション","category":"薬"},{"name":"エリ草","category":"薬"},{"name":"豆づくし","category":"薬"},{"name":"ルタバガの奇忠","category":"薬"},{"name":"クイックポーション","category":"薬"},{"name":"スピードポーション","category":"薬"},{"name":"伴駄天ポーション","category":"薬"},{"name":"利和衣の4","category":"剣"},{"name":"木カ","category":"剣"},{"name":"ブラッディウムアソ","category":"剣"},{"name":"アダマンチウムの","category":"剣"},{"name":"ボーンブレイド","category":"剣"},{"name":"カフラフフルソード","category":"剣"},{"name":"短剣","category":"剣"},{"name":"血の剣","category":"剣"},{"name":"ヴァトウゥウールンア","category":"剣"},{"name":"とっておさきのハ八ン","category":"剣"},{"name":"フィン・マックー","category":"剣"},{"name":"エクスカリバパー","category":"剣"},{"name":"エクスカリバハー","category":"剣"},{"name":"聖剣","category":"剣"},{"name":"ドウルハハーケン","category":"剣"},{"name":"<向上中@","category":"剣"},{"name":"ウヴァルキリーラン","category":"剣"},{"name":"飼りツリーランス","category":"剣"},{"name":"サイクロブスの梶","category":"剣"},{"name":"虎徹","category":"剣"},{"name":"村正","category":"剣"},{"name":"八八ネロマンの鎌","category":"剣"}],"items":[{"name":"紙束","category":"原料"},{"name":"サンフラワーオイル","category":"原料"},{"name":"ツッツジ","category":"原料"},{"name":"トゥバアァアキ","category":"原料"},{"name":"オタクサ","category":"原料"},{"name":"テューリップ","category":"原料"},{"name":"ハ八バネロの種","category":"原料"},{"name":"ビン","category":"原料"},{"name":"清水","category":"原料"},{"name":"肥料","category":"原料"},{"name":"ハイ肥料","category":"原料"},{"name":"薬草","category":"原料"},{"name":"木の枝","category":"原料"},{"name":"世界樹の枝","category":"原料"},{"name":"丸太","category":"原料"},{"name":"とんがった木","category":"原料"},{"name":"桃色の木","category":"原料"},{"name":"ササ","category":"原料"},{"name":"色草","category":"原料"},{"name":"鳥の羽根","category":"原料"},{"name":"色石","category":"原料"},{"name":"魔石","category":"原料"},{"name":"ガラス","category":"原料"},{"name":"鉄鉱石","category":"原料"},{"name":"ミスリル原石","category":"原料"},{"name":"オリハルコン原石","category":"原料"},{"name":"アダマンチウム原石","category":"原料"},{"name":"ミューナイト鉱石","category":"原料"},{"name":"宝石貝","category":"原料"},{"name":"オパール原石","category":"原料"},{"name":"ミューナイト結晶","category":"原料"},{"name":"鉄インゴット","category":"原料"},{"name":"ミスリルインゴット","category":"原料"},{"name":"オリハルコンインゴット","category":"原料"},{"name":"エメラルド","category":"原料"},{"name":"ルビー","category":"原料"},{"name":"サファイア","category":"原料"},{"name":"アメジスト","category":"原料"},{"name":"ガーネット","category":"原料"},{"name":"トパーズ","category":"原料"},{"name":"パール","category":"原料"},{"name":"ブルーダイヤ","category":"原料"},{"name":"レッドダイヤ","category":"原料"},{"name":"オパール","category":"原料"},{"name":"ロイヤルジュエリー","category":"原料"},{"name":"獣の皮","category":"原料"},{"name":"獣の骨","category":"原料"},{"name":"鋭い牙","category":"原料"},{"name":"カイコの葵","category":"原料"},{"name":"羊毛","category":"原料"},{"name":"純白綿","category":"原料"},{"name":"ふさふさ毛皮","category":"原料"},{"name":"顔料","category":"原料"},{"name":"高級染料","category":"原料"},{"name":"ライトレザー","category":"原料"},{"name":"龍の鱗","category":"原料"},{"name":"ユニコーンの角","category":"原料"},{"name":"&Wiki表示ビューア","category":"本"},{"name":"薬調合入門","category":"本"},{"name":"革細工入門","category":"本"},{"name":"木工細工入門","category":"本"},{"name":"装飾細工入門","category":"本"},{"name":"剣の鍛え方","category":"本"},{"name":"盾の作り方","category":"本"},{"name":"鎧の作り方","category":"本"},{"name":"杖の作り方","category":"本"},{"name":"指南書","category":"本"},{"name":"匠への道","category":"本"},{"name":"絵本","category":"本"},{"name":"わんこのすべて","category":"本"},{"name":"にゃんこのすべて","category":"本"},{"name":"うさこのすべて","category":"本"},{"name":"ひつじのすべて","category":"本"},{"name":"楽譜","category":"本"},{"name":"グリモワール","category":"本"},{"name":"真・グリモワール","category":"本"},{"name":"生物図鑑","category":"本"},{"name":"禁断の書","category":"本"},{"name":"ルタバガの教え","category":"本"},{"name":"スクロールオブフェイス","category":"本"},{"name":"申請書","category":"本"},{"name":"駆け出し店舗の設計図","category":"本"},{"name":"移動販売の設計図","category":"本"},{"name":"蔵の設計図","category":"本"},{"name":"露天商の設計図","category":"本"},{"name":"作業場の設計図","category":"本"},{"name":"ベースキャンプの設計図","category":"本"},{"name":"運び屋の設計図","category":"本"},{"name":"倉庫の設計図","category":"本"},{"name":"よろるず屋の設計図","category":"本"},{"name":"アトリエの設計図","category":"本"},{"name":"山小屋の設計図","category":"本"},{"name":"便利屋の設計図","category":"本"},{"name":"卸売問屋の設計図","category":"本"},{"name":"テナントの設計図","category":"本"},{"name":"工房の設計図","category":"本"},{"name":"ログハハウスの設計図","category":"本"},{"name":"運送屋の設計図","category":"本"},{"name":"宝くじ","category":"本"},{"name":"ポーション","category":"薬"},{"name":"八イポーション","category":"薬"},{"name":"エーテル","category":"薬"},{"name":"ハハイエーテル","category":"薬"},{"name":"キュアポーション","category":"薬"},{"name":"マインドポーション","category":"薬"},{"name":"レジストポーション","category":"薬"},{"name":"パワーポーション","category":"薬"},{"name":"八アイポーション","category":"薬"},{"name":"ロイヤルポーション","category":"薬"},{"name":"エリ草","category":"薬"},{"name":"豆づくし","category":"薬"},{"name":"ルタバガの奇忠","category":"薬"},{"name":"クイックポーション","category":"薬"},{"name":"スピードポーション","category":"薬"},{"name":"伴駄天ポーション","category":"薬"},{"name":"利和衣の4","category":"剣"},{"name":"木カ","category":"剣"},{"name":"ブラッディウムアソ","category":"剣"},{"name":"アダマンチウムの","category":"剣"},{"name":"ボーンブレイド","category":"剣"},{"name":"カフラフフルソード","category":"剣"},{"name":"短剣","category":"剣"},{"name":"血の剣","category":"剣"},{"name":"ヴァトウゥウールンア","category":"剣"},{"name":"とっておさきのハ八ン","category":"剣"},{"name":"フィン・マックー","category":"剣"},{"name":"エクスカリバパー","category":"剣"},{"name":"エクスカリバハー","category":"剣"},{"name":"聖剣","category":"剣"},{"name":"ドウルハハーケン","category":"剣"},{"name":"<向上中@","category":"剣"},{"name":"ウヴァルキリーラン","category":"剣"},{"name":"飼りツリーランス","category":"剣"},{"name":"サイクロブスの梶","category":"剣"},{"name":"虎徹","category":"剣"},{"name":"村正","category":"剣"},{"name":"八八ネロマンの鎌","category":"剣"}]}</script>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 15px; background: #f4f6f8; color: #333; box-sizing: border-box; }
+        h1 { font-size: 1.3rem; margin-bottom: 10px; color: #2c3e50; }
+        .card { background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 12px; }
+        select, input, button { padding: 8px 10px; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #3498db; color: #fff; border: none; cursor: pointer; }
+        button:hover { background: #2980b9; }
+        
+        .main-layout { display: flex; gap: 12px; align-items: flex-start; }
+        @media (max-width: 768px) { .main-layout { flex-direction: column; } }
+        .tab-buttons { display: flex; flex-direction: column; gap: 4px; min-width: 150px; }
+        .tab-btn { background: #e0e0e0; color: #555; border: none; padding: 10px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; text-align: left; }
+        .tab-btn.active { background: #2c3e50; color: #fff; font-weight: bold; }
+        .tab-content-area { flex-grow: 1; width: 100%; background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        textarea { width: 100%; height: 100px; padding: 10px; font-family: monospace; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 8px; }
+        
+        .template-card { background: #fff; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 10px; text-align: left; }
+        .template-card h4 { margin: 0 0 6px 0; font-size: 0.95rem; color: #2c3e50; }
+        .template-pre { background: #f8fafc; padding: 8px; border-radius: 4px; border: 1px solid #e2e8f0; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap; margin-bottom: 8px; }
+        .generator-panel { background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 12px; text-align: left; }
+        .generator-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 8px; }
+        .generator-grid input, .generator-grid select { width: 100%; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+    <h1>🗂️ マイ・ローカルデータベース＆Hub</h1>
+
+    <div class="card" style="background: #eef2f7; border: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 0.9rem; font-weight: bold; color: #2c3e50;">👤 ユーザー:</span>
+            <input type="text" id="usernameInput" placeholder="ユーザー名" style="padding: 5px 8px; font-size: 0.85rem;" onchange="saveCurrentUser()">
+        </div>
+        <button onclick="exportIntegratedHTML()" style="background: #e67e22; font-size: 0.85rem;">📦 結合したHTMLを出力する</button>
+    </div>
+
+    <div class="main-layout">
+        <div class="tab-buttons" id="tabButtonContainer">
+            <button class="tab-btn" onclick="switchTab('templateTab', this)">📋 定型文・品名登録</button>
+            <button class="tab-btn active" onclick="switchTab('adminTab', this)" style="background: #27ae60; color: #fff;">⚙️ HTML &amp; JSON 結合管理</button>
+        </div>
+
+        <div class="tab-content-area">
+            <!-- タブ: 定型文・品名登録 -->
+            <div id="templateTab" class="tab-content">
+                <div class="generator-panel">
+                    <div class="generator-grid">
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: bold;">カテゴリ・品名選択:</label>
+                            <select id="categorySelect" onchange="onCategoryChange()" style="margin-bottom: 4px;"><option value="">-- カテゴリ・品名を選択 --</option><option value="紙束">[原料] 紙束</option><option value="サンフラワーオイル">[原料] サンフラワーオイル</option><option value="ツッツジ">[原料] ツッツジ</option><option value="トゥバアァアキ">[原料] トゥバアァアキ</option><option value="オタクサ">[原料] オタクサ</option><option value="テューリップ">[原料] テューリップ</option><option value="ハ八バネロの種">[原料] ハ八バネロの種</option><option value="ビン">[原料] ビン</option><option value="清水">[原料] 清水</option><option value="肥料">[原料] 肥料</option><option value="ハイ肥料">[原料] ハイ肥料</option><option value="薬草">[原料] 薬草</option><option value="木の枝">[原料] 木の枝</option><option value="世界樹の枝">[原料] 世界樹の枝</option><option value="丸太">[原料] 丸太</option><option value="とんがった木">[原料] とんがった木</option><option value="桃色の木">[原料] 桃色の木</option><option value="ササ">[原料] ササ</option><option value="色草">[原料] 色草</option><option value="鳥の羽根">[原料] 鳥の羽根</option><option value="色石">[原料] 色石</option><option value="魔石">[原料] 魔石</option><option value="ガラス">[原料] ガラス</option><option value="鉄鉱石">[原料] 鉄鉱石</option><option value="ミスリル原石">[原料] ミスリル原石</option><option value="オリハルコン原石">[原料] オリハルコン原石</option><option value="アダマンチウム原石">[原料] アダマンチウム原石</option><option value="ミューナイト鉱石">[原料] ミューナイト鉱石</option><option value="宝石貝">[原料] 宝石貝</option><option value="オパール原石">[原料] オパール原石</option><option value="ミューナイト結晶">[原料] ミューナイト結晶</option><option value="鉄インゴット">[原料] 鉄インゴット</option><option value="ミスリルインゴット">[原料] ミスリルインゴット</option><option value="オリハルコンインゴット">[原料] オリハルコンインゴット</option><option value="エメラルド">[原料] エメラルド</option><option value="ルビー">[原料] ルビー</option><option value="サファイア">[原料] サファイア</option><option value="アメジスト">[原料] アメジスト</option><option value="ガーネット">[原料] ガーネット</option><option value="トパーズ">[原料] トパーズ</option><option value="パール">[原料] パール</option><option value="ブルーダイヤ">[原料] ブルーダイヤ</option><option value="レッドダイヤ">[原料] レッドダイヤ</option><option value="オパール">[原料] オパール</option><option value="ロイヤルジュエリー">[原料] ロイヤルジュエリー</option><option value="獣の皮">[原料] 獣の皮</option><option value="獣の骨">[原料] 獣の骨</option><option value="鋭い牙">[原料] 鋭い牙</option><option value="カイコの葵">[原料] カイコの葵</option><option value="羊毛">[原料] 羊毛</option><option value="純白綿">[原料] 純白綿</option><option value="ふさふさ毛皮">[原料] ふさふさ毛皮</option><option value="顔料">[原料] 顔料</option><option value="高級染料">[原料] 高級染料</option><option value="ライトレザー">[原料] ライトレザー</option><option value="龍の鱗">[原料] 龍の鱗</option><option value="ユニコーンの角">[原料] ユニコーンの角</option><option value="&amp;Wiki表示ビューア">[本] &amp;Wiki表示ビューア</option><option value="薬調合入門">[本] 薬調合入門</option><option value="革細工入門">[本] 革細工入門</option><option value="木工細工入門">[本] 木工細工入門</option><option value="装飾細工入門">[本] 装飾細工入門</option><option value="剣の鍛え方">[本] 剣の鍛え方</option><option value="盾の作り方">[本] 盾の作り方</option><option value="鎧の作り方">[本] 鎧の作り方</option><option value="杖の作り方">[本] 杖の作り方</option><option value="指南書">[本] 指南書</option><option value="匠への道">[本] 匠への道</option><option value="絵本">[本] 絵本</option><option value="わんこのすべて">[本] わんこのすべて</option><option value="にゃんこのすべて">[本] にゃんこのすべて</option><option value="うさこのすべて">[本] うさこのすべて</option><option value="ひつじのすべて">[本] ひつじのすべて</option><option value="楽譜">[本] 楽譜</option><option value="グリモワール">[本] グリモワール</option><option value="真・グリモワール">[本] 真・グリモワール</option><option value="生物図鑑">[本] 生物図鑑</option><option value="禁断の書">[本] 禁断の書</option><option value="ルタバガの教え">[本] ルタバガの教え</option><option value="スクロールオブフェイス">[本] スクロールオブフェイス</option><option value="申請書">[本] 申請書</option><option value="駆け出し店舗の設計図">[本] 駆け出し店舗の設計図</option><option value="移動販売の設計図">[本] 移動販売の設計図</option><option value="蔵の設計図">[本] 蔵の設計図</option><option value="露天商の設計図">[本] 露天商の設計図</option><option value="作業場の設計図">[本] 作業場の設計図</option><option value="ベースキャンプの設計図">[本] ベースキャンプの設計図</option><option value="運び屋の設計図">[本] 運び屋の設計図</option><option value="倉庫の設計図">[本] 倉庫の設計図</option><option value="よろるず屋の設計図">[本] よろるず屋の設計図</option><option value="アトリエの設計図">[本] アトリエの設計図</option><option value="山小屋の設計図">[本] 山小屋の設計図</option><option value="便利屋の設計図">[本] 便利屋の設計図</option><option value="卸売問屋の設計図">[本] 卸売問屋の設計図</option><option value="テナントの設計図">[本] テナントの設計図</option><option value="工房の設計図">[本] 工房の設計図</option><option value="ログハハウスの設計図">[本] ログハハウスの設計図</option><option value="運送屋の設計図">[本] 運送屋の設計図</option><option value="宝くじ">[本] 宝くじ</option><option value="ポーション">[薬] ポーション</option><option value="八イポーション">[薬] 八イポーション</option><option value="エーテル">[薬] エーテル</option><option value="ハハイエーテル">[薬] ハハイエーテル</option><option value="キュアポーション">[薬] キュアポーション</option><option value="マインドポーション">[薬] マインドポーション</option><option value="レジストポーション">[薬] レジストポーション</option><option value="パワーポーション">[薬] パワーポーション</option><option value="八アイポーション">[薬] 八アイポーション</option><option value="ロイヤルポーション">[薬] ロイヤルポーション</option><option value="エリ草">[薬] エリ草</option><option value="豆づくし">[薬] 豆づくし</option><option value="ルタバガの奇忠">[薬] ルタバガの奇忠</option><option value="クイックポーション">[薬] クイックポーション</option><option value="スピードポーション">[薬] スピードポーション</option><option value="伴駄天ポーション">[薬] 伴駄天ポーション</option><option value="利和衣の4">[剣] 利和衣の4</option><option value="木カ">[剣] 木カ</option><option value="ブラッディウムアソ">[剣] ブラッディウムアソ</option><option value="アダマンチウムの">[剣] アダマンチウムの</option><option value="ボーンブレイド">[剣] ボーンブレイド</option><option value="カフラフフルソード">[剣] カフラフフルソード</option><option value="短剣">[剣] 短剣</option><option value="血の剣">[剣] 血の剣</option><option value="ヴァトウゥウールンア">[剣] ヴァトウゥウールンア</option><option value="とっておさきのハ八ン">[剣] とっておさきのハ八ン</option><option value="フィン・マックー">[剣] フィン・マックー</option><option value="エクスカリバパー">[剣] エクスカリバパー</option><option value="エクスカリバハー">[剣] エクスカリバハー</option><option value="聖剣">[剣] 聖剣</option><option value="ドウルハハーケン">[剣] ドウルハハーケン</option><option value="<向上中@">[剣] &lt;向上中@</option><option value="ウヴァルキリーラン">[剣] ウヴァルキリーラン</option><option value="飼りツリーランス">[剣] 飼りツリーランス</option><option value="サイクロブスの梶">[剣] サイクロブスの梶</option><option value="虎徹">[剣] 虎徹</option><option value="村正">[剣] 村正</option><option value="八八ネロマンの鎌">[剣] 八八ネロマンの鎌</option></select>
+                            <input type="text" id="genItemName" value="コッペパン" placeholder="品名">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: bold;">価格:</label>
+                            <input type="text" id="genPrice" value="200">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; font-weight: bold;">数量:</label>
+                            <input type="text" id="genQuantity" value="3口無言可">
+                        </div>
+                    </div>
+                </div>
+                <div id="templateListArea"><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div><div class="template-card">
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
+                    <div class="template-pre"></div>
+                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                </div></div>
+            </div>
+
+            <!-- タブ: 結合管理画面 -->
+            <div id="adminTab" class="tab-content active">
+                <h3 style="margin-top: 0; font-size: 1.1rem; color: #2c3e50;">⚙️ HTMLとJSONの取り込み・結合</h3>
+                <div class="generator-panel" style="background: #fff; border-color: #cbd5e1; margin-top: 15px;">
+                    <h4 style="margin: 0 0 6px 0; font-size: 0.9rem;">1. ベースHTMLファイルの取り込み</h4>
+                    <input type="file" id="htmlImportFile" accept=".html" style="width: 100%; margin-bottom: 8px;">
+
+                    <h4 style="margin: 10px 0 6px 0; font-size: 0.9rem;">2. 品名マスターJSONファイルの取り込み</h4>
+                    <input type="file" id="jsonImportFile" accept=".json" style="width: 100%; margin-bottom: 8px;">
+
+                    <button onclick="processIntegration()" style="background: #d35400; width: 100%; margin-top: 6px;">🔗 取り込んでデータを結合する</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getCurrentUser() {
+            let user = localStorage.getItem('hub_current_user');
+            if (!user) { user = 'default_user'; localStorage.setItem('hub_current_user', user); }
+            return user;
+        }
+
+        function saveCurrentUser() {
+            localStorage.setItem('hub_current_user', document.getElementById('usernameInput').value.trim() || 'default_user');
+            updateTemplates();
+        }
+
+        const defaultTemplates = [
+            { id: 1, category: "パン・食品", label: "求・出形式", text: "{name}）求　{name}）出" },
+            { id: 2, category: "パン・食品", label: "トレード用", text: "<トレード>\n求) {name} （{qty}）\n出) {name} @1:{price}\n無言可です。" }
+        ];
+
+        function getStoredData() {
+            const user = getCurrentUser();
+            const stored = localStorage.getItem('hub_master_data_' + user);
+            try { return stored ? JSON.parse(stored) : { templates: defaultTemplates }; } catch(e) { return { templates: defaultTemplates }; }
+        }
+
+        function saveStoredData(data) {
+            localStorage.setItem('hub_master_data_' + getCurrentUser(), JSON.stringify(data));
+        }
+
+        // HTMLファイルとJSONファイルを同時に取り込んで結合する処理
+        function processIntegration() {
+            const htmlFile = document.getElementById('htmlImportFile').files[0];
+            const jsonFile = document.getElementById('jsonImportFile').files[0];
+
+            if (!jsonFile) return alert('品名マスターのJSONファイルを選択してください。');
+
+            const readerJson = new FileReader();
+            readerJson.onload = function(eJSON) {
+                try {
+                    const parsedJson = JSON.parse(eJSON.target.result);
+                    let currentData = getStoredData();
+                    
+                    // JSONが配列またはオブジェクトの場合の調整
+                    if (Array.isArray(parsedJson)) {
+                        currentData.templates = parsedJson;
+                    } else if (parsedJson.templates) {
+                        currentData = parsedJson;
+                    }
+                    saveStoredData(currentData);
+
+                    // もしHTMLファイルも選択されていれば、その中身をベースにする処理
+                    if (htmlFile) {
+                        const readerHtml = new FileReader();
+                        readerHtml.onload = function(eHtml) {
+                            // 簡易的にHTMLを取り込んだ場合の処理（今回はブラウザ上のデータを更新）
+                            updateTemplates();
+                            updateCategoryDropdown(currentData.templates);
+                            alert('HTMLとJSONの結合・取り込みが完了しました！');
+                        };
+                        readerHtml.readAsText(htmlFile, 'utf-8');
+                    } else {
+                        updateTemplates();
+                        updateCategoryDropdown(currentData.templates);
+                        alert('JSONデータの取り込みとカテゴリ連動が完了しました！');
+                    }
+                } catch(err) {
+                    alert('JSONファイルの解析に失敗しました。');
+                }
+            };
+            readerJson.readAsText(jsonFile, 'utf-8');
+        }
+
+        // カテゴリと連動したセレクトボックスの構築
+        function updateCategoryDropdown(templates) {
+            const select = document.getElementById('categorySelect');
+            select.innerHTML = '<option value="">-- カテゴリ・品名を選択 --</option>';
+            
+            templates.forEach(t => {
+                const opt = document.createElement('option');
+                const catName = t.category ? `[${t.category}] ` : '';
+                opt.value = t.label || t.name || '品名';
+                opt.textContent = catName + (t.label || t.name || '品名');
+                select.appendChild(opt);
+            });
+        }
+
+        function onCategoryChange() {
+            const select = document.getElementById('categorySelect');
+            if (select.value) {
+                document.getElementById('genItemName').value = select.value;
+                updateTemplates();
+            }
+        }
+
+        function exportIntegratedHTML() {
+            const data = getStoredData();
+            const clone = document.documentElement.cloneNode(true);
+            let dataScript = clone.querySelector('#embedded-data');
+            if (!dataScript) {
+                dataScript = document.createElement('script');
+                dataScript.id = 'embedded-data';
+                dataScript.type = 'application/json';
+                clone.querySelector('head').appendChild(dataScript);
+            }
+            dataScript.textContent = JSON.stringify(data);
+
+            const htmlContent = "<!DOCTYPE html>\n<html lang=\"ja\">\n" + clone.innerHTML + "\n</html>";
+            const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "memo.html";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function getGeneratedTemplates() {
+            const name = document.getElementById('genItemName').value.trim() || '品名';
+            const price = document.getElementById('genPrice').value.trim() || '価格';
+            const qty = document.getElementById('genQuantity').value.trim() || '数量';
+            const data = getStoredData();
+            return (data.templates || []).map(tpl => ({
+                id: tpl.id || Date.now(),
+                label: tpl.label || 'テンプレート',
+                text: (tpl.text || '').replace(/\{name\}/g, name).replace(/\{price\}/g, price).replace(/\{qty\}/g, qty)
+            }));
+        }
+
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if (btnElement) btnElement.classList.add('active');
+        }
+
+        function updateTemplates() {
+            const area = document.getElementById('templateListArea');
+            area.innerHTML = '';
+            getGeneratedTemplates().forEach(tpl => {
+                const card = document.createElement('div');
+                card.className = 'template-card';
+                card.innerHTML = `
+                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 ${escapeHtml(tpl.label)}</div>
+                    <div class="template-pre">${escapeHtml(tpl.text)}</div>
+                    <button onclick="copyToClipboard('${escapeJS(tpl.text)}')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                `;
+                area.appendChild(card);
+            });
+        }
+
+        ['genItemName', 'genPrice', 'genQuantity'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateTemplates);
+        });
+
+        function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => alert('コピーしました！')); }
+        function escapeHtml(str) { return str ? str.replace(/[&'`<>]/g, m => ({ '&': '&amp;', "'": '&#x27;', '`': '&#x60;', '<': '&lt;', '>': '&gt;' }[m])) : ''; }
+        function escapeJS(str) { return str ? str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n') : ''; }
+
+        window.onload = function() {
+            const dataScript = document.getElementById('embedded-data');
+            if (dataScript && dataScript.textContent && dataScript.textContent !== '{}') {
+                try {
+                    const embedded = JSON.parse(dataScript.textContent);
+                    if (embedded.templates) saveStoredData(embedded);
+                } catch(e) {}
+            }
+            document.getElementById('usernameInput').value = getCurrentUser();
+            const data = getStoredData();
+            updateTemplates();
+            updateCategoryDropdown(data.templates);
+        };
+    </script>
+
+
+
+
+<script>
+const embeddedItemMaster = [];
+</script>
+</body>
+</html>
