@@ -2,816 +2,890 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>マイ・ローカルデータベース＆Hub</title>
-    <!-- 👇 ここに結合されたデータが埋め込まれます -->
-    <script id="embedded-data" type="application/json">{"templates":[{"name":"紙束","category":"原料"},{"name":"サンフラワーオイル","category":"原料"},{"name":"ツッツジ","category":"原料"},{"name":"トゥバアァアキ","category":"原料"},{"name":"オタクサ","category":"原料"},{"name":"テューリップ","category":"原料"},{"name":"ハ八バネロの種","category":"原料"},{"name":"ビン","category":"原料"},{"name":"清水","category":"原料"},{"name":"肥料","category":"原料"},{"name":"ハイ肥料","category":"原料"},{"name":"薬草","category":"原料"},{"name":"木の枝","category":"原料"},{"name":"世界樹の枝","category":"原料"},{"name":"丸太","category":"原料"},{"name":"とんがった木","category":"原料"},{"name":"桃色の木","category":"原料"},{"name":"ササ","category":"原料"},{"name":"色草","category":"原料"},{"name":"鳥の羽根","category":"原料"},{"name":"色石","category":"原料"},{"name":"魔石","category":"原料"},{"name":"ガラス","category":"原料"},{"name":"鉄鉱石","category":"原料"},{"name":"ミスリル原石","category":"原料"},{"name":"オリハルコン原石","category":"原料"},{"name":"アダマンチウム原石","category":"原料"},{"name":"ミューナイト鉱石","category":"原料"},{"name":"宝石貝","category":"原料"},{"name":"オパール原石","category":"原料"},{"name":"ミューナイト結晶","category":"原料"},{"name":"鉄インゴット","category":"原料"},{"name":"ミスリルインゴット","category":"原料"},{"name":"オリハルコンインゴット","category":"原料"},{"name":"エメラルド","category":"原料"},{"name":"ルビー","category":"原料"},{"name":"サファイア","category":"原料"},{"name":"アメジスト","category":"原料"},{"name":"ガーネット","category":"原料"},{"name":"トパーズ","category":"原料"},{"name":"パール","category":"原料"},{"name":"ブルーダイヤ","category":"原料"},{"name":"レッドダイヤ","category":"原料"},{"name":"オパール","category":"原料"},{"name":"ロイヤルジュエリー","category":"原料"},{"name":"獣の皮","category":"原料"},{"name":"獣の骨","category":"原料"},{"name":"鋭い牙","category":"原料"},{"name":"カイコの葵","category":"原料"},{"name":"羊毛","category":"原料"},{"name":"純白綿","category":"原料"},{"name":"ふさふさ毛皮","category":"原料"},{"name":"顔料","category":"原料"},{"name":"高級染料","category":"原料"},{"name":"ライトレザー","category":"原料"},{"name":"龍の鱗","category":"原料"},{"name":"ユニコーンの角","category":"原料"},{"name":"&Wiki表示ビューア","category":"本"},{"name":"薬調合入門","category":"本"},{"name":"革細工入門","category":"本"},{"name":"木工細工入門","category":"本"},{"name":"装飾細工入門","category":"本"},{"name":"剣の鍛え方","category":"本"},{"name":"盾の作り方","category":"本"},{"name":"鎧の作り方","category":"本"},{"name":"杖の作り方","category":"本"},{"name":"指南書","category":"本"},{"name":"匠への道","category":"本"},{"name":"絵本","category":"本"},{"name":"わんこのすべて","category":"本"},{"name":"にゃんこのすべて","category":"本"},{"name":"うさこのすべて","category":"本"},{"name":"ひつじのすべて","category":"本"},{"name":"楽譜","category":"本"},{"name":"グリモワール","category":"本"},{"name":"真・グリモワール","category":"本"},{"name":"生物図鑑","category":"本"},{"name":"禁断の書","category":"本"},{"name":"ルタバガの教え","category":"本"},{"name":"スクロールオブフェイス","category":"本"},{"name":"申請書","category":"本"},{"name":"駆け出し店舗の設計図","category":"本"},{"name":"移動販売の設計図","category":"本"},{"name":"蔵の設計図","category":"本"},{"name":"露天商の設計図","category":"本"},{"name":"作業場の設計図","category":"本"},{"name":"ベースキャンプの設計図","category":"本"},{"name":"運び屋の設計図","category":"本"},{"name":"倉庫の設計図","category":"本"},{"name":"よろるず屋の設計図","category":"本"},{"name":"アトリエの設計図","category":"本"},{"name":"山小屋の設計図","category":"本"},{"name":"便利屋の設計図","category":"本"},{"name":"卸売問屋の設計図","category":"本"},{"name":"テナントの設計図","category":"本"},{"name":"工房の設計図","category":"本"},{"name":"ログハハウスの設計図","category":"本"},{"name":"運送屋の設計図","category":"本"},{"name":"宝くじ","category":"本"},{"name":"ポーション","category":"薬"},{"name":"八イポーション","category":"薬"},{"name":"エーテル","category":"薬"},{"name":"ハハイエーテル","category":"薬"},{"name":"キュアポーション","category":"薬"},{"name":"マインドポーション","category":"薬"},{"name":"レジストポーション","category":"薬"},{"name":"パワーポーション","category":"薬"},{"name":"八アイポーション","category":"薬"},{"name":"ロイヤルポーション","category":"薬"},{"name":"エリ草","category":"薬"},{"name":"豆づくし","category":"薬"},{"name":"ルタバガの奇忠","category":"薬"},{"name":"クイックポーション","category":"薬"},{"name":"スピードポーション","category":"薬"},{"name":"伴駄天ポーション","category":"薬"},{"name":"利和衣の4","category":"剣"},{"name":"木カ","category":"剣"},{"name":"ブラッディウムアソ","category":"剣"},{"name":"アダマンチウムの","category":"剣"},{"name":"ボーンブレイド","category":"剣"},{"name":"カフラフフルソード","category":"剣"},{"name":"短剣","category":"剣"},{"name":"血の剣","category":"剣"},{"name":"ヴァトウゥウールンア","category":"剣"},{"name":"とっておさきのハ八ン","category":"剣"},{"name":"フィン・マックー","category":"剣"},{"name":"エクスカリバパー","category":"剣"},{"name":"エクスカリバハー","category":"剣"},{"name":"聖剣","category":"剣"},{"name":"ドウルハハーケン","category":"剣"},{"name":"<向上中@","category":"剣"},{"name":"ウヴァルキリーラン","category":"剣"},{"name":"飼りツリーランス","category":"剣"},{"name":"サイクロブスの梶","category":"剣"},{"name":"虎徹","category":"剣"},{"name":"村正","category":"剣"},{"name":"八八ネロマンの鎌","category":"剣"}],"items":[{"name":"紙束","category":"原料"},{"name":"サンフラワーオイル","category":"原料"},{"name":"ツッツジ","category":"原料"},{"name":"トゥバアァアキ","category":"原料"},{"name":"オタクサ","category":"原料"},{"name":"テューリップ","category":"原料"},{"name":"ハ八バネロの種","category":"原料"},{"name":"ビン","category":"原料"},{"name":"清水","category":"原料"},{"name":"肥料","category":"原料"},{"name":"ハイ肥料","category":"原料"},{"name":"薬草","category":"原料"},{"name":"木の枝","category":"原料"},{"name":"世界樹の枝","category":"原料"},{"name":"丸太","category":"原料"},{"name":"とんがった木","category":"原料"},{"name":"桃色の木","category":"原料"},{"name":"ササ","category":"原料"},{"name":"色草","category":"原料"},{"name":"鳥の羽根","category":"原料"},{"name":"色石","category":"原料"},{"name":"魔石","category":"原料"},{"name":"ガラス","category":"原料"},{"name":"鉄鉱石","category":"原料"},{"name":"ミスリル原石","category":"原料"},{"name":"オリハルコン原石","category":"原料"},{"name":"アダマンチウム原石","category":"原料"},{"name":"ミューナイト鉱石","category":"原料"},{"name":"宝石貝","category":"原料"},{"name":"オパール原石","category":"原料"},{"name":"ミューナイト結晶","category":"原料"},{"name":"鉄インゴット","category":"原料"},{"name":"ミスリルインゴット","category":"原料"},{"name":"オリハルコンインゴット","category":"原料"},{"name":"エメラルド","category":"原料"},{"name":"ルビー","category":"原料"},{"name":"サファイア","category":"原料"},{"name":"アメジスト","category":"原料"},{"name":"ガーネット","category":"原料"},{"name":"トパーズ","category":"原料"},{"name":"パール","category":"原料"},{"name":"ブルーダイヤ","category":"原料"},{"name":"レッドダイヤ","category":"原料"},{"name":"オパール","category":"原料"},{"name":"ロイヤルジュエリー","category":"原料"},{"name":"獣の皮","category":"原料"},{"name":"獣の骨","category":"原料"},{"name":"鋭い牙","category":"原料"},{"name":"カイコの葵","category":"原料"},{"name":"羊毛","category":"原料"},{"name":"純白綿","category":"原料"},{"name":"ふさふさ毛皮","category":"原料"},{"name":"顔料","category":"原料"},{"name":"高級染料","category":"原料"},{"name":"ライトレザー","category":"原料"},{"name":"龍の鱗","category":"原料"},{"name":"ユニコーンの角","category":"原料"},{"name":"&Wiki表示ビューア","category":"本"},{"name":"薬調合入門","category":"本"},{"name":"革細工入門","category":"本"},{"name":"木工細工入門","category":"本"},{"name":"装飾細工入門","category":"本"},{"name":"剣の鍛え方","category":"本"},{"name":"盾の作り方","category":"本"},{"name":"鎧の作り方","category":"本"},{"name":"杖の作り方","category":"本"},{"name":"指南書","category":"本"},{"name":"匠への道","category":"本"},{"name":"絵本","category":"本"},{"name":"わんこのすべて","category":"本"},{"name":"にゃんこのすべて","category":"本"},{"name":"うさこのすべて","category":"本"},{"name":"ひつじのすべて","category":"本"},{"name":"楽譜","category":"本"},{"name":"グリモワール","category":"本"},{"name":"真・グリモワール","category":"本"},{"name":"生物図鑑","category":"本"},{"name":"禁断の書","category":"本"},{"name":"ルタバガの教え","category":"本"},{"name":"スクロールオブフェイス","category":"本"},{"name":"申請書","category":"本"},{"name":"駆け出し店舗の設計図","category":"本"},{"name":"移動販売の設計図","category":"本"},{"name":"蔵の設計図","category":"本"},{"name":"露天商の設計図","category":"本"},{"name":"作業場の設計図","category":"本"},{"name":"ベースキャンプの設計図","category":"本"},{"name":"運び屋の設計図","category":"本"},{"name":"倉庫の設計図","category":"本"},{"name":"よろるず屋の設計図","category":"本"},{"name":"アトリエの設計図","category":"本"},{"name":"山小屋の設計図","category":"本"},{"name":"便利屋の設計図","category":"本"},{"name":"卸売問屋の設計図","category":"本"},{"name":"テナントの設計図","category":"本"},{"name":"工房の設計図","category":"本"},{"name":"ログハハウスの設計図","category":"本"},{"name":"運送屋の設計図","category":"本"},{"name":"宝くじ","category":"本"},{"name":"ポーション","category":"薬"},{"name":"八イポーション","category":"薬"},{"name":"エーテル","category":"薬"},{"name":"ハハイエーテル","category":"薬"},{"name":"キュアポーション","category":"薬"},{"name":"マインドポーション","category":"薬"},{"name":"レジストポーション","category":"薬"},{"name":"パワーポーション","category":"薬"},{"name":"八アイポーション","category":"薬"},{"name":"ロイヤルポーション","category":"薬"},{"name":"エリ草","category":"薬"},{"name":"豆づくし","category":"薬"},{"name":"ルタバガの奇忠","category":"薬"},{"name":"クイックポーション","category":"薬"},{"name":"スピードポーション","category":"薬"},{"name":"伴駄天ポーション","category":"薬"},{"name":"利和衣の4","category":"剣"},{"name":"木カ","category":"剣"},{"name":"ブラッディウムアソ","category":"剣"},{"name":"アダマンチウムの","category":"剣"},{"name":"ボーンブレイド","category":"剣"},{"name":"カフラフフルソード","category":"剣"},{"name":"短剣","category":"剣"},{"name":"血の剣","category":"剣"},{"name":"ヴァトウゥウールンア","category":"剣"},{"name":"とっておさきのハ八ン","category":"剣"},{"name":"フィン・マックー","category":"剣"},{"name":"エクスカリバパー","category":"剣"},{"name":"エクスカリバハー","category":"剣"},{"name":"聖剣","category":"剣"},{"name":"ドウルハハーケン","category":"剣"},{"name":"<向上中@","category":"剣"},{"name":"ウヴァルキリーラン","category":"剣"},{"name":"飼りツリーランス","category":"剣"},{"name":"サイクロブスの梶","category":"剣"},{"name":"虎徹","category":"剣"},{"name":"村正","category":"剣"},{"name":"八八ネロマンの鎌","category":"剣"}]}</script>
-    <style>
-        body { font-family: sans-serif; margin: 0; padding: 15px; background: #f4f6f8; color: #333; box-sizing: border-box; }
-        h1 { font-size: 1.3rem; margin-bottom: 10px; color: #2c3e50; }
-        .card { background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 12px; }
-        select, input, button { padding: 8px 10px; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px; }
-        button { background: #3498db; color: #fff; border: none; cursor: pointer; }
-        button:hover { background: #2980b9; }
-        
-        .main-layout { display: flex; gap: 12px; align-items: flex-start; }
-        @media (max-width: 768px) { .main-layout { flex-direction: column; } }
-        .tab-buttons { display: flex; flex-direction: column; gap: 4px; min-width: 150px; }
-        .tab-btn { background: #e0e0e0; color: #555; border: none; padding: 10px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; text-align: left; }
-        .tab-btn.active { background: #2c3e50; color: #fff; font-weight: bold; }
-        .tab-content-area { flex-grow: 1; width: 100%; background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        textarea { width: 100%; height: 100px; padding: 10px; font-family: monospace; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 8px; }
-        
-        .template-card { background: #fff; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 10px; text-align: left; }
-        .template-card h4 { margin: 0 0 6px 0; font-size: 0.95rem; color: #2c3e50; }
-        .template-pre { background: #f8fafc; padding: 8px; border-radius: 4px; border: 1px solid #e2e8f0; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap; margin-bottom: 8px; }
-        .generator-panel { background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 12px; text-align: left; }
-        .generator-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 8px; }
-        .generator-grid input, .generator-grid select { width: 100%; box-sizing: border-box; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作業系データ解析・記録管理ツール</title>
+    <!-- iPhoneホーム画面対応メタタグ -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="作業解析ツール">
+    <link rel="apple-touch-icon" href="https://via.placeholder.com/180/3b82f6/ffffff?text=Work">
+    <!-- Tailwind CSS CDN -->
+    
+
+<style>
+:root{--bg:#f8fafc;--card:#fff;--line:#cbd5e1;--text:#1e293b;--muted:#64748b;--primary:#4f46e5;--primary2:#4338ca}
+*{box-sizing:border-box}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+button,input,textarea{font:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.header{background:#4f46e5;color:#fff;padding:10px 14px;box-shadow:0 1px 4px #0002}
+.header-inner{max-width:1100px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:10px}
+h1{font-size:16px;margin:0;font-weight:700}.revision{font-size:11px;color:#c7d2fe}
+.portal{color:#fff;text-decoration:none;background:#4338ca;padding:6px 9px;border-radius:7px;font-size:11px;white-space:nowrap}
+main{max-width:1100px;margin:auto;padding:12px;display:grid;grid-template-columns:minmax(280px,1fr) minmax(0,2fr);gap:12px}
+section{background:var(--card);border:1px solid #e2e8f0;border-radius:10px;padding:13px}
+.section-title{font-size:14px;font-weight:700;border-bottom:1px solid #e2e8f0;padding-bottom:8px;margin:0 0 12px;display:flex;justify-content:space-between;align-items:center}
+label{display:block;font-size:11px;font-weight:600;color:#475569;margin-bottom:4px}
+textarea,input[type=text],input[type=number]{width:100%;font-size:12px;padding:8px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--text);outline:none}
+textarea:focus,input:focus{border-color:#6366f1;box-shadow:0 0 0 2px #6366f133}
+textarea{resize:vertical}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{border:1px solid var(--line);border-radius:7px;padding:7px 9px;font-size:11px;font-weight:600;background:#f1f5f9;color:#334155}
+.btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}.btn-primary:active{background:var(--primary2)}
+.btn-danger{background:#fff1f2;border-color:#fecdd3;color:#be123c}
+.btn-small{font-size:10px;padding:4px 7px}
+.full{width:100%}
+.spacer{height:10px;border:0;border-top:1px solid #f1f5f9;margin:11px 0}
+.items-box,.eff-box{padding:9px;border-radius:8px;border:1px solid #e2e8f0}
+.items-box{background:#f8fafc}.eff-box{background:#eef2ff;border-color:#c7d2fe}
+.item-row{display:grid;grid-template-columns:minmax(0,1fr) 76px 58px 25px;gap:5px;align-items:center;background:#fff;padding:6px;border:1px solid #e2e8f0;border-radius:7px;margin-top:6px}
+.item-row input{padding:6px;font-size:11px}
+.remove-item{border:0;background:transparent;color:#e11d48;font-weight:700;padding:5px}
+.help{font-size:10px;color:#4338ca;background:#fff;padding:6px;border:1px solid #c7d2fe;border-radius:6px;line-height:1.45}
+.muted{color:var(--muted)}.mini{font-size:10px}
+.actions{display:flex;gap:7px;margin-top:10px}.actions .btn-primary{flex:1}
+.record-list{max-height:650px;overflow:auto}
+.record{border:1px solid #e2e8f0;border-radius:8px;padding:9px;margin-bottom:8px;background:#fff}
+.record-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.record-title{font-size:12px;font-weight:700}.record-date{font-size:9px;color:#94a3b8;white-space:nowrap}
+.badge{display:inline-block;font-size:9px;padding:2px 5px;border-radius:5px;background:#e0e7ff;color:#3730a3;font-weight:700}
+.percent{background:#ecfdf5;color:#047857;margin-left:4px}
+.record-meta{margin-top:7px;background:#eef2ff;padding:5px 7px;border-radius:6px;font-size:10px;display:flex;justify-content:space-between;gap:8px}
+.item-display{margin-top:4px;background:#f8fafc;border:1px solid #f1f5f9;border-radius:6px;padding:6px;display:flex;justify-content:space-between;gap:8px;font-size:10px}
+.record-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px;border-top:1px solid #f1f5f9;margin-top:7px;padding-top:7px}
+.hidden{display:none!important}
+footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
+.modal{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;padding:12px;z-index:50}
+.modal-card{background:#fff;border-radius:10px;width:min(600px,100%);padding:13px}
+.modal pre{background:#f1f5f9;border:1px solid #e2e8f0;padding:9px;border-radius:7px;font-size:11px;white-space:pre-wrap;max-height:65vh;overflow:auto}
+@media(max-width:760px){main{grid-template-columns:1fr;padding:8px}.header-inner{align-items:flex-start}.revision{display:none}section{padding:10px}.record-list{max-height:none}.item-row{grid-template-columns:minmax(0,1fr) 68px 52px 24px}}
+</style>
 </head>
 <body>
 
-    <h1>🗂️ マイ・ローカルデータベース＆Hub</h1>
-
-    <div class="card" style="background: #eef2f7; border: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 0.9rem; font-weight: bold; color: #2c3e50;">👤 ユーザー:</span>
-            <input type="text" id="usernameInput" placeholder="ユーザー名" style="padding: 5px 8px; font-size: 0.85rem;" onchange="saveCurrentUser()">
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="header-inner">
+                <a href="index.html" class="portal">
+                    ← ポータルへ戻る
+                </a>
+                <h1 >作業系データ解析・記録管理ツール</h1>
+            </div>
+            <div class="revision">
+                Revision: v1.6.0
+            </div>
         </div>
-        <button onclick="exportIntegratedHTML()" style="background: #e67e22; font-size: 0.85rem;">📦 結合したHTMLを出力する</button>
-    </div>
+    </header>
 
-    <div class="main-layout">
-        <div class="tab-buttons" id="tabButtonContainer">
-            <button class="tab-btn" onclick="switchTab('templateTab', this)">📋 定型文・品名登録</button>
-            <button class="tab-btn active" onclick="switchTab('adminTab', this)" style="background: #27ae60; color: #fff;">⚙️ HTML &amp; JSON 結合管理</button>
-        </div>
+    <!-- メインコンテンツ -->
+    <main>
 
-        <div class="tab-content-area">
-            <!-- タブ: 定型文・品名登録 -->
-            <div id="templateTab" class="tab-content">
-                <div class="generator-panel">
-                    <div class="generator-grid">
-                        <div>
-                            <label style="font-size: 0.75rem; font-weight: bold;">カテゴリ・品名選択:</label>
-                            <select id="categorySelect" onchange="onCategoryChange()" style="margin-bottom: 4px;"><option value="">-- カテゴリ・品名を選択 --</option><option value="紙束">[原料] 紙束</option><option value="サンフラワーオイル">[原料] サンフラワーオイル</option><option value="ツッツジ">[原料] ツッツジ</option><option value="トゥバアァアキ">[原料] トゥバアァアキ</option><option value="オタクサ">[原料] オタクサ</option><option value="テューリップ">[原料] テューリップ</option><option value="ハ八バネロの種">[原料] ハ八バネロの種</option><option value="ビン">[原料] ビン</option><option value="清水">[原料] 清水</option><option value="肥料">[原料] 肥料</option><option value="ハイ肥料">[原料] ハイ肥料</option><option value="薬草">[原料] 薬草</option><option value="木の枝">[原料] 木の枝</option><option value="世界樹の枝">[原料] 世界樹の枝</option><option value="丸太">[原料] 丸太</option><option value="とんがった木">[原料] とんがった木</option><option value="桃色の木">[原料] 桃色の木</option><option value="ササ">[原料] ササ</option><option value="色草">[原料] 色草</option><option value="鳥の羽根">[原料] 鳥の羽根</option><option value="色石">[原料] 色石</option><option value="魔石">[原料] 魔石</option><option value="ガラス">[原料] ガラス</option><option value="鉄鉱石">[原料] 鉄鉱石</option><option value="ミスリル原石">[原料] ミスリル原石</option><option value="オリハルコン原石">[原料] オリハルコン原石</option><option value="アダマンチウム原石">[原料] アダマンチウム原石</option><option value="ミューナイト鉱石">[原料] ミューナイト鉱石</option><option value="宝石貝">[原料] 宝石貝</option><option value="オパール原石">[原料] オパール原石</option><option value="ミューナイト結晶">[原料] ミューナイト結晶</option><option value="鉄インゴット">[原料] 鉄インゴット</option><option value="ミスリルインゴット">[原料] ミスリルインゴット</option><option value="オリハルコンインゴット">[原料] オリハルコンインゴット</option><option value="エメラルド">[原料] エメラルド</option><option value="ルビー">[原料] ルビー</option><option value="サファイア">[原料] サファイア</option><option value="アメジスト">[原料] アメジスト</option><option value="ガーネット">[原料] ガーネット</option><option value="トパーズ">[原料] トパーズ</option><option value="パール">[原料] パール</option><option value="ブルーダイヤ">[原料] ブルーダイヤ</option><option value="レッドダイヤ">[原料] レッドダイヤ</option><option value="オパール">[原料] オパール</option><option value="ロイヤルジュエリー">[原料] ロイヤルジュエリー</option><option value="獣の皮">[原料] 獣の皮</option><option value="獣の骨">[原料] 獣の骨</option><option value="鋭い牙">[原料] 鋭い牙</option><option value="カイコの葵">[原料] カイコの葵</option><option value="羊毛">[原料] 羊毛</option><option value="純白綿">[原料] 純白綿</option><option value="ふさふさ毛皮">[原料] ふさふさ毛皮</option><option value="顔料">[原料] 顔料</option><option value="高級染料">[原料] 高級染料</option><option value="ライトレザー">[原料] ライトレザー</option><option value="龍の鱗">[原料] 龍の鱗</option><option value="ユニコーンの角">[原料] ユニコーンの角</option><option value="&amp;Wiki表示ビューア">[本] &amp;Wiki表示ビューア</option><option value="薬調合入門">[本] 薬調合入門</option><option value="革細工入門">[本] 革細工入門</option><option value="木工細工入門">[本] 木工細工入門</option><option value="装飾細工入門">[本] 装飾細工入門</option><option value="剣の鍛え方">[本] 剣の鍛え方</option><option value="盾の作り方">[本] 盾の作り方</option><option value="鎧の作り方">[本] 鎧の作り方</option><option value="杖の作り方">[本] 杖の作り方</option><option value="指南書">[本] 指南書</option><option value="匠への道">[本] 匠への道</option><option value="絵本">[本] 絵本</option><option value="わんこのすべて">[本] わんこのすべて</option><option value="にゃんこのすべて">[本] にゃんこのすべて</option><option value="うさこのすべて">[本] うさこのすべて</option><option value="ひつじのすべて">[本] ひつじのすべて</option><option value="楽譜">[本] 楽譜</option><option value="グリモワール">[本] グリモワール</option><option value="真・グリモワール">[本] 真・グリモワール</option><option value="生物図鑑">[本] 生物図鑑</option><option value="禁断の書">[本] 禁断の書</option><option value="ルタバガの教え">[本] ルタバガの教え</option><option value="スクロールオブフェイス">[本] スクロールオブフェイス</option><option value="申請書">[本] 申請書</option><option value="駆け出し店舗の設計図">[本] 駆け出し店舗の設計図</option><option value="移動販売の設計図">[本] 移動販売の設計図</option><option value="蔵の設計図">[本] 蔵の設計図</option><option value="露天商の設計図">[本] 露天商の設計図</option><option value="作業場の設計図">[本] 作業場の設計図</option><option value="ベースキャンプの設計図">[本] ベースキャンプの設計図</option><option value="運び屋の設計図">[本] 運び屋の設計図</option><option value="倉庫の設計図">[本] 倉庫の設計図</option><option value="よろるず屋の設計図">[本] よろるず屋の設計図</option><option value="アトリエの設計図">[本] アトリエの設計図</option><option value="山小屋の設計図">[本] 山小屋の設計図</option><option value="便利屋の設計図">[本] 便利屋の設計図</option><option value="卸売問屋の設計図">[本] 卸売問屋の設計図</option><option value="テナントの設計図">[本] テナントの設計図</option><option value="工房の設計図">[本] 工房の設計図</option><option value="ログハハウスの設計図">[本] ログハハウスの設計図</option><option value="運送屋の設計図">[本] 運送屋の設計図</option><option value="宝くじ">[本] 宝くじ</option><option value="ポーション">[薬] ポーション</option><option value="八イポーション">[薬] 八イポーション</option><option value="エーテル">[薬] エーテル</option><option value="ハハイエーテル">[薬] ハハイエーテル</option><option value="キュアポーション">[薬] キュアポーション</option><option value="マインドポーション">[薬] マインドポーション</option><option value="レジストポーション">[薬] レジストポーション</option><option value="パワーポーション">[薬] パワーポーション</option><option value="八アイポーション">[薬] 八アイポーション</option><option value="ロイヤルポーション">[薬] ロイヤルポーション</option><option value="エリ草">[薬] エリ草</option><option value="豆づくし">[薬] 豆づくし</option><option value="ルタバガの奇忠">[薬] ルタバガの奇忠</option><option value="クイックポーション">[薬] クイックポーション</option><option value="スピードポーション">[薬] スピードポーション</option><option value="伴駄天ポーション">[薬] 伴駄天ポーション</option><option value="利和衣の4">[剣] 利和衣の4</option><option value="木カ">[剣] 木カ</option><option value="ブラッディウムアソ">[剣] ブラッディウムアソ</option><option value="アダマンチウムの">[剣] アダマンチウムの</option><option value="ボーンブレイド">[剣] ボーンブレイド</option><option value="カフラフフルソード">[剣] カフラフフルソード</option><option value="短剣">[剣] 短剣</option><option value="血の剣">[剣] 血の剣</option><option value="ヴァトウゥウールンア">[剣] ヴァトウゥウールンア</option><option value="とっておさきのハ八ン">[剣] とっておさきのハ八ン</option><option value="フィン・マックー">[剣] フィン・マックー</option><option value="エクスカリバパー">[剣] エクスカリバパー</option><option value="エクスカリバハー">[剣] エクスカリバハー</option><option value="聖剣">[剣] 聖剣</option><option value="ドウルハハーケン">[剣] ドウルハハーケン</option><option value="<向上中@">[剣] &lt;向上中@</option><option value="ウヴァルキリーラン">[剣] ウヴァルキリーラン</option><option value="飼りツリーランス">[剣] 飼りツリーランス</option><option value="サイクロブスの梶">[剣] サイクロブスの梶</option><option value="虎徹">[剣] 虎徹</option><option value="村正">[剣] 村正</option><option value="八八ネロマンの鎌">[剣] 八八ネロマンの鎌</option></select>
-                            <input type="text" id="genItemName" value="コッペパン" placeholder="品名">
-                        </div>
-                        <div>
-                            <label style="font-size: 0.75rem; font-weight: bold;">価格:</label>
-                            <input type="text" id="genPrice" value="200">
-                        </div>
-                        <div>
-                            <label style="font-size: 0.75rem; font-weight: bold;">数量:</label>
-                            <input type="text" id="genQuantity" value="3口無言可">
-                        </div>
+        <!-- 左側：入力・取り込みセクション -->
+        <section>
+            <h2 class="section-title">
+                <span>データ入力・取り込み</span>
+                <span id="edit-mode-badge" class="hidden text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-normal">編集モード</span>
+            </h2>
+            <input type="hidden" id="edit-id" value="">
+
+            <!-- 自由入力テキスト（複数成果物・ゆらぎ対応パーサー） -->
+            <div>
+                <div class="record-head">
+                    <label >一括テキスト取り込み（複数成果物対応）</label>
+                    <button type="button" id="raw-clear-btn" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-0.5 rounded transition font-medium">
+                        ✕ 文章をクリア
+                    </button>
+                </div>
+                <textarea id="raw-input-text" rows="5"  placeholder="ここに単数または複数のログを貼り付け..."></textarea>
+                <button type="button" id="parse-btn" class="btn full">
+                    テキストを自動解析してフォームに反映
+                </button>
+            </div>
+
+            <hr class="border-slate-100">
+
+            <!-- 手動フォーム項目 -->
+            <div >
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">作業名 / 職人・レベル</label>
+                    <input type="text" id="form-title"  placeholder="例: 肉屋LV 9 (+0.22%)">
+                </div>
+                
+                <div class="row2">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">進捗パーセンテージ</label>
+                        <input type="text" id="form-percentage"  placeholder="例: 3.8%">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">作業回数 <span class="text-slate-400 font-normal">※省略可</span></label>
+                        <input type="number" id="form-operations"  placeholder="例: 20">
                     </div>
                 </div>
-                <div id="templateListArea"><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div><div class="template-card">
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 テンプレート</div>
-                    <div class="template-pre"></div>
-                    <button onclick="copyToClipboard('')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
-                </div></div>
+
+                <!-- 成果物一覧（複数対応） -->
+                <div class="items-box">
+                    <div class="flex justify-between items-center">
+                        <label class="block text-xs font-bold text-slate-700">成果物・獲得アイテム一覧 <span class="text-rose-500">*必須</span></label>
+                        <button type="button" id="add-item-row-btn" class="text-[10px] bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded transition font-medium">
+                            ＋ アイテム追加
+                        </button>
+                    </div>
+                    
+                    <div id="items-container" class="space-y-2 max-h-44 overflow-y-auto pr-1">
+                        <!-- 動的にアイテム入力行が生成されます -->
+                    </div>
+                </div>
+
+                <!-- 詳細効率・経験値計算オプション -->
+                <div class="eff-box">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-indigo-900">詳細効率・経験値計算（微小端数対応）</span>
+                        <span class="text-[10px] text-indigo-600">速度未入力時=100%</span>
+                    </div>
+                    <div class="help">
+                        <p>※1時間がデフォルトです（1, 2, 4, 8, 12, 24時間などの段階的な設定を想定）</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <div>
+                            <label class="block text-[11px] text-indigo-800 mb-0.5">基礎作業時間 (時間)</label>
+                            <input type="number" step="0.0001" id="form-base-time" class="w-full text-xs p-1.5 bg-white border border-indigo-200 rounded focus:ring-1 focus:ring-indigo-500" placeholder="未入力時: 1">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-indigo-800 mb-0.5">作業速度 (%)</label>
+                            <input type="number" step="0.0001" id="form-speed-rate" class="w-full text-xs p-1.5 bg-white border border-indigo-200 rounded focus:ring-1 focus:ring-indigo-500" placeholder="未入力時: 100">
+                        </div>
+                    </div>
+                    <div class="text-[11px] text-indigo-700 flex justify-between items-center pt-1">
+                        <span>算出された効率効果 (端数対応):</span>
+                        <span id="calculated-efficiency-preview" class="font-bold text-indigo-900">---</span>
+                    </div>
+                </div>
+
+                <!-- プロンプト / 元の情報テキストエリア -->
+                <div>
+                    <div class="record-head">
+                        <label >元の情報（逆引き用テキスト記録）</label>
+                        <button type="button" id="source-clear-btn" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-0.5 rounded transition font-medium">
+                            ✕ プロンプトをクリア
+                        </button>
+                    </div>
+                    <textarea id="form-raw-source" rows="2" class="w-full text-xs p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none font-mono text-slate-500" placeholder="取り込み元のテキストがここに保持されます"></textarea>
+                </div>
             </div>
 
-            <!-- タブ: 結合管理画面 -->
-            <div id="adminTab" class="tab-content active">
-                <h3 style="margin-top: 0; font-size: 1.1rem; color: #2c3e50;">⚙️ HTMLとJSONの取り込み・結合</h3>
-                <div class="generator-panel" style="background: #fff; border-color: #cbd5e1; margin-top: 15px;">
-                    <h4 style="margin: 0 0 6px 0; font-size: 0.9rem;">1. ベースHTMLファイルの取り込み</h4>
-                    <input type="file" id="htmlImportFile" accept=".html" style="width: 100%; margin-bottom: 8px;">
+            <!-- アクションボタン -->
+            <div class="actions">
+                <button type="button" id="save-btn" class="btn btn-primary">
+                    保存 / 更新
+                </button>
+                <button type="button" id="clear-btn" class="btn">
+                    すべてクリア
+                </button>
+            </div>
+        </section>
 
-                    <h4 style="margin: 10px 0 6px 0; font-size: 0.9rem;">2. 品名マスターJSONファイルの取り込み</h4>
-                    <input type="file" id="jsonImportFile" accept=".json" style="width: 100%; margin-bottom: 8px;">
-
-                    <button onclick="processIntegration()" style="background: #d35400; width: 100%; margin-top: 6px;">🔗 取り込んでデータを結合する</button>
+        <!-- 右側：保存記録・一覧管理セクション -->
+        <section>
+            <div class="section-title">
+                <h2 class="text-base font-bold text-slate-700">保存記録一覧・管理</h2>
+                <div class="actions">
+                    <button id="export-btn" class="btn btn-small">JSON保存</button><button id="import-btn" class="btn btn-small">JSON取込</button><input id="import-file" type="file" accept=".json,application/json" class="hidden">
+                    <button id="reset-default-btn" class="btn btn-small btn-danger">サンプル復元</button>
                 </div>
+            </div>
+
+            <!-- 検索・フィルター -->
+            <div>
+                <input type="text" id="search-box"  placeholder="記録内をキーワード検索（作業名、成果物名など）...">
+            </div>
+
+            <!-- 記録リストコンテナ -->
+            <div id="records-container" class="record-list">
+                <!-- 動的にJavaScriptでリストが生成されます -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 逆引き内容確認モーダル -->
+    <div id="reverse-modal" class="modal hidden">
+        <div class="modal-card">
+            <h3 class="text-sm font-bold text-slate-800 border-b pb-2 flex justify-between items-center">
+                <span>元の情報（逆引きデータ）</span>
+                <button id="modal-close-btn" type="button" class="btn btn-small">✕ 閉じる</button>
+            </h3>
+            <pre id="reverse-modal-content" ></pre>
+            <div class="flex justify-end pt-1">
+                <button id="modal-close-btn-footer" type="button" class="btn btn-primary">
+                    閉じる
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- フッター -->
+    <footer >
+        &copy; 2026 作業系データ解析・記録管理ツール. All rights reserved.
+    </footer>
+
+    <!-- アプリケーション制御ロジック -->
     <script>
-        function getCurrentUser() {
-            let user = localStorage.getItem('hub_current_user');
-            if (!user) { user = 'default_user'; localStorage.setItem('hub_current_user', user); }
-            return user;
-        }
-
-        function saveCurrentUser() {
-            localStorage.setItem('hub_current_user', document.getElementById('usernameInput').value.trim() || 'default_user');
-            updateTemplates();
-        }
-
-        const defaultTemplates = [
-            { id: 1, category: "パン・食品", label: "求・出形式", text: "{name}）求　{name}）出" },
-            { id: 2, category: "パン・食品", label: "トレード用", text: "<トレード>\n求) {name} （{qty}）\n出) {name} @1:{price}\n無言可です。" }
+        const INITIAL_RECORDS = [
+            {
+                id: 1,
+                title: "肉屋LV 9 (+0.22%)",
+                percentage: "3.8%",
+                operations: 20,
+                baseTime: 1.0,
+                speedRate: 100,
+                efficiency: "1.0000",
+                items: [
+                    { name: "獣の肉", quantity: 200, unit: "塊", average: 10.0 },
+                    { name: "獣の皮", quantity: 178, unit: "枚", average: 8.9 },
+                    { name: "獣の骨", quantity: 149, unit: "個", average: 7.45 }
+                ],
+                rawSource: "肉屋LV 9 (+0.22%)\n3.8%\n獲得したもの\n獣の肉\n200塊\n獣の皮\n178枚\n獣の骨\n149個\n作業回数：20回",
+                createdAt: "2026-06-03 10:00:00"
+            },
+            {
+                id: 2,
+                title: "鍛冶職人LV 7 (+1.81%)",
+                percentage: "26.1%",
+                operations: 50,
+                baseTime: 1.0,
+                speedRate: 115.5,
+                efficiency: "1.1550",
+                items: [
+                    { name: "斧", quantity: 436, unit: "本", average: 8.72 }
+                ],
+                rawSource: "鍛冶職人LV 7 (+1.81%)\n26.1%\n獲得したもの\n斧\n436本\n作業回数：50回",
+                createdAt: "2026-06-01 12:00:00"
+            }
         ];
 
-        function getStoredData() {
-            const user = getCurrentUser();
-            const stored = localStorage.getItem('hub_master_data_' + user);
-            try { return stored ? JSON.parse(stored) : { templates: defaultTemplates }; } catch(e) { return { templates: defaultTemplates }; }
+        const STORAGE_KEY = "work_tool_records_v1.5.0";
+
+        const rawInputText = document.getElementById('raw-input-text');
+        const rawClearBtn = document.getElementById('raw-clear-btn');
+        const parseBtn = document.getElementById('parse-btn');
+        const formTitle = document.getElementById('form-title');
+        const formPercentage = document.getElementById('form-percentage');
+        const formOperations = document.getElementById('form-operations');
+        const itemsContainer = document.getElementById('items-container');
+        const addItemRowBtn = document.getElementById('add-item-row-btn');
+        const formBaseTime = document.getElementById('form-base-time');
+        const formSpeedRate = document.getElementById('form-speed-rate');
+        const calculatedEfficiencyPreview = document.getElementById('calculated-efficiency-preview');
+        const formRawSource = document.getElementById('form-raw-source');
+        const sourceClearBtn = document.getElementById('source-clear-btn');
+        const editId = document.getElementById('edit-id');
+        const editModeBadge = document.getElementById('edit-mode-badge');
+        const saveBtn = document.getElementById('save-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const recordsContainer = document.getElementById('records-container');
+        const searchBox = document.getElementById('search-box');
+        const exportBtn = document.getElementById('export-btn');
+        const importBtn = document.getElementById('import-btn');
+        const importFile = document.getElementById('import-file');
+        const resetDefaultBtn = document.getElementById('reset-default-btn');
+        const reverseModal = document.getElementById('reverse-modal');
+        const reverseModalContent = document.getElementById('reverse-modal-content');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const modalCloseBtnFooter = document.getElementById('modal-close-btn-footer');
+
+        let records = [];
+
+        function init() {
+            loadRecords();
+            setupEventListeners();
+            renderRecords();
+            if (itemsContainer.children.length === 0) {
+                addItemRow();
+            }
         }
 
-        function saveStoredData(data) {
-            localStorage.setItem('hub_master_data_' + getCurrentUser(), JSON.stringify(data));
-        }
-
-        // HTMLファイルとJSONファイルを同時に取り込んで結合する処理
-        function processIntegration() {
-            const htmlFile = document.getElementById('htmlImportFile').files[0];
-            const jsonFile = document.getElementById('jsonImportFile').files[0];
-
-            if (!jsonFile) return alert('品名マスターのJSONファイルを選択してください。');
-
-            const readerJson = new FileReader();
-            readerJson.onload = function(eJSON) {
+        function loadRecords() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (data) {
                 try {
-                    const parsedJson = JSON.parse(eJSON.target.result);
-                    let currentData = getStoredData();
-                    
-                    // JSONが配列またはオブジェクトの場合の調整
-                    if (Array.isArray(parsedJson)) {
-                        currentData.templates = parsedJson;
-                    } else if (parsedJson.templates) {
-                        currentData = parsedJson;
-                    }
-                    saveStoredData(currentData);
-
-                    // もしHTMLファイルも選択されていれば、その中身をベースにする処理
-                    if (htmlFile) {
-                        const readerHtml = new FileReader();
-                        readerHtml.onload = function(eHtml) {
-                            // 簡易的にHTMLを取り込んだ場合の処理（今回はブラウザ上のデータを更新）
-                            updateTemplates();
-                            updateCategoryDropdown(currentData.templates);
-                            alert('HTMLとJSONの結合・取り込みが完了しました！');
-                        };
-                        readerHtml.readAsText(htmlFile, 'utf-8');
+                    const parsed = JSON.parse(data);
+                    if (Array.isArray(parsed)) {
+                        records = parsed.map(r => {
+                            // 旧データの移行互換性確保
+                            if (!r.items && r.itemName) {
+                                r.items = [{ name: r.itemName, quantity: r.quantity, unit: r.unit, average: r.average }];
+                            }
+                            return r;
+                        });
                     } else {
-                        updateTemplates();
-                        updateCategoryDropdown(currentData.templates);
-                        alert('JSONデータの取り込みとカテゴリ連動が完了しました！');
+                        records = structuredClone(INITIAL_RECORDS);
                     }
-                } catch(err) {
-                    alert('JSONファイルの解析に失敗しました。');
+                } catch (e) {
+                    records = structuredClone(INITIAL_RECORDS);
                 }
-            };
-            readerJson.readAsText(jsonFile, 'utf-8');
+            } else {
+                records = structuredClone(INITIAL_RECORDS);
+                saveToStorage();
+            }
         }
 
-        // カテゴリと連動したセレクトボックスの構築
-        function updateCategoryDropdown(templates) {
-            const select = document.getElementById('categorySelect');
-            select.innerHTML = '<option value="">-- カテゴリ・品名を選択 --</option>';
+        function saveToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+            } catch (e) {
+                alert("データの保存に失敗しました。");
+            }
+        }
+
+        function setupEventListeners() {
+            rawClearBtn.addEventListener('click', () => {
+                rawInputText.value = "";
+                rawInputText.focus();
+            });
+
+            sourceClearBtn.addEventListener('click', () => {
+                formRawSource.value = "";
+                formRawSource.focus();
+            });
+
+            addItemRowBtn.addEventListener('click', () => addItemRow());
+            parseBtn.addEventListener('click', parseRawText);
+            saveBtn.addEventListener('click', saveRecord);
+            clearBtn.addEventListener('click', clearForm);
+            searchBox.addEventListener('input', renderRecords);
+            exportBtn.addEventListener('click', exportJSON);
+            importBtn.addEventListener('click', () => importFile.click());
+            importFile.addEventListener('change', importJSON);
+            resetDefaultBtn.addEventListener('click', resetToDefault);
+
+            formBaseTime.addEventListener('input', updateEfficiencyPreview);
+            formSpeedRate.addEventListener('input', updateEfficiencyPreview);
+
+            modalCloseBtn.addEventListener('click', closeReverseModal);
+            modalCloseBtnFooter.addEventListener('click', closeReverseModal);
+            reverseModal.addEventListener('click', (e) => {
+                if (e.target === reverseModal) closeReverseModal();
+            });
+        }
+
+        function addItemRow(name = "", quantity = "", unit = "") {
+            const row = document.createElement("div");
+            row.className = "item-row";
+
+            const nameInput = document.createElement("input");
+            nameInput.type = "text"; nameInput.className = "item-name";
+            nameInput.placeholder = "成果物名"; nameInput.value = name;
+
+            const qtyInput = document.createElement("input");
+            qtyInput.type = "number"; qtyInput.inputMode = "decimal";
+            qtyInput.className = "item-qty"; qtyInput.placeholder = "数量";
+            qtyInput.value = quantity ?? "";
+
+            const unitInput = document.createElement("input");
+            unitInput.type = "text"; unitInput.className = "item-unit";
+            unitInput.placeholder = "単位"; unitInput.value = unit;
+
+            const remove = document.createElement("button");
+            remove.type = "button"; remove.className = "remove-item";
+            remove.textContent = "✕"; remove.title = "削除";
+
+            remove.addEventListener("click", () => {
+                if (itemsContainer.children.length > 1) row.remove();
+                else { nameInput.value = ""; qtyInput.value = ""; unitInput.value = ""; }
+            });
+            row.append(nameInput, qtyInput, unitInput, remove);
+            itemsContainer.appendChild(row);
+        }
+
+        function updateEfficiencyPreview() {
+            const baseInput = formBaseTime.value.trim();
+            const base = baseInput === "" ? 1.0 : parseFloat(baseInput);
+            const validBase = isNaN(base) ? 1.0 : base;
+
+            const speedInput = formSpeedRate.value.trim();
+            const speed = speedInput === "" ? 100 : parseFloat(speedInput);
+            const validSpeed = isNaN(speed) ? 100 : speed;
+
+            const calculated = validBase * (validSpeed / 100);
+            calculatedEfficiencyPreview.textContent = calculated.toFixed(4);
+        }
+
+        function normalizeText(s) {
+            return String(s ?? "")
+                .replace(/\r\n?/g, "\n")
+                .replace(/\u3000/g, " ")
+                .replace(/[ \t]+/g, " ")
+                .trim();
+        }
+
+        function parseNumber(s) {
+            const n = Number(String(s ?? "").replace(/,/g, "").trim());
+            return Number.isFinite(n) ? n : null;
+        }
+
+        function parseQuantityLine(line) {
+            const s = normalizeText(line);
+            // 200塊 / 200 塊 / 1,234個 / 12.5kg など
+            const m = s.match(/^([\d,]+(?:\.\d+)?)[ ]*([^\d\s].*)?$/);
+            if (!m) return null;
+            const quantity = parseNumber(m[1]);
+            if (quantity === null) return null;
+            const unit = (m[2] || "").trim();
+            if (unit === "回" || unit === "回数") return null;
+            return { quantity, unit };
+        }
+
+        function parseRawText() {
+            const original = rawInputText.value;
+            const text = normalizeText(original);
+            if (!text) { alert("解析するテキストを入力してください。"); return; }
+
+            formRawSource.value = original.trim();
+            const lines = text.split("\n").map(normalizeText).filter(Boolean);
+            let titleVal = "", percentageVal = "", operationsVal = "";
+            const parsedItems = [];
+            let acquired = false;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+
+                if (!titleVal && /(?:LV|Lv|レベル)\s*\d+/i.test(line)) {
+                    titleVal = line; continue;
+                }
+                const pct = line.match(/^[-+]?\d+(?:\.\d+)?\s*%$/);
+                if (!percentageVal && pct) { percentageVal = pct[0]; continue; }
+
+                if (/作業回数|作業した回数|回数/.test(line)) {
+                    const nums = line.match(/[\d,]+(?:\.\d+)?/g);
+                    if (nums?.length) operationsVal = nums[nums.length - 1].replace(/,/g, "");
+                    continue;
+                }
+                if (/^獲得したもの$|^成果物$|^成果物・獲得アイテム/.test(line)) {
+                    acquired = true; continue;
+                }
+
+                const q = parseQuantityLine(line);
+                if (q && parsedItems.length && parsedItems.at(-1).quantity == null) {
+                    parsedItems.at(-1).quantity = q.quantity;
+                    parsedItems.at(-1).unit = q.unit;
+                    continue;
+                }
+
+                // 「獣の肉 200塊」「木製食器 10組」の同一行にも対応
+                const inline = line.match(/^(.+?)\s+([\d,]+(?:\.\d+)?)[ ]*([^\d\s].*)?$/);
+                if (inline && !/^(?:作業回数|回数)/.test(line)) {
+                    const quantity = parseNumber(inline[2]);
+                    const unit = (inline[3] || "").trim();
+                    if (quantity !== null && unit !== "回" && unit !== "回数") {
+                        parsedItems.push({name:inline[1].trim(), quantity, unit}); continue;
+                    }
+                }
+
+                if (acquired && !/^\d+(?:\.\d+)?$/.test(line) && !/回数/.test(line)) {
+                    parsedItems.push({name:line, quantity:null, unit:""});
+                }
+            }
+
+            // セクションなしの「名称→数量単位」形式
+            if (!parsedItems.length) {
+                for (let i=1; i<lines.length; i++) {
+                    const q = parseQuantityLine(lines[i]);
+                    if (q && !/LV|Lv|レベル|%/.test(lines[i-1])) {
+                        parsedItems.push({name:lines[i-1], quantity:q.quantity, unit:q.unit});
+                    }
+                }
+            }
+
+            if (titleVal) formTitle.value = titleVal;
+            if (percentageVal) formPercentage.value = percentageVal;
+            if (operationsVal) formOperations.value = operationsVal;
+
+            if (parsedItems.length) {
+                itemsContainer.innerHTML = "";
+                parsedItems.forEach(x => addItemRow(x.name, x.quantity, x.unit));
+            } else if (!formTitle.value && lines[0]) {
+                formTitle.value = lines[0];
+            }
+
+            updateEfficiencyPreview();
+            alert(parsedItems.length
+                ? `解析完了：成果物 ${parsedItems.length}件を反映しました。`
+                : "解析完了：読み取れる成果物がありませんでした。元テキストは保持しています。");
+        }
+
+        function saveRecord() {
+            const title = formTitle.value.trim();
+            const percentage = formPercentage.value.trim();
+            const operationsInput = formOperations.value.trim();
+            const operations = operationsInput === "" ? null : parseNumber(operationsInput);
             
-            templates.forEach(t => {
-                const opt = document.createElement('option');
-                const catName = t.category ? `[${t.category}] ` : '';
-                opt.value = t.label || t.name || '品名';
-                opt.textContent = catName + (t.label || t.name || '品名');
-                select.appendChild(opt);
+            const baseTimeInput = formBaseTime.value.trim();
+            const baseTime = baseTimeInput === "" ? 1.0 : parseFloat(baseTimeInput);
+            const validBaseTime = isNaN(baseTime) ? 1.0 : baseTime;
+
+            const speedInput = formSpeedRate.value.trim();
+            const speedRate = speedInput === "" ? 100 : parseFloat(speedInput);
+            const validSpeedRate = isNaN(speedRate) ? 100 : speedRate;
+
+            const rawSource = formRawSource.value.trim();
+            const currentEditId = editId.value.trim();
+
+            // アイテム行の収集
+            const itemRows = itemsContainer.querySelectorAll('.item-row');
+            const items = [];
+            itemRows.forEach(row => {
+                const name = row.querySelector('.item-name').value.trim();
+                const qtyInput = row.querySelector('.item-qty').value.trim();
+                const unit = row.querySelector('.item-unit').value.trim();
+                
+                if (name) {
+                    const quantity = qtyInput === "" ? null : parseNumber(qtyInput);
+                    let average = null;
+                    if (quantity !== null && operations !== null && !isNaN(quantity) && !isNaN(operations) && operations > 0) {
+                        average = parseFloat((quantity / operations).toFixed(4));
+                    }
+                    items.push({ name, quantity: quantity === null ? null : quantity, unit, average });
+                }
             });
-        }
 
-        function onCategoryChange() {
-            const select = document.getElementById('categorySelect');
-            if (select.value) {
-                document.getElementById('genItemName').value = select.value;
-                updateTemplates();
+            if (items.length === 0) {
+                alert("少なくとも1つの「成果物名」を入力してください。");
+                return;
             }
-        }
 
-        function exportIntegratedHTML() {
-            const data = getStoredData();
-            const clone = document.documentElement.cloneNode(true);
-            let dataScript = clone.querySelector('#embedded-data');
-            if (!dataScript) {
-                dataScript = document.createElement('script');
-                dataScript.id = 'embedded-data';
-                dataScript.type = 'application/json';
-                clone.querySelector('head').appendChild(dataScript);
+            const efficiency = (validBaseTime * (validSpeedRate / 100)).toFixed(4);
+
+            const now = new Date();
+            const timestamp = now.getFullYear() + '-' +
+                String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                String(now.getDate()).padStart(2, '0') + ' ' +
+                String(now.getHours()).padStart(2, '0') + ':' +
+                String(now.getMinutes()).padStart(2, '0') + ':' +
+                String(now.getSeconds()).padStart(2, '0');
+
+            const generatedRawSource = rawSource || `${title || '作業記録'}\n獲得したもの\n` + items.map(i => `${i.name}\n${i.quantity !== null ? i.quantity + i.unit : ''}`).join('\n') + `\n作業回数：${operations !== null ? operations + '回' : '未入力'}`;
+
+            if (currentEditId !== "") {
+                const idNum = parseInt(currentEditId, 10);
+                const index = records.findIndex(r => r.id === idNum);
+                
+                if (index !== -1) {
+                    records[index] = {
+                        ...records[index],
+                        title: title || records[index].title,
+                        percentage,
+                        operations: (operations !== null && !isNaN(operations)) ? operations : null,
+                        baseTime: validBaseTime,
+                        speedRate: validSpeedRate,
+                        efficiency,
+                        items,
+                        rawSource: generatedRawSource
+                    };
+                    alert("記録を正常に上書き更新しました！");
+                } else {
+                    addNewRecord(title, percentage, operations, validBaseTime, validSpeedRate, efficiency, items, generatedRawSource, timestamp);
+                }
+            } else {
+                addNewRecord(title, percentage, operations, validBaseTime, validSpeedRate, efficiency, items, generatedRawSource, timestamp);
+                alert("新規記録を保存しました！");
             }
-            dataScript.textContent = JSON.stringify(data);
 
-            const htmlContent = "<!DOCTYPE html>\n<html lang=\"ja\">\n" + clone.innerHTML + "\n</html>";
-            const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = "memo.html";
-            a.click();
-            URL.revokeObjectURL(url);
+            saveToStorage();
+            clearForm();
+            renderRecords();
         }
 
-        function getGeneratedTemplates() {
-            const name = document.getElementById('genItemName').value.trim() || '品名';
-            const price = document.getElementById('genPrice').value.trim() || '価格';
-            const qty = document.getElementById('genQuantity').value.trim() || '数量';
-            const data = getStoredData();
-            return (data.templates || []).map(tpl => ({
-                id: tpl.id || Date.now(),
-                label: tpl.label || 'テンプレート',
-                text: (tpl.text || '').replace(/\{name\}/g, name).replace(/\{price\}/g, price).replace(/\{qty\}/g, qty)
-            }));
+        function addNewRecord(title, percentage, operations, baseTime, speedRate, efficiency, items, rawSource, timestamp) {
+            const newId = records.length > 0 ? Math.max(...records.map(r => r.id || 0)) + 1 : 1;
+            const newRecord = {
+                id: newId,
+                title: title || ("作業記録 #" + newId),
+                percentage,
+                operations: (operations !== null && !isNaN(operations)) ? operations : null,
+                baseTime,
+                speedRate,
+                efficiency,
+                items,
+                rawSource,
+                createdAt: timestamp
+            };
+            records.unshift(newRecord);
         }
 
-        function switchTab(tabId, btnElement) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            if (btnElement) btnElement.classList.add('active');
+        function clearForm() {
+            editId.value = "";
+            editModeBadge.classList.add('hidden');
+            rawInputText.value = "";
+            formTitle.value = "";
+            formPercentage.value = "";
+            formOperations.value = "";
+            itemsContainer.innerHTML = "";
+            addItemRow();
+            formBaseTime.value = "";
+            formSpeedRate.value = "";
+            calculatedEfficiencyPreview.textContent = "---";
+            formRawSource.value = "";
+            saveBtn.textContent = "保存 / 更新";
         }
 
-        function updateTemplates() {
-            const area = document.getElementById('templateListArea');
-            area.innerHTML = '';
-            getGeneratedTemplates().forEach(tpl => {
+        function renderRecords() {
+            const keyword = (searchBox.value || "").toLowerCase().trim();
+            recordsContainer.innerHTML = "";
+
+            if (!Array.isArray(records)) records = [];
+
+            const filtered = records.filter(rec => {
+                if (!rec) return false;
+                const t = (rec.title || "").toLowerCase();
+                const matchItem = rec.items && rec.items.some(i => (i.name || "").toLowerCase().includes(keyword) || (i.unit || "").toLowerCase().includes(keyword));
+                return t.includes(keyword) || matchItem;
+            });
+
+            if (filtered.length === 0) {
+                recordsContainer.innerHTML = `<div class="text-xs text-slate-400 text-center py-8">保存された記録はありません。</div>`;
+                return;
+            }
+
+            filtered.forEach(rec => {
                 const card = document.createElement('div');
-                card.className = 'template-card';
+                card.className = "bg-white border border-slate-200 rounded-lg p-3 hover:border-indigo-300 transition shadow-sm flex flex-col space-y-2";
+                
+                const baseTimeVal = (rec.baseTime !== undefined && rec.baseTime !== null && rec.baseTime !== "") ? rec.baseTime : 1.0;
+                const speedVal = (rec.speedRate !== undefined && rec.speedRate !== null && rec.speedRate !== "") ? rec.speedRate : 100;
+                const opDisplay = (rec.operations !== null && rec.operations !== undefined && !isNaN(rec.operations)) ? `${rec.operations}回` : '未入力';
+
+                let itemsHtml = "";
+                if (rec.items && rec.items.length > 0) {
+                    itemsHtml = rec.items.map(i => {
+                        const qStr = (i.quantity !== null && i.quantity !== undefined && !isNaN(i.quantity)) ? `${Number(i.quantity).toLocaleString()} ${escapeHtml(i.unit || '')}` : '未入力';
+                        const aStr = (i.average !== null && i.average !== undefined && !isNaN(i.average)) ? `${i.average} ${escapeHtml(i.unit || '')}/回` : '---';
+                        return `
+                            <div class="bg-slate-50 p-2 rounded border border-slate-100 flex justify-between items-center text-xs">
+                                <div>
+                                    <strong class="text-slate-700">${escapeHtml(i.name)}</strong>
+                                    <span class="text-slate-500 ml-2">数量: ${qStr}</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-slate-400 text-[10px] block">平均 (アベレージ)</span>
+                                    <span class="font-bold text-indigo-600">${aStr}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
                 card.innerHTML = `
-                    <div style="font-weight: bold; font-size: 0.95rem; color: #2c3e50; margin-bottom: 6px;">📝 ${escapeHtml(tpl.label)}</div>
-                    <div class="template-pre">${escapeHtml(tpl.text)}</div>
-                    <button onclick="copyToClipboard('${escapeJS(tpl.text)}')" style="width: 100%; font-size: 0.8rem;">📋 コピー</button>
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-indigo-100 text-indigo-800 text-[10px] font-bold px-2 py-0.5 rounded">ID: ${rec.id}</span>
+                            <h3 class="text-xs font-bold text-slate-800">${escapeHtml(rec.title || '無題の作業')}</h3>
+                            ${rec.percentage ? `<span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded">${escapeHtml(rec.percentage)}</span>` : ''}
+                        </div>
+                        <span class="text-[10px] text-slate-400">${escapeHtml(rec.createdAt || '')}</span>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center text-xs bg-indigo-50/50 px-2 py-1 rounded">
+                            <span class="text-slate-600">作業回数: <strong class="text-slate-800">${opDisplay}</strong></span>
+                            <span class="text-slate-600">基礎時間/速度: <strong class="text-slate-800">${baseTimeVal}h / ${speedVal}%</strong> <span class="text-indigo-700 font-bold">(${escapeHtml(rec.efficiency || '---')})</span></span>
+                        </div>
+                        <div class="space-y-1">
+                            ${itemsHtml}
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-1.5 pt-1 justify-end border-t border-slate-100">
+                        <button type="button" data-action="same" data-id="${rec.id}" class="text-[11px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-medium transition">
+                            同じ作業をする
+                        </button>
+                        <button type="button" data-action="reverse" data-id="${rec.id}" class="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded font-medium transition">
+                            逆引き表示
+                        </button>
+                        <button type="button" data-action="copy" data-id="${rec.id}" class="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded font-medium transition">
+                            コピー
+                        </button>
+                        <button type="button" data-action="edit" data-id="${rec.id}" class="text-[11px] bg-amber-50 hover:bg-amber-100 text-amber-700 px-2 py-1 rounded font-medium transition">
+                            編集
+                        </button>
+                        <button type="button" data-action="delete" data-id="${rec.id}" class="text-[11px] bg-rose-50 hover:bg-rose-100 text-rose-700 px-2 py-1 rounded font-medium transition">
+                            削除
+                        </button>
+                    </div>
                 `;
-                area.appendChild(card);
+                recordsContainer.appendChild(card);
             });
         }
 
-        ['genItemName', 'genPrice', 'genQuantity'].forEach(id => {
-            document.getElementById(id).addEventListener('input', updateTemplates);
+        recordsContainer.addEventListener('click', function(e) {
+            const btn = e.target.closest('button[data-action]');
+            if (!btn) return;
+
+            const action = btn.getAttribute('data-action');
+            const idAttr = btn.getAttribute('data-id');
+            if (!idAttr) return;
+            const id = parseInt(idAttr, 10);
+
+            if (action === 'same') handleSameWork(id);
+            if (action === 'reverse') handleReverse(id);
+            if (action === 'copy') handleCopy(id);
+            if (action === 'edit') handleEdit(id);
+            if (action === 'delete') handleDelete(id);
         });
 
-        function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => alert('コピーしました！')); }
-        function escapeHtml(str) { return str ? str.replace(/[&'`<>]/g, m => ({ '&': '&amp;', "'": '&#x27;', '`': '&#x60;', '<': '&lt;', '>': '&gt;' }[m])) : ''; }
-        function escapeJS(str) { return str ? str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n') : ''; }
+        function handleSameWork(id) {
+            const rec = records.find(r => r.id === id);
+            if (!rec) return;
 
-        window.onload = function() {
-            const dataScript = document.getElementById('embedded-data');
-            if (dataScript && dataScript.textContent && dataScript.textContent !== '{}') {
-                try {
-                    const embedded = JSON.parse(dataScript.textContent);
-                    if (embedded.templates) saveStoredData(embedded);
-                } catch(e) {}
+            formTitle.value = rec.title || "";
+            formPercentage.value = rec.percentage || "";
+            formOperations.value = (rec.operations !== null && rec.operations !== undefined && !isNaN(rec.operations)) ? rec.operations : "";
+            formBaseTime.value = (rec.baseTime !== undefined && rec.baseTime !== null && rec.baseTime !== 1.0) ? rec.baseTime : "";
+            formSpeedRate.value = (rec.speedRate !== undefined && rec.speedRate !== null && rec.speedRate !== 100) ? rec.speedRate : "";
+            updateEfficiencyPreview();
+            formRawSource.value = rec.rawSource || "";
+            
+            itemsContainer.innerHTML = "";
+            if (rec.items && rec.items.length > 0) {
+                rec.items.forEach(i => addItemRow(i.name, i.quantity, i.unit));
+            } else {
+                addItemRow();
             }
-            document.getElementById('usernameInput').value = getCurrentUser();
-            const data = getStoredData();
-            updateTemplates();
-            updateCategoryDropdown(data.templates);
-        };
+
+            editId.value = "";
+            editModeBadge.classList.add('hidden');
+            saveBtn.textContent = "保存 / 更新";
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function handleReverse(id) {
+            const rec = records.find(r => r.id === id);
+            if (!rec) return;
+
+            const sourceText = rec.rawSource || "元の情報はありません。";
+            reverseModalContent.textContent = `[記録ID: ${rec.id}] 登録日時: ${rec.createdAt || '不明'}\n\n` + sourceText;
+            reverseModal.classList.remove('hidden');
+        }
+
+        function closeReverseModal() {
+            reverseModal.classList.add('hidden');
+        }
+
+        async function handleCopy(id) {
+            const rec = records.find(r => r.id === id);
+            if (!rec) return;
+            const opStr = Number.isFinite(Number(rec.operations)) ? `${rec.operations}回` : "回数未入力";
+            const itemsStr = (rec.items || []).map(i =>
+                `${i.name}: ${i.quantity != null ? i.quantity + (i.unit || "") : "数量未入力"}`
+            ).join(", ");
+            const textToCopy = `作業名: ${rec.title || "無題"}\n成果物: ${itemsStr} (${opStr})\n効率効果: ${rec.efficiency || "---"}\n進捗: ${rec.percentage || "---"}`;
+
+            try {
+                if (navigator.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(textToCopy);
+                } else {
+                    const ta = document.createElement("textarea");
+                    ta.value = textToCopy; ta.style.position = "fixed"; ta.style.opacity = "0";
+                    document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove();
+                }
+                alert("クリップボードにコピーしました！");
+            } catch { alert("コピーに失敗しました。長押しで選択してコピーしてください。"); }
+        }
+
+        function handleEdit(id) {
+            const rec = records.find(r => r.id === id);
+            if (!rec) return;
+
+            editId.value = rec.id;
+            editModeBadge.classList.remove('hidden');
+            formTitle.value = rec.title || "";
+            formPercentage.value = rec.percentage || "";
+            formOperations.value = (rec.operations !== null && rec.operations !== undefined && !isNaN(rec.operations)) ? rec.operations : "";
+            formBaseTime.value = (rec.baseTime !== undefined && rec.baseTime !== null && rec.baseTime !== 1.0) ? rec.baseTime : "";
+            formSpeedRate.value = (rec.speedRate !== undefined && rec.speedRate !== null && rec.speedRate !== 100) ? rec.speedRate : "";
+            updateEfficiencyPreview();
+            formRawSource.value = rec.rawSource || "";
+
+            itemsContainer.innerHTML = "";
+            if (rec.items && rec.items.length > 0) {
+                rec.items.forEach(i => addItemRow(i.name, i.quantity, i.unit));
+            } else {
+                addItemRow();
+            }
+
+            saveBtn.textContent = "変更を上書き保存";
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function handleDelete(id) {
+            if (confirm(`ID: ${id} の記録を本当に削除しますか？`)) {
+                records = records.filter(r => r.id !== id);
+                saveToStorage();
+                renderRecords();
+            }
+        }
+
+        function exportJSON() {
+            const blob = new Blob([JSON.stringify(records, null, 2)], {type:"application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url; a.download = "work_records_backup.json";
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function importJSON(e) {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const imported = JSON.parse(reader.result);
+                    if (!Array.isArray(imported)) throw new Error("配列ではありません");
+                    const cleaned = imported.filter(Boolean).map(r => ({
+                        ...r,
+                        id: Number(r.id) || 0,
+                        items: Array.isArray(r.items) ? r.items : (r.itemName ? [{name:r.itemName,quantity:r.quantity,unit:r.unit,average:r.average}] : [])
+                    }));
+                    if (!cleaned.length) throw new Error("記録がありません");
+                    records = cleaned;
+                    saveToStorage(); renderRecords(); clearForm();
+                    alert(`${records.length}件を取り込みました。`);
+                } catch (err) {
+                    alert("JSONを読み込めませんでした。保存したバックアップを選択してください。");
+                } finally {
+                    importFile.value = "";
+                }
+            };
+            reader.readAsText(file, "utf-8");
+        }
+
+        function resetToDefault() {
+            if (confirm("すべての記録を初期サンプル状態にリセットしますか？")) {
+                records = structuredClone(INITIAL_RECORDS);
+                saveToStorage();
+                clearForm();
+                renderRecords();
+                alert("サンプルデータにリセットしました。");
+            }
+        }
+
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str).replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
     </script>
-
-
-
-
-<script>
-const embeddedItemMaster = [];
-</script>
 </body>
 </html>
+
+
+
+
