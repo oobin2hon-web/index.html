@@ -13,7 +13,6 @@
             --text-main: #1f2937;
             --text-muted: #6b7280;
             --border-color: #e5e7eb;
-            --sidebar-width: 220px;
         }
 
         * {
@@ -28,8 +27,7 @@
             color: var(--text-main);
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
         }
 
         /* ヘルパー・共通スタイル */
@@ -72,7 +70,6 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 12px;
-            z-index: 10;
         }
         .header-group {
             display: flex;
@@ -86,52 +83,45 @@
             white-space: nowrap;
         }
 
-        /* メインコンテナ（縦タブレイアウト） */
-        .main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        /* 左側：縦タブナビゲーション */
-        sidebar {
-            width: var(--sidebar-width);
+        /* 上部タブナビゲーションコンテナ */
+        .tab-nav-container {
             background: var(--card-bg);
-            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 20px;
             display: flex;
-            flex-direction: column;
-            overflow-y: auto;
+            gap: 4px;
+            overflow-x: auto;
         }
         .tab-btn {
-            text-align: left;
-            padding: 14px 18px;
+            padding: 12px 16px;
             border: none;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 3px solid transparent;
             background: transparent;
             font-weight: 500;
             font-size: 14px;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-radius: 0;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
         }
-        .tab-btn:hover { background: #f8fafc; color: var(--primary-color); }
+        .tab-btn:hover { color: var(--primary-color); background: #f8fafc; }
         .tab-btn.active {
-            background: #eff6ff;
             color: var(--primary-color);
             font-weight: 600;
-            border-left: 4px solid var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            background: #f8fafc;
         }
 
-        /* 右側：コンテンツエリア */
+        /* メインコンテンツエリア */
         .content-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 24px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px 20px;
             display: flex;
             flex-direction: column;
             gap: 20px;
+            flex: 1;
         }
         .tab-pane {
             display: none;
@@ -192,7 +182,7 @@
             gap: 12px;
             margin-bottom: 12px;
         }
-        .memo-list, .grid-list {
+        .memo-list {
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -202,6 +192,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
             gap: 16px;
+            margin-top: 12px;
         }
 
         /* 個別メモアイテム */
@@ -262,14 +253,14 @@
 
         /* iframeエリア */
         .iframe-wrapper {
-            flex: 1;
-            min-height: 500px;
+            height: 600px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             overflow: hidden;
             background: white;
             display: flex;
             flex-direction: column;
+            margin-top: 12px;
         }
         .iframe-wrapper iframe {
             width: 100%;
@@ -309,265 +300,260 @@
         </div>
     </header>
 
-    <!-- メインコンテナ -->
-    <div class="main-container">
-        <!-- 左側：縦タブレイアウト -->
-        <sidebar>
-            <button class="tab-btn active" onclick="switchTab('tab-template', this)">📋 定型文・品名管理</button>
-            <button class="tab-btn" onclick="switchTab('tab-memo', this)">📝 詳細メモ</button>
-            <button class="tab-btn" onclick="switchTab('tab-price', this)">💰 売買・価格メモ</button>
-            <button class="tab-btn" onclick="switchTab('tab-event', this)">📅 イベント情報</button>
-            <button class="tab-btn" onclick="switchTab('tab-screenshot', this)">📸 スクショ保存</button>
-            <button class="tab-btn" onclick="switchTab('tab-wiki', this)">🌐 非公式Wiki</button>
-            <button class="tab-btn" onclick="switchTab('tab-bbs', this)">💬 公式掲示板</button>
-        </sidebar>
+    <!-- 上部タブナビゲーション -->
+    <nav class="tab-nav-container">
+        <button class="tab-btn active" onclick="switchTab('tab-template', this)">📋 定型文・品名管理</button>
+        <button class="tab-btn" onclick="switchTab('tab-memo', this)">📝 詳細メモ</button>
+        <button class="tab-btn" onclick="switchTab('tab-price', this)">💰 売買・価格メモ</button>
+        <button class="tab-btn" onclick="switchTab('tab-event', this)">📅 イベント情報</button>
+        <button class="tab-btn" onclick="switchTab('tab-screenshot', this)">📸 スクショ保存</button>
+        <button class="tab-btn" onclick="switchTab('tab-wiki', this)">🌐 非公式Wiki</button>
+        <button class="tab-btn" onclick="switchTab('tab-bbs', this)">💬 公式掲示板</button>
+    </nav>
 
-        <!-- 右側：コンテンツエリア -->
-        <div class="content-area">
+    <!-- メインコンテンツエリア -->
+    <div class="content-area">
 
-            <!-- 1. 定型文・品名管理タブ -->
-            <div id="tab-template" class="tab-pane active">
-                <div class="card">
-                    <div class="card-title">トレード・宣伝ジェネレーター</div>
-                    <div class="form-grid">
-                        <div>
-                            <label>品名</label>
-                            <select id="genItemSelect" onchange="updateGenerator()">
-                                <option value="">-- 品名を選択 --</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>価格 (price)</label>
-                            <input type="text" id="genPrice" placeholder="例: 5000" oninput="updateGenerator()">
-                        </div>
-                        <div>
-                            <label>数量 (qty)</label>
-                            <input type="text" id="genQty" placeholder="例: 10" oninput="updateGenerator()">
-                        </div>
-                    </div>
-                    <div style="margin-top: 10px;">
-                        <label>定型文テンプレート選択</label>
-                        <select id="genTemplateSelect" style="margin-top: 4px; margin-bottom: 10px;" onchange="selectTemplateToGen()">
-                            <option value="">-- テンプレートを選択 --</option>
+        <!-- 1. 定型文・品名管理タブ -->
+        <div id="tab-template" class="tab-pane active">
+            <div class="card">
+                <div class="card-title">トレード・宣伝ジェネレーター</div>
+                <div class="form-grid">
+                    <div>
+                        <label>品名</label>
+                        <select id="genItemSelect" onchange="updateGenerator()">
+                            <option value="">-- 品名を選択 --</option>
                         </select>
                     </div>
                     <div>
-                        <label>プレビュー / 出力結果</label>
-                        <textarea id="genOutput" rows="4" style="margin-top: 4px; font-family: monospace;"></textarea>
+                        <label>価格 (price)</label>
+                        <input type="text" id="genPrice" placeholder="例: 5000" oninput="updateGenerator()">
                     </div>
-                    <div class="flex-row" style="margin-top: 10px;">
-                        <button class="primary" onclick="copyGeneratorOutput()">クリップボードにコピー</button>
-                        <button onclick="setBbsTemplateToGen()">公式掲示板用テンプレートをセット</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">品名の一括登録 & マスター管理</div>
-                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">改行区切りで複数の品名をペーストして一括登録できます。</p>
-                    <textarea id="bulkItemsInput" rows="3" placeholder="例:\n鉄鉱石\n高級木材\n神秘の水"></textarea>
-                    <div style="margin-top: 10px;">
-                        <button class="primary" onclick="bulkAddItems()">一括登録を実行</button>
-                    </div>
-                    <div style="margin-top: 14px;">
-                        <label style="font-size: 13px; font-weight: 600;">登録済み品名一覧（クリックでジェネレーターに反映）</label>
-                        <div id="masterItemChips" class="chip-container"></div>
+                    <div>
+                        <label>数量 (qty)</label>
+                        <input type="text" id="genQty" placeholder="例: 10" oninput="updateGenerator()">
                     </div>
                 </div>
-
-                <div class="card">
-                    <div class="card-title">カスタム定型文の個別追加</div>
-                    <div class="form-grid">
-                        <input type="text" id="customTemplateTitle" placeholder="テンプレート名（例: 買取募集文）">
-                    </div>
-                    <textarea id="customTemplateBody" rows="3" placeholder="本文（{name}, {price}, {qty} が利用可能）" style="margin-top: 8px;"></textarea>
-                    <div style="margin-top: 10px;">
-                        <button class="primary" onclick="addCustomTemplate()">テンプレートを保存</button>
-                    </div>
-                    <div id="customTemplateList" class="memo-list"></div>
+                <div style="margin-top: 10px;">
+                    <label>定型文テンプレート選択</label>
+                    <select id="genTemplateSelect" style="margin-top: 4px; margin-bottom: 10px;" onchange="selectTemplateToGen()">
+                        <option value="">-- テンプレートを選択 --</option>
+                    </select>
+                </div>
+                <div>
+                    <label>プレビュー / 出力結果</label>
+                    <textarea id="genOutput" rows="4" style="margin-top: 4px; font-family: monospace;"></textarea>
+                </div>
+                <div class="flex-row" style="margin-top: 10px;">
+                    <button class="primary" onclick="copyGeneratorOutput()">クリップボードにコピー</button>
+                    <button onclick="setBbsTemplateToGen()">公式掲示板用テンプレートをセット</button>
                 </div>
             </div>
 
-            <!-- 2. 詳細メモタブ -->
-            <div id="tab-memo" class="tab-pane" data-storage-key="memo_items">
-                <div class="card">
-                    <div class="card-title">詳細メモの作成・編集</div>
-                    <div class="form-grid">
-                        <select id="memoCategory">
-                            <option value="general">一般・日常</option>
-                            <option value="trade">トレード・素材</option>
-                            <option value="gear">装備・アイテム</option>
-                            <option value="quest">クエスト・攻略</option>
-                        </select>
-                        <input type="text" id="memoTitle" placeholder="タイトル">
-                    </div>
-                    <textarea id="memoContent" rows="4" placeholder="メモの内容を入力... 定型文チップをクリックして挿入できます" style="margin-top: 8px;"></textarea>
-                    <div style="margin-top: 8px;">
-                        <label style="font-size: 12px; color: var(--text-muted);">挿入用定型文チップ:</label>
-                        <div id="memoSnippetChips" class="chip-container"></div>
-                    </div>
-                    <div style="margin-top: 12px;" class="flex-row">
-                        <button class="primary" onclick="saveItem('memo')">メモを保存</button>
-                        <button onclick="resetForm('memo')">クリア</button>
-                    </div>
+            <div class="card">
+                <div class="card-title">品名の一括登録 & マスター管理</div>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">改行区切りで複数の品名をペーストして一括登録できます。</p>
+                <textarea id="bulkItemsInput" rows="3" placeholder="例:\n鉄鉱石\n高級木材\n神秘の水"></textarea>
+                <div style="margin-top: 10px;">
+                    <button class="primary" onclick="bulkAddItems()">一括登録を実行</button>
                 </div>
-
-                <div class="card">
-                    <div class="card-title">メモ一覧・検索</div>
-                    <div class="form-grid">
-                        <input type="text" id="memoSearch" placeholder="🔍 リアルタイムキーワード検索..." oninput="renderItems('memo')">
-                        <select id="memoSort" onchange="renderItems('memo')">
-                            <option value="custom">カスタム並び順 (▲▼)</option>
-                            <option value="newest">新しい順</option>
-                            <option value="oldest">古い順</option>
-                        </select>
-                    </div>
-                    <div class="chip-container" id="memoKeywordChips">
-                        <!-- 優先検索キーワードチップがここに入ります -->
-                        <span class="chip" onclick="setSearchKeyword('memo', '重要')">#重要</span>
-                        <span class="chip" onclick="setSearchKeyword('memo', '金策')">#金策</span>
-                        <span class="chip" onclick="setSearchKeyword('memo', 'メモ')">#メモ</span>
-                    </div>
-                    <div id="memoList" class="memo-list"></div>
+                <div style="margin-top: 14px;">
+                    <label style="font-size: 13px; font-weight: 600;">登録済み品名一覧（クリックでジェネレーターに反映）</label>
+                    <div id="masterItemChips" class="chip-container"></div>
                 </div>
             </div>
 
-            <!-- 3. 売買・価格メモタブ -->
-            <div id="tab-price" class="tab-pane" data-storage-key="price_items">
-                <div class="card">
-                    <div class="card-title">売買・価格メモの作成</div>
-                    <div class="form-grid">
-                        <select id="priceCategory">
-                            <option value="general">一般・日常</option>
-                            <option value="trade">トレード・素材</option>
-                            <option value="gear">装備・アイテム</option>
-                            <option value="quest">クエスト・攻略</option>
-                        </select>
-                        <input type="text" id="priceTitle" placeholder="アイテム名・相場タイトル">
-                    </div>
-                    <textarea id="priceContent" rows="4" placeholder="価格、購入先、売却先、メモなど..." style="margin-top: 8px;"></textarea>
-                    <div style="margin-top: 8px;">
-                        <label style="font-size: 12px; color: var(--text-muted);">挿入用定型文チップ:</label>
-                        <div id="priceSnippetChips" class="chip-container"></div>
-                    </div>
-                    <div style="margin-top: 12px;" class="flex-row">
-                        <button class="primary" onclick="saveItem('price')">価格メモを保存</button>
-                        <button onclick="resetForm('price')">クリア</button>
-                    </div>
+            <div class="card">
+                <div class="card-title">カスタム定型文の個別追加</div>
+                <div class="form-grid">
+                    <input type="text" id="customTemplateTitle" placeholder="テンプレート名（例: 買取募集文）">
                 </div>
-
-                <div class="card">
-                    <div class="card-title">価格メモ一覧・検索</div>
-                    <div class="form-grid">
-                        <input type="text" id="priceSearch" placeholder="🔍 相場を検索..." oninput="renderItems('price')">
-                        <select id="priceSort" onchange="renderItems('price')">
-                            <option value="custom">カスタム並び順 (▲▼)</option>
-                            <option value="newest">新しい順</option>
-                            <option value="oldest">古い順</option>
-                        </select>
-                    </div>
-                    <div class="chip-container">
-                        <span class="chip" onclick="setSearchKeyword('price', '最安値')">#最安値</span>
-                        <span class="chip" onclick="setSearchKeyword('price', '高騰')">#高騰</span>
-                    </div>
-                    <div id="priceList" class="memo-list"></div>
+                <textarea id="customTemplateBody" rows="3" placeholder="本文（{name}, {price}, {qty} が利用可能）" style="margin-top: 8px;"></textarea>
+                <div style="margin-top: 10px;">
+                    <button class="primary" onclick="addCustomTemplate()">テンプレートを保存</button>
                 </div>
+                <div id="customTemplateList" class="memo-list"></div>
             </div>
-
-            <!-- 4. イベント情報タブ -->
-            <div id="tab-event" class="tab-pane" data-storage-key="event_items">
-                <div class="card">
-                    <div class="card-title">イベント情報・計画の記録</div>
-                    <div class="form-grid">
-                        <select id="eventCategory">
-                            <option value="general">一般・日常</option>
-                            <option value="trade">トレード・素材</option>
-                            <option value="gear">装備・アイテム</option>
-                            <option value="quest">クエスト・攻略</option>
-                        </select>
-                        <input type="text" id="eventTitle" placeholder="イベント名・タイトル">
-                    </div>
-                    <textarea id="eventContent" rows="3" placeholder="計画、進捗、結果などを記入..." style="margin-top: 8px;"></textarea>
-                    <div style="margin-top: 10px;">
-                        <label style="font-size: 13px;">スクショ添付（任意）</label>
-                        <input type="file" id="eventImageFile" accept="image/*" style="margin-top: 4px;">
-                    </div>
-                    <div style="margin-top: 12px;" class="flex-row">
-                        <button class="primary" onclick="saveEventItem()">イベント情報を保存</button>
-                        <button onclick="resetForm('event')">クリア</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">イベント一覧</div>
-                    <div class="form-grid">
-                        <input type="text" id="eventSearch" placeholder="🔍 イベントを検索..." oninput="renderItems('event')">
-                        <select id="eventSort" onchange="renderItems('event')">
-                            <option value="custom">カスタム並び順 (▲▼)</option>
-                            <option value="newest">新しい順</option>
-                            <option value="oldest">古い順</option>
-                        </select>
-                    </div>
-                    <div id="eventList" class="memo-list"></div>
-                </div>
-            </div>
-
-            <!-- 5. スクショ保存タブ -->
-            <div id="tab-screenshot" class="tab-pane">
-                <div class="card">
-                    <div class="card-title">スクリーンショット保存</div>
-                    <div class="form-grid">
-                        <input type="text" id="ssTitle" placeholder="スクショのタイトル・説明">
-                        <input type="file" id="ssFile" accept="image/*">
-                    </div>
-                    <div style="margin-top: 12px;">
-                        <button class="primary" onclick="saveScreenshot()">保存する</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">保存済みスクショ一覧</div>
-                    <div id="screenshotGrid" class="grid-cards"></div>
-                </div>
-            </div>
-
-            <!-- 6. 非公式Wikiタブ -->
-            <div id="tab-wiki" class="tab-pane" style="height: 100%;">
-                <div class="card" style="display: flex; flex-direction: column; height: 100%; flex: 1;">
-                    <div class="card-title">
-                        非公式Wiki Hub
-                        <div class="flex-row">
-                            <input type="text" id="wikiUrlInput" value="https://wikipedia.org" style="width: 250px; font-size: 13px;">
-                            <button onclick="updateIframe('wiki')">移動</button>
-                        </div>
-                    </div>
-                    <div class="iframe-wrapper">
-                        <iframe id="wikiIframe" src="https://wikipedia.org"></iframe>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 7. 公式掲示板タブ -->
-            <div id="tab-bbs" class="tab-pane" style="height: 100%;">
-                <div class="card" style="display: flex; flex-direction: column; height: 100%; flex: 1;">
-                    <div class="card-title">
-                        公式掲示板 Hub
-                        <div class="flex-row">
-                            <input type="text" id="bbsUrlInput" value="https://example.com" style="width: 250px; font-size: 13px;">
-                            <button onclick="updateIframe('bbs')">移動</button>
-                        </div>
-                    </div>
-                    <div class="iframe-wrapper">
-                        <iframe id="bbsIframe" src="about:blank"></iframe>
-                    </div>
-                </div>
-            </div>
-
         </div>
+
+        <!-- 2. 詳細メモタブ -->
+        <div id="tab-memo" class="tab-pane" data-storage-key="memo_items">
+            <div class="card">
+                <div class="card-title">詳細メモの作成・編集</div>
+                <div class="form-grid">
+                    <select id="memoCategory">
+                        <option value="general">一般・日常</option>
+                        <option value="trade">トレード・素材</option>
+                        <option value="gear">装備・アイテム</option>
+                        <option value="quest">クエスト・攻略</option>
+                    </select>
+                    <input type="text" id="memoTitle" placeholder="タイトル">
+                </div>
+                <textarea id="memoContent" rows="4" placeholder="メモの内容を入力... 定型文チップをクリックして挿入できます" style="margin-top: 8px;"></textarea>
+                <div style="margin-top: 8px;">
+                    <label style="font-size: 12px; color: var(--text-muted);">挿入用定型文チップ:</label>
+                    <div id="memoSnippetChips" class="chip-container"></div>
+                </div>
+                <div style="margin-top: 12px;" class="flex-row">
+                    <button class="primary" onclick="saveItem('memo')">メモを保存</button>
+                    <button onclick="resetForm('memo')">クリア</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">メモ一覧・検索</div>
+                <div class="form-grid">
+                    <input type="text" id="memoSearch" placeholder="🔍 リアルタイムキーワード検索..." oninput="renderItems('memo')">
+                    <select id="memoSort" onchange="renderItems('memo')">
+                        <option value="custom">カスタム並び順 (▲▼)</option>
+                        <option value="newest">新しい順</option>
+                        <option value="oldest">古い順</option>
+                    </select>
+                </div>
+                <div class="chip-container" id="memoKeywordChips">
+                    <span class="chip" onclick="setSearchKeyword('memo', '重要')">#重要</span>
+                    <span class="chip" onclick="setSearchKeyword('memo', '金策')">#金策</span>
+                    <span class="chip" onclick="setSearchKeyword('memo', 'メモ')">#メモ</span>
+                </div>
+                <div id="memoList" class="memo-list"></div>
+            </div>
+        </div>
+
+        <!-- 3. 売買・価格メモタブ -->
+        <div id="tab-price" class="tab-pane" data-storage-key="price_items">
+            <div class="card">
+                <div class="card-title">売買・価格メモの作成</div>
+                <div class="form-grid">
+                    <select id="priceCategory">
+                        <option value="general">一般・日常</option>
+                        <option value="trade">トレード・素材</option>
+                        <option value="gear">装備・アイテム</option>
+                        <option value="quest">クエスト・攻略</option>
+                    </select>
+                    <input type="text" id="priceTitle" placeholder="アイテム名・相場タイトル">
+                </div>
+                <textarea id="priceContent" rows="4" placeholder="価格、購入先、売却先、メモなど..." style="margin-top: 8px;"></textarea>
+                <div style="margin-top: 8px;">
+                    <label style="font-size: 12px; color: var(--text-muted);">挿入用定型文チップ:</label>
+                    <div id="priceSnippetChips" class="chip-container"></div>
+                </div>
+                <div style="margin-top: 12px;" class="flex-row">
+                    <button class="primary" onclick="saveItem('price')">価格メモを保存</button>
+                    <button onclick="resetForm('price')">クリア</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">価格メモ一覧・検索</div>
+                <div class="form-grid">
+                    <input type="text" id="priceSearch" placeholder="🔍 相場を検索..." oninput="renderItems('price')">
+                    <select id="priceSort" onchange="renderItems('price')">
+                        <option value="custom">カスタム並び順 (▲▼)</option>
+                        <option value="newest">新しい順</option>
+                        <option value="oldest">古い順</option>
+                    </select>
+                </div>
+                <div class="chip-container">
+                    <span class="chip" onclick="setSearchKeyword('price', '最安値')">#最安値</span>
+                    <span class="chip" onclick="setSearchKeyword('price', '高騰')">#高騰</span>
+                </div>
+                <div id="priceList" class="memo-list"></div>
+            </div>
+        </div>
+
+        <!-- 4. イベント情報タブ -->
+        <div id="tab-event" class="tab-pane" data-storage-key="event_items">
+            <div class="card">
+                <div class="card-title">イベント情報・計画の記録</div>
+                <div class="form-grid">
+                    <select id="eventCategory">
+                        <option value="general">一般・日常</option>
+                        <option value="trade">トレード・素材</option>
+                        <option value="gear">装備・アイテム</option>
+                        <option value="quest">クエスト・攻略</option>
+                    </select>
+                    <input type="text" id="eventTitle" placeholder="イベント名・タイトル">
+                </div>
+                <textarea id="eventContent" rows="3" placeholder="計画、進捗、結果などを記入..." style="margin-top: 8px;"></textarea>
+                <div style="margin-top: 10px;">
+                    <label style="font-size: 13px;">スクショ添付（任意）</label>
+                    <input type="file" id="eventImageFile" accept="image/*" style="margin-top: 4px;">
+                </div>
+                <div style="margin-top: 12px;" class="flex-row">
+                    <button class="primary" onclick="saveEventItem()">イベント情報を保存</button>
+                    <button onclick="resetForm('event')">クリア</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">イベント一覧</div>
+                <div class="form-grid">
+                    <input type="text" id="eventSearch" placeholder="🔍 イベントを検索..." oninput="renderItems('event')">
+                    <select id="eventSort" onchange="renderItems('event')">
+                        <option value="custom">カスタム並び順 (▲▼)</option>
+                        <option value="newest">新しい順</option>
+                        <option value="oldest">古い順</option>
+                    </select>
+                </div>
+                <div id="eventList" class="memo-list"></div>
+            </div>
+        </div>
+
+        <!-- 5. スクショ保存タブ -->
+        <div id="tab-screenshot" class="tab-pane">
+            <div class="card">
+                <div class="card-title">スクリーンショット保存</div>
+                <div class="form-grid">
+                    <input type="text" id="ssTitle" placeholder="スクショのタイトル・説明">
+                    <input type="file" id="ssFile" accept="image/*">
+                </div>
+                <div style="margin-top: 12px;">
+                    <button class="primary" onclick="saveScreenshot()">保存する</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">保存済みスクショ一覧</div>
+                <div id="screenshotGrid" class="grid-cards"></div>
+            </div>
+        </div>
+
+        <!-- 6. 非公式Wikiタブ -->
+        <div id="tab-wiki" class="tab-pane">
+            <div class="card">
+                <div class="card-title">
+                    非公式Wiki Hub
+                    <div class="flex-row">
+                        <input type="text" id="wikiUrlInput" value="https://wikipedia.org" style="width: 250px; font-size: 13px;">
+                        <button onclick="updateIframe('wiki')">移動</button>
+                    </div>
+                </div>
+                <div class="iframe-wrapper">
+                    <iframe id="wikiIframe" src="https://wikipedia.org"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. 公式掲示板タブ -->
+        <div id="tab-bbs" class="tab-pane">
+            <div class="card">
+                <div class="card-title">
+                    公式掲示板 Hub
+                    <div class="flex-row">
+                        <input type="text" id="bbsUrlInput" value="https://example.com" style="width: 250px; font-size: 13px;">
+                        <button onclick="updateIframe('bbs')">移動</button>
+                    </div>
+                </div>
+                <div class="iframe-wrapper">
+                    <iframe id="bbsIframe" src="about:blank"></iframe>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- アプリケーション・ロジック -->
     <script>
-        // 状態管理
         let currentProfile = 'default';
         let db = {
             masterItems: [],
@@ -578,14 +564,12 @@
             screenshots: []
         };
 
-        // 初期ロード
         window.addEventListener('DOMContentLoaded', () => {
             loadProfileData();
             initDefaultTemplates();
             updateAllUI();
         });
 
-        // プロファイル切替
         function switchProfile() {
             currentProfile = document.getElementById('profileSelect').value;
             loadProfileData();
@@ -624,7 +608,6 @@
             localStorage.setItem(getStorageKey(key), JSON.stringify(db[key]));
         }
 
-        // タブ切替
         function switchTab(tabId, btnElement) {
             document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -632,7 +615,6 @@
             if(btnElement) btnElement.classList.add('active');
         }
 
-        // グローバルフィルター適用
         function applyGlobalFilter() {
             renderItems('memo');
             renderItems('price');
@@ -643,7 +625,6 @@
             return document.getElementById('globalCategory').value;
         }
 
-        // --- 1. 定型文・品名管理ロジック ---
         function initDefaultTemplates() {
             updateMasterItemSelects();
             updateTemplateSelects();
@@ -796,7 +777,6 @@
             });
         }
 
-        // --- 2, 3, 4. メモ・価格・イベント共通ロジック ---
         function saveItem(type) {
             const category = document.getElementById(`${type}Category`).value;
             const title = document.getElementById(`${type}Title`).value;
@@ -870,19 +850,17 @@
 
             let items = [...db[`${type}_items`]];
 
-            // フィルター (グローバルカテゴリ ＆ 検索キーワード)
             items = items.filter(item => {
                 const matchCat = !globalCat || item.category === globalCat;
                 const matchSearch = !searchVal || item.title.toLowerCase().includes(searchVal) || item.content.toLowerCase().includes(searchVal);
                 return matchCat && matchSearch;
             });
 
-            // ソート
             if(sortVal === 'newest') {
                 items.sort((a, b) => b.createdAt - a.createdAt);
             } else if(sortVal === 'oldest') {
                 items.sort((a, b) => a.createdAt - b.createdAt);
-            } // 'custom' の場合は配列の順序をそのまま保持
+            }
 
             listEl.innerHTML = '';
             if(items.length === 0) {
@@ -934,7 +912,6 @@
             renderItems(type);
         }
 
-        // --- 5. スクショ保存ロジック ---
         function saveScreenshot() {
             const title = document.getElementById('ssTitle').value;
             const fileInput = document.getElementById('ssFile');
@@ -988,7 +965,6 @@
             renderScreenshots();
         }
 
-        // --- 6, 7. iframe Hub ロジック ---
         function updateIframe(type) {
             const url = document.getElementById(`${type}UrlInput`).value;
             if(url) {
@@ -996,7 +972,6 @@
             }
         }
 
-        // --- 総合UI更新 ---
         function updateAllUI() {
             initDefaultTemplates();
             renderItems('memo');
