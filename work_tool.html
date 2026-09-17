@@ -743,12 +743,8 @@ textarea{resize:vertical}
             alert("全記録を一括コピーしました！");
         }
 
-        // 記録を埋め込んだ完全なHTMLとして保存する機能
         function exportCompleteHTML() {
-            // 現在のlocalStorageのデータを埋め込むスクリプトを生成
             const currentDataString = JSON.stringify(records);
-            
-            // ドキュメント全体を取得
             const htmlContent = `<!DOCTYPE html>\n` + document.documentElement.outerHTML.replace(
                 /const INITIAL_RECORDS\s*=\s*\[[\s\S]*?\];/,
                 `const INITIAL_RECORDS = ${currentDataString};`
@@ -787,8 +783,11 @@ textarea{resize:vertical}
                         renderRecords();
                         alert("JSONを取り込みました。");
                     }
-                } { alert("取込に失敗しました。"); }
-                finally { importFile.value = ""; }
+                } catch { 
+                    alert("取込に失敗しました。"); 
+                } finally { 
+                    importFile.value = ""; 
+                }
             };
             reader.readAsText(file);
         }
