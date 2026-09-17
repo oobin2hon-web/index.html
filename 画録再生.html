@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>マイ・歌声プレイヤー（練習強化版）</title>
+    <title>マイ・歌声プレイヤー（表示切り替え対応版）</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -22,17 +22,6 @@
             font-size: 13px;
             color: #64748b;
         }
-        #player-container {
-            max-width: 100%;
-            margin: 15px auto;
-        }
-        video {
-            width: 100%;
-            max-height: 55vh;
-            background: black;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
         .file-input-wrapper {
             margin: 15px 0;
         }
@@ -50,18 +39,52 @@
         .btn:hover {
             background: #4338ca;
         }
-        /* コントロールパネル（速度・リピート） */
-        .control-panel {
+        
+        /* 表示モード切り替えタブのスタイル */
+        .mode-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 15px 0 10px 0;
+        }
+        .tab-btn {
+            background: #e2e8f0;
+            color: #475569;
+            border: none;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .tab-btn.active {
+            background: #4f46e5;
+            color: white;
+        }
+
+        /* パネル共通 */
+        .panel-card {
             background: white;
             border: 1px solid #e2e8f0;
             border-radius: 10px;
             padding: 12px;
             margin-top: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            text-align: left;
         }
+        
+        #player-container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        video {
+            width: 100%;
+            max-height: 50vh;
+            background: black;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
         .control-row {
             display: flex;
             justify-content: center;
@@ -104,17 +127,44 @@
         .small-danger-btn:hover {
             background: #ffe4e6;
         }
+
+        /* 歌詞パネル用スタイル */
+        .lyrics-panel h3 {
+            font-size: 13px;
+            margin: 0 0 8px 0;
+            color: #475569;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        textarea#lyrics-input {
+            width: 100%;
+            height: 220px;
+            padding: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            resize: vertical;
+            box-sizing: border-box;
+            outline: none;
+        }
+        textarea#lyrics-input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+        }
+
         #playlist-container {
-            text-align: left;
             background: white;
             border: 1px solid #e2e8f0;
             border-radius: 10px;
             padding: 12px;
             margin-top: 15px;
-            max-height: 220px;
+            max-height: 200px;
             overflow-y: auto;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             display: none;
+            text-align: left;
         }
         #playlist-container h3 {
             font-size: 13px;
@@ -156,26 +206,45 @@
         <button type="button" class="btn" onclick="document.getElementById('fileInput').click()">＋ 動画ファイルを選択</button>
     </div>
 
-    <div id="player-container">
-        <video id="myVideo" controls playsinline></video>
+    <!-- 表示モード切り替えタブ -->
+    <div class="mode-tabs">
+        <button type="button" id="tab-video" class="tab-btn active" onclick="switchMode('video')">📺 動画メイン表示</button>
+        <button type="button" id="tab-lyrics" class="tab-btn" onclick="switchMode('lyrics')">📝 歌詞メモメイン表示</button>
     </div>
 
-    <!-- 練習用コントロールパネル -->
-    <div class="control-panel">
-        <div class="control-row">
-            <span style="font-size: 12px; font-weight: bold; color: #475569;">再生速度:</span>
-            <button type="button" class="sub-btn speed-btn" data-speed="0.75">0.75倍</button>
-            <button type="button" class="sub-btn speed-btn active" data-speed="1.0">標準</button>
-            <button type="button" class="sub-btn speed-btn" data-speed="1.25">1.25倍</button>
-            <button type="button" class="sub-btn speed-btn" data-speed="1.5">1.5倍</button>
+    <!-- 動画ビューエリア -->
+    <div id="view-video-section">
+        <div id="player-container">
+            <video id="myVideo" controls playsinline></video>
         </div>
-        <div class="control-row" style="border-top: 1px solid #f1f5f9; padding-top: 8px;">
-            <span style="font-size: 12px; font-weight: bold; color: #475569;">A-Bリピート:</span>
-            <button type="button" id="btn-set-a" class="sub-btn">起点 (A) 設定</button>
-            <button type="button" id="btn-set-b" class="sub-btn">終点 (B) 設定</button>
-            <button type="button" id="btn-clear-ab" class="sub-btn" style="display:none;">解除</button>
+        <!-- 練習用コントロールパネル（速度・A-Bリピート） -->
+        <div class="panel-card">
+            <div class="control-row" style="margin-bottom: 8px;">
+                <span style="font-size: 12px; font-weight: bold; color: #475569;">再生速度:</span>
+                <button type="button" class="sub-btn speed-btn" data-speed="0.75">0.75倍</button>
+                <button type="button" class="sub-btn speed-btn active" data-speed="1.0">標準</button>
+                <button type="button" class="sub-btn speed-btn" data-speed="1.25">1.25倍</button>
+                <button type="button" class="sub-btn speed-btn" data-speed="1.5">1.5倍</button>
+            </div>
+            <div class="control-row" style="border-top: 1px solid #f1f5f9; padding-top: 8px;">
+                <span style="font-size: 12px; font-weight: bold; color: #475569;">A-Bリピート:</span>
+                <button type="button" id="btn-set-a" class="sub-btn">起点 (A)</button>
+                <button type="button" id="btn-set-b" class="sub-btn">終点 (B)</button>
+                <button type="button" id="btn-clear-ab" class="sub-btn" style="display:none;">解除</button>
+            </div>
+            <div id="ab-status" style="font-size: 11px; color: #64748b; text-align: center; margin-top: 4px;"></div>
         </div>
-        <div id="ab-status" style="font-size: 11px; color: #64748b;"></div>
+    </div>
+
+    <!-- 歌詞メモビューエリア（初期状態は非表示） -->
+    <div id="view-lyrics-section" style="display: none;">
+        <div class="panel-card lyrics-panel">
+            <h3>
+                <span>歌詞メモ（この曲専用に自動保存）</span>
+                <button type="button" id="save-lyrics-btn" class="sub-btn" style="padding: 2px 6px; font-size: 10px;">保存</button>
+            </h3>
+            <textarea id="lyrics-input" placeholder="ここに曲の歌詞を入力しておけます...（歌詞メイン表示では大きく表示されます）"></textarea>
+        </div>
     </div>
 
     <div id="playlist-container">
@@ -197,19 +266,48 @@
         const btnSetB = document.getElementById('btn-set-b');
         const btnClearAb = document.getElementById('btn-clear-ab');
         const abStatus = document.getElementById('ab-status');
+        
+        const lyricsInput = document.getElementById('lyrics-input');
+        const saveLyricsBtn = document.getElementById('save-lyrics-btn');
 
-        let playlist = [];
+        const viewVideoSection = document.getElementById('view-video-section');
+        const viewLyricsSection = document.getElementById('view-lyrics-section');
+        const tabVideo = document.getElementById('tab-video');
+        const tabLyrics = document.getElementById('tab-lyrics');
+
+        let playlist = []; 
         let currentIndex = 0;
         let currentObjectURL = null;
 
-        // A-Bリピート用変数
         let repeatA = null;
         let repeatB = null;
+
+        // 画面モード切り替え関数
+        function switchMode(mode) {
+            if (mode === 'video') {
+                viewVideoSection.style.display = 'block';
+                viewLyricsSection.style.display = 'none';
+                tabVideo.classList.add('active');
+                tabLyrics.classList.remove('active');
+            } else {
+                viewVideoSection.style.display = 'none';
+                viewLyricsSection.style.display = 'block';
+                tabLyrics.classList.add('active');
+                tabVideo.classList.remove('active');
+            }
+        }
 
         fileInput.addEventListener('change', function(e) {
             const files = Array.from(e.target.files);
             if (files.length > 0) {
-                playlist = playlist.concat(files);
+                files.forEach(file => {
+                    playlist.push({
+                        file: file,
+                        name: file.name,
+                        lyrics: "" 
+                    });
+                });
+
                 playlistContainer.style.display = 'block';
                 renderPlaylistUI();
                 status.textContent = `合計 ${playlist.length}個のファイルを読み込みました`;
@@ -221,9 +319,22 @@
             }
         });
 
+        saveLyricsBtn.addEventListener('click', function() {
+            if (playlist.length > 0 && playlist[currentIndex]) {
+                playlist[currentIndex].lyrics = lyricsInput.value;
+                alert("歌詞を保存しました！");
+            }
+        });
+
+        lyricsInput.addEventListener('input', function() {
+            if (playlist.length > 0 && playlist[currentIndex]) {
+                playlist[currentIndex].lyrics = lyricsInput.value;
+            }
+        });
+
         function renderPlaylistUI() {
             playlistItems.innerHTML = '';
-            playlist.forEach((file, index) => {
+            playlist.forEach((item, index) => {
                 const div = document.createElement('div');
                 div.className = 'playlist-item';
                 if (index === currentIndex) {
@@ -231,7 +342,7 @@
                 }
 
                 const span = document.createElement('span');
-                span.textContent = `${index + 1}. ${file.name || '動画'}`;
+                span.textContent = `${index + 1}. ${item.name}`;
                 span.style.flexGrow = '1';
                 span.style.overflow = 'hidden';
                 span.style.textOverflow = 'ellipsis';
@@ -249,6 +360,7 @@
                     playlist.splice(index, 1);
                     if (playlist.length === 0) {
                         video.src = '';
+                        lyricsInput.value = '';
                         playlistContainer.style.display = 'none';
                         status.textContent = '動画ファイルを選択してください';
                     } else {
@@ -270,37 +382,34 @@
             if (playlist.length === 0) return;
             
             currentIndex = index;
-            const file = playlist[currentIndex];
+            const currentItem = playlist[currentIndex];
 
             if (currentObjectURL) {
                 URL.revokeObjectURL(currentObjectURL);
             }
 
-            currentObjectURL = URL.createObjectURL(file);
+            currentObjectURL = URL.createObjectURL(currentItem.file);
             video.src = currentObjectURL;
             video.load();
             
-            // ファイル切り替え時にリピート設定をリセット
+            lyricsInput.value = currentItem.lyrics || "";
             clearABRepeat();
 
-            status.textContent = `再生中 (${currentIndex + 1}/${playlist.length}): ${file.name || '動画'}`;
+            status.textContent = `再生中 (${currentIndex + 1}/${playlist.length}): ${currentItem.name}`;
             renderPlaylistUI();
         }
 
-        // 動画終了時の自動次曲再生
         video.addEventListener('ended', function() {
-            // A-Bリピート中でなければ次へ
             if (repeatA !== null && repeatB !== null) return; 
 
             currentIndex++;
             if (currentIndex >= playlist.length) {
-                currentIndex = 0; // ループ再生
+                currentIndex = 0; 
             }
             playVideo(currentIndex);
             video.play().catch(err => console.log("自動再生制限:", err));
         });
 
-        // 再生速度変更の処理
         speedButtons.forEach(btn => {
             btn.addEventListener('click', function() {
                 const speed = parseFloat(this.getAttribute('data-speed'));
@@ -311,7 +420,6 @@
             });
         });
 
-        // A-Bリピート機能
         btnSetA.addEventListener('click', function() {
             repeatA = video.currentTime;
             updateABStatus();
@@ -351,7 +459,6 @@
             }
         }
 
-        //  reproducción中にA-B間を監視してループさせる
         video.addEventListener('timeupdate', function() {
             if (repeatA !== null && repeatB !== null) {
                 if (video.currentTime >= repeatB) {
