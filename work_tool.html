@@ -27,12 +27,12 @@ main{max-width:1100px;margin:auto;padding:12px;display:grid;grid-template-column
 section{background:var(--card);border:1px solid #e2e8f0;border-radius:10px;padding:13px}
 .section-title{font-size:14px;font-weight:700;border-bottom:1px solid #e2e8f0;padding-bottom:8px;margin:0 0 12px;display:flex;justify-content:space-between;align-items:center}
 label{display:block;font-size:11px;font-weight:600;color:#475569;margin-bottom:4px}
-textarea,input[type=text],input[type=number]{width:100%;font-size:12px;padding:8px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--text);outline:none}
-textarea:focus,input:focus{border-color:#6366f1;box-shadow:0 0 0 2px #6366f133}
+textarea,input[type=text],input[type=number],select{width:100%;font-size:12px;padding:8px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--text);outline:none}
+textarea:focus,input:focus,select:focus{border-color:#6366f1;box-shadow:0 0 0 2px #6366f133}
 textarea{resize:vertical}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .btn{border:1px solid var(--line);border-radius:7px;padding:7px 9px;font-size:11px;font-weight:600;background:#f1f5f9;color:#334155}
-.btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}.btn-primary:active{background:var(--primary2)}
+.btn-primary{background:#4f46e5;border-color:#4f46e5;color:#fff}.btn-primary:active{background:#4338ca}
 .btn-danger{background:#fff1f2;border-color:#fecdd3;color:#be123c}
 .btn-small{font-size:10px;padding:4px 7px}
 .full{width:100%}
@@ -46,20 +46,13 @@ textarea{resize:vertical}
 .muted{color:var(--muted)}.mini{font-size:10px}
 .actions{display:flex;gap:7px;margin-top:10px}.actions .btn-primary{flex:1}
 .record-list{max-height:650px;overflow:auto}
-.record{border:1px solid #e2e8f0;border-radius:8px;padding:9px;margin-bottom:8px;background:#fff}
+.record-card{border:1px solid #e2e8f0;border-radius:8px;padding:9px;margin-bottom:8px;background:#fff}
 .record-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
-.record-title{font-size:12px;font-weight:700}.record-date{font-size:9px;color:#94a3b8;white-space:nowrap}
-.badge{display:inline-block;font-size:9px;padding:2px 5px;border-radius:5px;background:#e0e7ff;color:#3730a3;font-weight:700}
-.percent{background:#ecfdf5;color:#047857;margin-left:4px}
-.record-meta{margin-top:7px;background:#eef2ff;padding:5px 7px;border-radius:6px;font-size:10px;display:flex;justify-content:space-between;gap:8px}
-.item-display{margin-top:4px;background:#f8fafc;border:1px solid #f1f5f9;border-radius:6px;padding:6px;display:flex;justify-content:space-between;gap:8px;font-size:10px}
-.record-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px;border-top:1px solid #f1f5f9;margin-top:7px;padding-top:7px}
 .hidden{display:none!important}
-footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
-.modal{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;padding:12px;z-index:50}
-.modal-card{background:#fff;border-radius:10px;width:min(600px,100%);padding:13px}
-.modal pre{background:#f1f5f9;border:1px solid #e2e8f0;padding:9px;border-radius:7px;font-size:11px;white-space:pre-wrap;max-height:65vh;overflow:auto}
-@media(max-width:760px){main{grid-template-columns:1fr;padding:8px}.header-inner{align-items:flex-start}.revision{display:none}section{padding:10px}.record-list{max-height:none}.item-row{grid-template-columns:minmax(0,1fr) 68px 52px 24px}}
+
+/* フィルター・セレクト部分の拡張デザイン */
+.filter-bar{display:grid;grid-template-columns:2fr 1fr;gap:6px;margin-bottom:10px}
+@media(max-width:760px){.filter-bar{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -74,7 +67,7 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
                 <h1>作業系データ解析・記録管理ツール</h1>
             </div>
             <div class="revision">
-                Revision: v1.6.1
+                Revision: v1.6.4
             </div>
         </div>
     </header>
@@ -200,9 +193,12 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
                 </div>
             </div>
 
-            <!-- 検索・フィルター -->
-            <div>
-                <input type="text" id="search-box" placeholder="記録内をキーワード検索（作業名、成果物名など）...">
+            <!-- 検索 & 作業別フィルターバー -->
+            <div class="filter-bar">
+                <input type="text" id="search-box" placeholder="キーワード検索（アイテム名など）...">
+                <select id="category-filter">
+                    <option value="ALL">📂 すべての作業</option>
+                </select>
             </div>
 
             <!-- 記録リストコンテナ -->
@@ -269,7 +265,7 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
             }
         ];
 
-        const STORAGE_KEY = "work_tool_records_v1.5.0";
+        const STORAGE_KEY = "work_tool_records_v1.6.4";
 
         const rawInputText = document.getElementById('raw-input-text');
         const rawClearBtn = document.getElementById('raw-clear-btn');
@@ -290,6 +286,7 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
         const clearBtn = document.getElementById('clear-btn');
         const recordsContainer = document.getElementById('records-container');
         const searchBox = document.getElementById('search-box');
+        const categoryFilter = document.getElementById('category-filter');
         const copyAllBtn = document.getElementById('copy-all-btn');
         const exportBtn = document.getElementById('export-btn');
         const importBtn = document.getElementById('import-btn');
@@ -305,6 +302,7 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
         function init() {
             loadRecords();
             setupEventListeners();
+            updateCategoryFilterOptions();
             renderRecords();
             if (itemsContainer.children.length === 0) {
                 addItemRow();
@@ -358,7 +356,9 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
             parseBtn.addEventListener('click', parseRawText);
             saveBtn.addEventListener('click', saveRecord);
             clearBtn.addEventListener('click', clearForm);
+            
             searchBox.addEventListener('input', renderRecords);
+            categoryFilter.addEventListener('change', renderRecords);
             
             copyAllBtn.addEventListener('click', copyAllRecords);
             exportBtn.addEventListener('click', exportJSON);
@@ -518,6 +518,39 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
                 : "解析完了：読み取れる成果物がありませんでした。元テキストは保持しています。");
         }
 
+        function getWorkCategory(title) {
+            if (!title) return "その他";
+            const cleaned = title.replace(/【|】|\[\vert{}\]/g, "").trim();
+            const match = cleaned.match(/^([^\dLVLvレベル\s]+)/i);
+            if (match && match[1]) {
+                return match[1].trim();
+            }
+            const parts = cleaned.split(/[\sLVLvレベル]+/);
+            return parts[0] ? parts[0].trim() : "その他";
+        }
+
+        function updateCategoryFilterOptions() {
+            const currentSelected = categoryFilter.value;
+            const categories = new Set();
+            records.forEach(r => {
+                categories.add(getWorkCategory(r.title));
+            });
+
+            categoryFilter.innerHTML = `<option value="ALL">📂 すべての作業</option>`;
+            Array.from(categories).sort().forEach(cat => {
+                const opt = document.createElement("option");
+                opt.value = cat;
+                opt.textContent = cat;
+                categoryFilter.appendChild(opt);
+            });
+
+            if (categories.has(currentSelected)) {
+                categoryFilter.value = currentSelected;
+            } else {
+                categoryFilter.value = "ALL";
+            }
+        }
+
         function saveRecord() {
             const title = formTitle.value.trim();
             const percentage = formPercentage.value.trim();
@@ -596,6 +629,7 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
 
             saveToStorage();
             clearForm();
+            updateCategoryFilterOptions();
             renderRecords();
         }
 
@@ -634,25 +668,34 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
 
         function renderRecords() {
             const keyword = (searchBox.value || "").toLowerCase().trim();
+            const selectedCategory = categoryFilter.value;
             recordsContainer.innerHTML = "";
 
             if (!Array.isArray(records)) records = [];
 
             const filtered = records.filter(rec => {
                 if (!rec) return false;
+                
+                // 作業別セレクトボックスのフィルター
+                const cat = getWorkCategory(rec.title);
+                if (selectedCategory !== "ALL" && cat !== selectedCategory) {
+                    return false;
+                }
+
+                // キーワード検索のフィルター
                 const t = (rec.title || "").toLowerCase();
                 const matchItem = rec.items && rec.items.some(i => (i.name || "").toLowerCase().includes(keyword) || (i.unit || "").toLowerCase().includes(keyword));
                 return t.includes(keyword) || matchItem;
             });
 
             if (filtered.length === 0) {
-                recordsContainer.innerHTML = `<div class="text-xs text-slate-400 text-center py-8">保存された記録はありません。</div>`;
+                recordsContainer.innerHTML = `<div class="text-xs text-slate-400 text-center py-8">該当する作業記録はありません。</div>`;
                 return;
             }
 
             filtered.forEach(rec => {
                 const card = document.createElement('div');
-                card.className = "bg-white border border-slate-200 rounded-lg p-3 hover:border-indigo-300 transition shadow-sm flex flex-col space-y-2";
+                card.className = "record-card hover:border-indigo-300 transition shadow-sm flex flex-col space-y-2";
                 
                 const baseTimeVal = (rec.baseTime !== undefined && rec.baseTime !== null && rec.baseTime !== "") ? rec.baseTime : 1.0;
                 const speedVal = (rec.speedRate !== undefined && rec.speedRate !== null && rec.speedRate !== "") ? rec.speedRate : 100;
@@ -778,11 +821,7 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
         async function handleCopy(id) {
             const rec = records.find(r => r.id === id);
             if (!rec) return;
-            const opStr = Number.isFinite(Number(rec.operations)) ? `${rec.operations}回` : "回数未入力";
-            const itemsStr = (rec.items || []).map(i =>
-                `${i.name}: ${i.quantity != null ? i.quantity + (i.unit || "") : "数量未入力"}`
-            ).join(", ");
-            const textToCopy = `作業名: ${rec.title || "無題"}\n成果物: ${itemsStr} (${opStr})\n効率効果: ${rec.efficiency || "---"}\n進捗: ${rec.percentage || "---"}`;
+            const textToCopy = formatSingleRecordForCopy(rec);
 
             try {
                 if (navigator.clipboard?.writeText) {
@@ -796,20 +835,49 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
             } catch { alert("コピーに失敗しました。長押しで選択してコピーしてください。"); }
         }
 
-        // 全記録を一括コピーする関数
+        function formatSingleRecordForCopy(rec) {
+            const titlePart = rec.title || "無題";
+            const pctPart = rec.percentage ? ` (進捗: ${rec.percentage})` : "";
+            
+            let itemsLines = "";
+            if (rec.items && rec.items.length > 0) {
+                itemsLines = rec.items.map(i => {
+                    const qStr = (i.quantity !== null && i.quantity !== undefined && !isNaN(i.quantity)) ? `${Number(i.quantity).toLocaleString()}${i.unit || ''}` : '';
+                    const opStr = (rec.operations !== null && rec.operations !== undefined && !isNaN(rec.operations)) ? `${rec.operations}回` : '';
+                    
+                    let detailPart = "";
+                    if (qStr && opStr) {
+                        detailPart = ` (${qStr} / ${opStr})`;
+                    } else if (qStr) {
+                        detailPart = ` (${qStr})`;
+                    } else if (opStr) {
+                        detailPart = ` (${opStr})`;
+                    }
+
+                    const avgPart = (i.average !== null && i.average !== undefined && !isNaN(i.average)) ? ` [平均: ${i.average}${i.unit || ''}/回]` : "";
+
+                    return `・${i.name}: ${qStr || '数量未入力'}${detailPart}${avgPart}`;
+                }).join('\n');
+            } else {
+                itemsLines = "・成果物なし";
+            }
+
+            const effPart = rec.efficiency ? `効率効果: ${rec.efficiency}` : "";
+            const datePart = rec.createdAt ? `登録日時: ${rec.createdAt}` : "";
+
+            let block = `【${titlePart}】${pctPart}\n${itemsLines}`;
+            if (effPart) block += `\n${effPart}`;
+            if (datePart) block += `\n${datePart}`;
+            return block;
+        }
+
         async function copyAllRecords() {
             if (!records || records.length === 0) {
                 alert("コピーする記録がありません。");
                 return;
             }
 
-            const allText = records.map(rec => {
-                const opStr = Number.isFinite(Number(rec.operations)) ? `${rec.operations}回` : "回数未入力";
-                const itemsStr = (rec.items || []).map(i =>
-                    `${i.name}: ${i.quantity != null ? i.quantity + (i.unit || "") : "数量未入力"}`
-                ).join(", ");
-                return `【${rec.title || "無題"}】 (進捗: ${rec.percentage || "---"})\n成果物: ${itemsStr} (${opStr})\n効率効果: ${rec.efficiency || "---"}\n登録日時: ${rec.createdAt || "---"}`;
-            }).join("\n\n--------------------\n\n");
+            const allText = records.map(rec => formatSingleRecordForCopy(rec)).join("\n\n--------------------\n\n");
 
             try {
                 if (navigator.clipboard?.writeText) {
@@ -819,7 +887,7 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
                     ta.value = allText; ta.style.position = "fixed"; ta.style.opacity = "0";
                     document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove();
                 }
-                alert(`全 ${records.length} 件の記録をクリップボードに一括コピーしました！`);
+                alert(`全 ${records.length} 件の記録を綺麗に一括コピーしました！`);
             } catch {
                 alert("一括コピーに失敗しました。");
             }
@@ -855,6 +923,7 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
             if (confirm(`ID: ${id} の記録を本当に削除しますか？`)) {
                 records = records.filter(r => r.id !== id);
                 saveToStorage();
+                updateCategoryFilterOptions();
                 renderRecords();
             }
         }
@@ -883,7 +952,7 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
                     }));
                     if (!cleaned.length) throw new Error("記録がありません");
                     records = cleaned;
-                    saveToStorage(); renderRecords(); clearForm();
+                    saveToStorage(); updateCategoryFilterOptions(); renderRecords(); clearForm();
                     alert(`${records.length}件を取り込みました。`);
                 } catch (err) {
                     alert("JSONを読み込めませんでした。保存したバックアップを選択してください。");
@@ -899,6 +968,7 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
                 records = structuredClone(INITIAL_RECORDS);
                 saveToStorage();
                 clearForm();
+                updateCategoryFilterOptions();
                 renderRecords();
                 alert("サンプルデータにリセットしました。");
             }
