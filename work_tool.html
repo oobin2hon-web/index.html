@@ -71,10 +71,10 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
                 <a href="index.html" class="portal">
                     ← ポータルへ戻る
                 </a>
-                <h1 >作業系データ解析・記録管理ツール</h1>
+                <h1>作業系データ解析・記録管理ツール</h1>
             </div>
             <div class="revision">
-                Revision: v1.6.0
+                Revision: v1.6.1
             </div>
         </div>
     </header>
@@ -93,12 +93,12 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
             <!-- 自由入力テキスト（複数成果物・ゆらぎ対応パーサー） -->
             <div>
                 <div class="record-head">
-                    <label >一括テキスト取り込み（複数成果物対応）</label>
+                    <label>一括テキスト取り込み（複数成果物対応）</label>
                     <button type="button" id="raw-clear-btn" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-0.5 rounded transition font-medium">
                         ✕ 文章をクリア
                     </button>
                 </div>
-                <textarea id="raw-input-text" rows="5"  placeholder="ここに単数または複数のログを貼り付け..."></textarea>
+                <textarea id="raw-input-text" rows="5" placeholder="ここに単数または複数のログを貼り付け..."></textarea>
                 <button type="button" id="parse-btn" class="btn full">
                     テキストを自動解析してフォームに反映
                 </button>
@@ -107,20 +107,20 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
             <hr class="border-slate-100">
 
             <!-- 手動フォーム項目 -->
-            <div >
+            <div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">作業名 / 職人・レベル</label>
-                    <input type="text" id="form-title"  placeholder="例: 肉屋LV 9 (+0.22%)">
+                    <input type="text" id="form-title" placeholder="例: 肉屋LV 9 (+0.22%)">
                 </div>
                 
                 <div class="row2">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">進捗パーセンテージ</label>
-                        <input type="text" id="form-percentage"  placeholder="例: 3.8%">
+                        <input type="text" id="form-percentage" placeholder="例: 3.8%">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">作業回数 <span class="text-slate-400 font-normal">※省略可</span></label>
-                        <input type="number" id="form-operations"  placeholder="例: 20">
+                        <input type="number" id="form-operations" placeholder="例: 20">
                     </div>
                 </div>
 
@@ -167,7 +167,7 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
                 <!-- プロンプト / 元の情報テキストエリア -->
                 <div>
                     <div class="record-head">
-                        <label >元の情報（逆引き用テキスト記録）</label>
+                        <label>元の情報（逆引き用テキスト記録）</label>
                         <button type="button" id="source-clear-btn" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-0.5 rounded transition font-medium">
                             ✕ プロンプトをクリア
                         </button>
@@ -191,15 +191,18 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
         <section>
             <div class="section-title">
                 <h2 class="text-base font-bold text-slate-700">保存記録一覧・管理</h2>
-                <div class="actions">
-                    <button id="export-btn" class="btn btn-small">JSON保存</button><button id="import-btn" class="btn btn-small">JSON取込</button><input id="import-file" type="file" accept=".json,application/json" class="hidden">
+                <div class="actions flex-wrap">
+                    <button id="copy-all-btn" class="btn btn-small bg-indigo-50 text-indigo-700 border-indigo-200 font-bold">📋 全記録を一括コピー</button>
+                    <button id="export-btn" class="btn btn-small">JSON保存</button>
+                    <button id="import-btn" class="btn btn-small">JSON取込</button>
+                    <input id="import-file" type="file" accept=".json,application/json" class="hidden">
                     <button id="reset-default-btn" class="btn btn-small btn-danger">サンプル復元</button>
                 </div>
             </div>
 
             <!-- 検索・フィルター -->
             <div>
-                <input type="text" id="search-box"  placeholder="記録内をキーワード検索（作業名、成果物名など）...">
+                <input type="text" id="search-box" placeholder="記録内をキーワード検索（作業名、成果物名など）...">
             </div>
 
             <!-- 記録リストコンテナ -->
@@ -217,7 +220,7 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
                 <span>元の情報（逆引きデータ）</span>
                 <button id="modal-close-btn" type="button" class="btn btn-small">✕ 閉じる</button>
             </h3>
-            <pre id="reverse-modal-content" ></pre>
+            <pre id="reverse-modal-content"></pre>
             <div class="flex justify-end pt-1">
                 <button id="modal-close-btn-footer" type="button" class="btn btn-primary">
                     閉じる
@@ -227,7 +230,7 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
     </div>
 
     <!-- フッター -->
-    <footer >
+    <footer>
         &copy; 2026 作業系データ解析・記録管理ツール. All rights reserved.
     </footer>
 
@@ -287,6 +290,7 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
         const clearBtn = document.getElementById('clear-btn');
         const recordsContainer = document.getElementById('records-container');
         const searchBox = document.getElementById('search-box');
+        const copyAllBtn = document.getElementById('copy-all-btn');
         const exportBtn = document.getElementById('export-btn');
         const importBtn = document.getElementById('import-btn');
         const importFile = document.getElementById('import-file');
@@ -314,7 +318,6 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
                     const parsed = JSON.parse(data);
                     if (Array.isArray(parsed)) {
                         records = parsed.map(r => {
-                            // 旧データの移行互換性確保
                             if (!r.items && r.itemName) {
                                 r.items = [{ name: r.itemName, quantity: r.quantity, unit: r.unit, average: r.average }];
                             }
@@ -356,6 +359,8 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
             saveBtn.addEventListener('click', saveRecord);
             clearBtn.addEventListener('click', clearForm);
             searchBox.addEventListener('input', renderRecords);
+            
+            copyAllBtn.addEventListener('click', copyAllRecords);
             exportBtn.addEventListener('click', exportJSON);
             importBtn.addEventListener('click', () => importFile.click());
             importFile.addEventListener('change', importJSON);
@@ -428,7 +433,6 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
 
         function parseQuantityLine(line) {
             const s = normalizeText(line);
-            // 200塊 / 200 塊 / 1,234個 / 12.5kg など
             const m = s.match(/^([\d,]+(?:\.\d+)?)[ ]*([^\d\s].*)?$/);
             if (!m) return null;
             const quantity = parseNumber(m[1]);
@@ -474,7 +478,6 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
                     continue;
                 }
 
-                // 「獣の肉 200塊」「木製食器 10組」の同一行にも対応
                 const inline = line.match(/^(.+?)\s+([\d,]+(?:\.\d+)?)[ ]*([^\d\s].*)?$/);
                 if (inline && !/^(?:作業回数|回数)/.test(line)) {
                     const quantity = parseNumber(inline[2]);
@@ -489,7 +492,6 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
                 }
             }
 
-            // セクションなしの「名称→数量単位」形式
             if (!parsedItems.length) {
                 for (let i=1; i<lines.length; i++) {
                     const q = parseQuantityLine(lines[i]);
@@ -533,7 +535,6 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
             const rawSource = formRawSource.value.trim();
             const currentEditId = editId.value.trim();
 
-            // アイテム行の収集
             const itemRows = itemsContainer.querySelectorAll('.item-row');
             const items = [];
             itemRows.forEach(row => {
@@ -795,6 +796,35 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
             } catch { alert("コピーに失敗しました。長押しで選択してコピーしてください。"); }
         }
 
+        // 全記録を一括コピーする関数
+        async function copyAllRecords() {
+            if (!records || records.length === 0) {
+                alert("コピーする記録がありません。");
+                return;
+            }
+
+            const allText = records.map(rec => {
+                const opStr = Number.isFinite(Number(rec.operations)) ? `${rec.operations}回` : "回数未入力";
+                const itemsStr = (rec.items || []).map(i =>
+                    `${i.name}: ${i.quantity != null ? i.quantity + (i.unit || "") : "数量未入力"}`
+                ).join(", ");
+                return `【${rec.title || "無題"}】 (進捗: ${rec.percentage || "---"})\n成果物: ${itemsStr} (${opStr})\n効率効果: ${rec.efficiency || "---"}\n登録日時: ${rec.createdAt || "---"}`;
+            }).join("\n\n--------------------\n\n");
+
+            try {
+                if (navigator.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(allText);
+                } else {
+                    const ta = document.createElement("textarea");
+                    ta.value = allText; ta.style.position = "fixed"; ta.style.opacity = "0";
+                    document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove();
+                }
+                alert(`全 ${records.length} 件の記録をクリップボードに一括コピーしました！`);
+            } catch {
+                alert("一括コピーに失敗しました。");
+            }
+        }
+
         function handleEdit(id) {
             const rec = records.find(r => r.id === id);
             if (!rec) return;
@@ -885,7 +915,3 @@ footer{text-align:center;font-size:10px;color:#64748b;padding:14px}
     </script>
 </body>
 </html>
-
-
-
-
