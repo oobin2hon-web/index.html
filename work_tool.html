@@ -48,6 +48,35 @@ textarea{resize:vertical}
 .record-card{border:1px solid #e2e8f0;border-radius:8px;padding:9px;margin-bottom:8px;background:#fff}
 .hidden{display:none!important}
 
+/* クイックタブボタンエリア */
+.quick-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #e2e8f0;
+}
+.quick-tab-btn {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 15px;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    transition: all 0.2s;
+    font-weight: 600;
+}
+.quick-tab-btn:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+.quick-tab-btn.active {
+    background: #4f46e5;
+    color: #fff;
+    border-color: #4f46e5;
+}
+
 /* モーダル共通スタイル */
 .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:1000;padding:12px}
 .modal-card{background:#fff;border-radius:10px;width:100%;max-width:600px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:flex;flex-direction:column;gap:10px}
@@ -67,7 +96,7 @@ textarea{resize:vertical}
                 <a href="index.html" class="portal">← ポータルへ戻る</a>
                 <h1>作業系データ解析・記録管理ツール</h1>
             </div>
-            <div class="revision">Revision: v1.6.5</div>
+            <div class="revision">Revision: v1.8.0</div>
         </div>
     </header>
 
@@ -168,11 +197,17 @@ textarea{resize:vertical}
                 <h2 class="text-base font-bold text-slate-700">保存記録一覧・管理</h2>
                 <div class="actions" style="margin-top:0; flex-wrap:wrap;">
                     <button id="copy-all-btn" class="btn btn-small bg-indigo-50 text-indigo-700 border-indigo-200 font-bold">📋 全記録を一括コピー</button>
+                    <button id="export-html-btn" class="btn btn-small bg-emerald-600 text-white font-bold border-emerald-600 hover:bg-emerald-700">💾 記録込HTML保存</button>
                     <button id="export-btn" class="btn btn-small">JSON保存</button>
                     <button id="import-btn" class="btn btn-small">JSON取込</button>
                     <input id="import-file" type="file" accept=".json,application/json" class="hidden">
                     <button id="reset-default-btn" class="btn btn-small btn-danger">サンプル復元</button>
                 </div>
+            </div>
+
+            <!-- 作業名クイックタブボタンエリア -->
+            <div id="quick-tabs-container" class="quick-tabs">
+                <!-- 動的にタブが生成されます -->
             </div>
 
             <!-- 検索 & 作業別フィルターバー -->
@@ -228,7 +263,7 @@ textarea{resize:vertical}
             }
         ];
 
-        const STORAGE_KEY = "work_tool_records_v1.6.5";
+        const STORAGE_KEY = "work_tool_records_v1.8.0";
 
         const rawInputText = document.getElementById('raw-input-text');
         const rawClearBtn = document.getElementById('raw-clear-btn');
@@ -250,7 +285,9 @@ textarea{resize:vertical}
         const recordsContainer = document.getElementById('records-container');
         const searchBox = document.getElementById('search-box');
         const categoryFilter = document.getElementById('category-filter');
+        const quickTabsContainer = document.getElementById('quick-tabs-container');
         const copyAllBtn = document.getElementById('copy-all-btn');
+        const exportHtmlBtn = document.getElementById('export-html-btn');
         const exportBtn = document.getElementById('export-btn');
         const importBtn = document.getElementById('import-btn');
         const importFile = document.getElementById('import-file');
@@ -261,11 +298,13 @@ textarea{resize:vertical}
         const modalCloseBtnFooter = document.getElementById('modal-close-btn-footer');
 
         let records = [];
+        let currentSelectedTab = "ALL";
 
         function init() {
             loadRecords();
             setupEventListeners();
             updateCategoryFilterOptions();
+            renderQuickTabs();
             renderRecords();
             if (itemsContainer.children.length === 0) {
                 addItemRow();
@@ -313,9 +352,14 @@ textarea{resize:vertical}
             clearBtn.addEventListener('click', clearForm);
             
             searchBox.addEventListener('input', renderRecords);
-            categoryFilter.addEventListener('change', renderRecords);
+            categoryFilter.addEventListener('change', (e) => {
+                currentSelectedTab = e.target.value;
+                renderQuickTabs();
+                renderRecords();
+            });
             
             copyAllBtn.addEventListener('click', copyAllRecords);
+            exportHtmlBtn.addEventListener('click', exportCompleteHTML);
             exportBtn.addEventListener('click', exportJSON);
             importBtn.addEventListener('click', () => importFile.click());
             importFile.addEventListener('change', importJSON);
@@ -464,6 +508,44 @@ textarea{resize:vertical}
                 categoryFilter.appendChild(opt);
             });
             categoryFilter.value = categories.has(currentSelected) ? currentSelected : "ALL";
+            currentSelectedTab = categoryFilter.value;
+        }
+
+        function renderQuickTabs() {
+            quickTabsContainer.innerHTML = "";
+            const categories = [];
+            records.forEach(r => {
+                const cat = getWorkCategory(r.title);
+                if (!categories.includes(cat)) categories.push(cat);
+            });
+
+            // すべてタブ
+            const allBtn = document.createElement("button");
+            allBtn.type = "button";
+            allBtn.className = `quick-tab-btn ${currentSelectedTab === "ALL" ? "active" : ""}`;
+            allBtn.textContent = "すべて";
+            allBtn.addEventListener("click", () => {
+                currentSelectedTab = "ALL";
+                categoryFilter.value = "ALL";
+                renderQuickTabs();
+                renderRecords();
+            });
+            quickTabsContainer.appendChild(allBtn);
+
+            // 各作業カテゴリタブ
+            categories.sort().forEach(cat => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = `quick-tab-btn ${currentSelectedTab === cat ? "active" : ""}`;
+                btn.textContent = cat;
+                btn.addEventListener("click", () => {
+                    currentSelectedTab = cat;
+                    categoryFilter.value = cat;
+                    renderQuickTabs();
+                    renderRecords();
+                });
+                quickTabsContainer.appendChild(btn);
+            });
         }
 
         function saveRecord() {
@@ -511,6 +593,7 @@ textarea{resize:vertical}
             saveToStorage();
             clearForm();
             updateCategoryFilterOptions();
+            renderQuickTabs();
             renderRecords();
         }
 
@@ -643,7 +726,10 @@ textarea{resize:vertical}
             if (action === 'delete') {
                 if (confirm(`ID: ${id} の記録を削除しますか？`)) {
                     records = records.filter(r => r.id !== id);
-                    saveToStorage(); updateCategoryFilterOptions(); renderRecords();
+                    saveToStorage(); 
+                    updateCategoryFilterOptions(); 
+                    renderQuickTabs();
+                    renderRecords();
                 }
             }
         });
@@ -655,6 +741,27 @@ textarea{resize:vertical}
             const allText = records.map(rec => `【${rec.title}】\n` + (rec.items || []).map(i => `・${i.name}: ${i.quantity ?? ''}${i.unit || ''}`).join('\n')).join("\n\n---\n\n");
             await navigator.clipboard.writeText(allText);
             alert("全記録を一括コピーしました！");
+        }
+
+        // 記録を埋め込んだ完全なHTMLとして保存する機能
+        function exportCompleteHTML() {
+            // 現在のlocalStorageのデータを埋め込むスクリプトを生成
+            const currentDataString = JSON.stringify(records);
+            
+            // ドキュメント全体を取得
+            const htmlContent = `<!DOCTYPE html>\n` + document.documentElement.outerHTML.replace(
+                /const INITIAL_RECORDS\s*=\s*\[[\s\S]*?\];/,
+                `const INITIAL_RECORDS = ${currentDataString};`
+            );
+
+            const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "work_tool_backup_complete.html";
+            a.click();
+            URL.revokeObjectURL(url);
+            alert("現在の記録データを埋め込んだHTMLファイルをダウンロードしました！");
         }
 
         function exportJSON() {
@@ -674,10 +781,13 @@ textarea{resize:vertical}
                     const imported = JSON.parse(reader.result);
                     if (Array.isArray(imported)) {
                         records = imported;
-                        saveToStorage(); updateCategoryFilterOptions(); renderRecords();
+                        saveToStorage(); 
+                        updateCategoryFilterOptions(); 
+                        renderQuickTabs();
+                        renderRecords();
                         alert("JSONを取り込みました。");
                     }
-                } catch { alert("取込に失敗しました。"); }
+                } { alert("取込に失敗しました。"); }
                 finally { importFile.value = ""; }
             };
             reader.readAsText(file);
@@ -686,7 +796,11 @@ textarea{resize:vertical}
         function resetToDefault() {
             if (confirm("サンプルデータにリセットしますか？")) {
                 records = structuredClone(INITIAL_RECORDS);
-                saveToStorage(); clearForm(); updateCategoryFilterOptions(); renderRecords();
+                saveToStorage(); 
+                clearForm(); 
+                updateCategoryFilterOptions(); 
+                renderQuickTabs();
+                renderRecords();
             }
         }
 
