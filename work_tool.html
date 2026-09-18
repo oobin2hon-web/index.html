@@ -346,7 +346,6 @@ textarea{resize:vertical}
             }
         }
 
-        // 保存失敗時のエラーを安全に捕捉する修正版関数
         function loadRecords() {
             try {
                 const data = localStorage.getItem(STORAGE_KEY);
@@ -499,7 +498,8 @@ textarea{resize:vertical}
                     continue;
                 }
 
-                const inline = line.match(/^(.+?)\s+([\d,]+(?:\.\d+)?)[ ]*([^\d\s].*)?$/);
+                // 「アイテム名 数量単位」の形式をマッチさせる正規表現（漢字の単位にも対応）
+                const inline = line.match(/^(.+?)\s+([\d,]+(?:\.\d+)?)([^\d\s].*?)?$/);
                 if (inline && !/^(?:作業回数|回数)/.test(line)) {
                     const quantity = parseNumber(inline[2]);
                     const unit = (inline[3] || "").trim();
