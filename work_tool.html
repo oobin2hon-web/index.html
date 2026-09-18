@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>作業系データ解析・記録管理ツール（画面連携版）</title>
+    <title>作業系データ解析・記録管理ツール</title>
     <!-- iPhoneホーム画面対応メタタグ -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -95,9 +95,9 @@ textarea{resize:vertical}
         <div class="header-inner">
             <div style="display:flex; align-items:center; gap:10px;">
                 <a href="#" class="portal">ツールポータル</a>
-                <h1>作業系データ解析・記録管理ツール（画面連携版）</h1>
+                <h1>作業系データ解析・記録管理ツール</h1>
             </div>
-            <div class="revision">Revision: v1.9.0</div>
+            <div class="revision">Revision: v1.9.1</div>
         </div>
     </header>
 
@@ -227,7 +227,7 @@ textarea{resize:vertical}
             </section>
         </div>
 
-        <!-- 【画面3】データ連携・集計シミュレーション画面（新規追加） -->
+        <!-- 【画面3】データ連携・集計シミュレーション画面 -->
         <div id="view-link" class="view-section">
             <section>
                 <div class="section-title">
@@ -285,7 +285,7 @@ textarea{resize:vertical}
     <script>
         const INITIAL_RECORDS = [{"id":5,"title":"【木工師LV 9 (+0.01%)】","percentage":"","operations":0,"baseTime":1,"speedRate":100,"efficiency":"1.0000","items":[{"name":"・木槌:","quantity":10,"unit":"本","average":null},{"name":"【石工師LV","quantity":8,"unit":"(+0.02%)】","average":null},{"name":"・炉:","quantity":8,"unit":"基","average":null},{"name":"【肉屋LV","quantity":9,"unit":"(+0.22%)】","average":null},{"name":"・獣の肉:","quantity":200,"unit":"塊","average":null},{"name":"・獣の皮:","quantity":178,"unit":"枚","average":null},{"name":"・獣の骨:","quantity":149,"unit":"個","average":null}],"rawSource":"【木工師LV 9 (+0.01%)】\n・木槌: 10本\n\n---\n\n【石工師LV 8 (+0.02%)】\n・炉: 8基\n\n---\n\n【肉屋LV 9 (+0.22%)】\n・獣の肉: 200塊\n・獣の皮: 178枚\n・獣の骨: 149個","createdAt":"2026-09-18 12:15:51"},{"id":4,"title":"木工師LV 9 (+0.01%)","percentage":"47.24%","operations":1,"baseTime":1,"speedRate":100,"efficiency":"1.0000","items":[{"name":"木槌","quantity":10,"unit":"本","average":10}],"rawSource":"47.24%\n木工師LV 9 (+0.01%)\n70.53%\n獲得したもの\n\n木槌\n10","createdAt":"2026-09-18 08:15:01"},{"id":3,"title":"石工師LV 8 (+0.02%)","percentage":"45.43%","operations":1,"baseTime":1,"speedRate":100,"efficiency":"1.0000","items":[{"name":"炉","quantity":8,"unit":"基","average":8}],"rawSource":"石工師LV 8 (+0.02%)\n45.43%\n獲得したもの\n\n炉\n8基","createdAt":"2026-09-18 08:13:07"},{"id":1,"title":"肉屋LV 9 (+0.22%)","percentage":"3.8%","operations":20,"baseTime":1,"speedRate":100,"efficiency":"1.0000","items":[{"name":"獣の肉","quantity":200,"unit":"塊","average":10},{"name":"獣の皮","quantity":178,"unit":"枚","average":8.9},{"name":"獣の骨","quantity":149,"unit":"個","average":7.45}],"rawSource":"肉屋LV 9 (+0.22%)\n3.8%\n獲得したもの\n獣の肉\n200塊\n獣の皮\n178枚\n獣の骨\n149個\n作業回数：20回","createdAt":"2026-06-03 10:00:00"}];
 
-        const STORAGE_KEY = "work_tool_records_v1.9.0";
+        const STORAGE_KEY = "work_tool_records_v1.9.1";
 
         // DOM要素
         const navTabBtns = document.querySelectorAll('.nav-tab-btn');
@@ -326,7 +326,6 @@ textarea{resize:vertical}
         const modalCloseBtn = document.getElementById('modal-close-btn');
         const modalCloseBtnFooter = document.getElementById('modal-close-btn-footer');
 
-        // 連携画面用の要素
         const refreshLinkBtn = document.getElementById('refresh-link-btn');
         const linkCategoryFilter = document.getElementById('link-category-filter');
         const linkMultiplier = document.getElementById('link-multiplier');
@@ -347,31 +346,35 @@ textarea{resize:vertical}
             }
         }
 
+        // 保存失敗時のエラーを安全に捕捉する修正版関数
         function loadRecords() {
-            const data = localStorage.getItem(STORAGE_KEY);
-            if (data) {
-                try {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                if (data) {
                     const parsed = JSON.parse(data);
                     records = Array.isArray(parsed) ? parsed : structuredClone(INITIAL_RECORDS);
-                } catch (e) {
+                } else {
                     records = structuredClone(INITIAL_RECORDS);
+                    saveToStorage();
                 }
-            } else {
+            } catch (e) {
+                console.error("Load Error:", e);
                 records = structuredClone(INITIAL_RECORDS);
-                saveToStorage();
             }
         }
 
         function saveToStorage() {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+                return true;
             } catch (e) {
-                alert("データの保存に失敗しました。");
+                console.error("Storage Error:", e);
+                alert("データの保存に失敗しました。ブラウザのプライベートモードやストレージ設定をご確認ください。");
+                return false;
             }
         }
 
         function setupEventListeners() {
-            // 画面（タブ）切り替えイベント
             navTabBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     navTabBtns.forEach(b => b.classList.remove('active'));
@@ -380,7 +383,7 @@ textarea{resize:vertical}
                     const targetId = btn.getAttribute('data-target');
                     document.getElementById(targetId).classList.add('active');
                     if (targetId === 'view-link') {
-                        renderLinkedSummary(); // 連携画面を開いた時に再集計
+                        renderLinkedSummary();
                     }
                 });
             });
@@ -618,15 +621,14 @@ textarea{resize:vertical}
                 const index = records.findIndex(r => r.id === idNum);
                 if (index !== -1) {
                     records[index] = { ...records[index], title: title || records[index].title, percentage, operations, baseTime, speedRate, efficiency, items, rawSource: generatedRawSource };
-                    alert("記録を上書き更新しました！");
+                    if (saveToStorage()) alert("記録を上書き更新しました！");
                 }
             } else {
                 const newId = records.length > 0 ? Math.max(...records.map(r => r.id || 0)) + 1 : 1;
                 records.unshift({ id: newId, title: title || ("作業記録 #" + newId), percentage, operations, baseTime, speedRate, efficiency, items, rawSource: generatedRawSource, createdAt: timestamp });
-                alert("新規記録を保存しました！");
+                if (saveToStorage()) alert("新規記録を保存しました！");
             }
 
-            saveToStorage();
             clearForm();
             updateCategoryFilterOptions();
             renderQuickTabs();
@@ -709,15 +711,12 @@ textarea{resize:vertical}
             });
         }
 
-        // 【新機能】データ連携・集計シミュレーション描画関数
         function renderLinkedSummary() {
             const selectedCat = linkCategoryFilter.value;
             const multiplier = parseFloat(linkMultiplier.value) || 1.0;
             linkedSummaryContainer.innerHTML = "";
 
-            // 該当カテゴリの記録を抽出して、アイテムごとに数量を集計
             const aggregated = {};
-
             records.forEach(rec => {
                 if (!rec || !rec.items) return;
                 if (selectedCat !== "ALL" && getWorkCategory(rec.title) !== selectedCat) return;
@@ -785,7 +784,6 @@ textarea{resize:vertical}
                 editId.value = "";
                 editModeBadge.classList.add('hidden');
                 saveBtn.textContent = "保存 / 更新";
-                // 入力タブへ切り替え
                 document.querySelector('[data-target="view-input"]').click();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
@@ -815,7 +813,6 @@ textarea{resize:vertical}
                 itemsContainer.innerHTML = "";
                 (rec.items || []).forEach(i => addItemRow(i.name, i.quantity, i.unit));
                 saveBtn.textContent = "変更を上書き保存";
-                // 入力タブへ切り替え
                 document.querySelector('[data-target="view-input"]').click();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
