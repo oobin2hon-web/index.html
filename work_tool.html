@@ -903,6 +903,13 @@ textarea{resize:vertical}
             if (str == null) return '';
             return String(str).replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t));
         }
+        function saveToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+            } catch (e) {
+                alert("データの保存に失敗しました。ブラウザのプライベートモードやストレージ設定をご確認ください。");
+            }
+        }
 
         window.addEventListener('DOMContentLoaded', init);
     </script>
