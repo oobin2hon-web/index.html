@@ -302,7 +302,7 @@ function doMerge(){
 function updatePreview(){
   if(!mergedCode.value.trim()){preview.srcdoc="";return}
   let src=mergedCode.value;
-  if($("removeScripts").checked)src=src.replace(/<script\\b[^>]*>[\\s\\S]*?<\\/script>/gi,"");
+  if($("removeScripts").checked)src=src.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,"");
   preview.srcdoc=src;
 }
 function download(){
@@ -332,7 +332,7 @@ $("fileBtn").onclick=()=>$("fileInput").click();
 $("fileInput").onchange=async e=>{
   const f=e.target.files[0];if(!f)return;
   codeInput.value=await f.text();
-  titleInput.value=f.name.replace(/\\.(html?|HTML?)$/,"");
+  titleInput.value=f.name.replace(/\.(html?|HTML?)$/,"");
   editingId=null;status.textContent="ファイルを読み込みました："+f.name;
   e.target.value="";
 };
