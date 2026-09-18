@@ -35,7 +35,28 @@ const $=id=>document.getElementById(id),N=id=>Number($(id).value)||0,F=x=>Number
 function tab(id,b){document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));$(id).classList.add('on');b.classList.add('on')}
 function work(){let c=N('wc'),n=N('wn'),g=N('wg'),t=N('wb')/(N('ws')/100);if(!g&&t>0)g=t/100;if(c<0||c>=100||n<=0||g<=0){$('wr').innerHTML='<div class="warn">現在経験値・回数・経験値を確認してください。</div>';return}let p=g/n,r=100-c,q=r/p;$('wr').innerHTML=`現在Lv：${N('wl')}<br>現在経験値：${F(c)}%<br>LVアップまで：${F(r)}%<hr>${t?`予想作業時間：${F(t)}分<br>`:''}1回あたり：+${F(p)}%<br>理論上あと：${F(q)}回<div class="big">あと ${Math.ceil(q).toLocaleString()}回でLVアップ（推定）</div>`}
 function sale(){let c=N('sc'),n=N('sn'),g=N('sg');if(c<0||c>=100||n<=0||g<=0){$('rr').innerHTML='<div class="warn">販売数・現在経験値・実測経験値を確認してください。</div>';return}let p=g/n,r=100-c,q=r/p;$('rr').innerHTML=`現在Lv：${N('sl')}<br>現在経験値：${F(c)}%<br>LVアップまで：${F(r)}%<hr>${N('sr')?`今回の売上：${F(N('sr'))}g<br>`:''}1販売あたり：+${F(p)}%<br>理論上あと：${F(q)}販売<div class="big">あと ${Math.ceil(q).toLocaleString()}販売でLVアップ（推定）</div>`}
-function parse(k){let t=$('imp').value,m=t.match(/([\d,]+)\s*個?\s*販売/),w=t.match(/([\d,]+)\s*回/),g=t.match(/(?:経験値|EXP)[^\d]*([0-9]+(?:\.[0-9]+)?)/i),num=k==='sale'?(m?m[1]:0):(w?w[1]:0),gain=g?g[1]:0;if(k==='sale'){if(num)$('sn').value=String(num).replace(/,/g,'');if(gain)$('sg').value=gain}else{if(num)$('wn').value=String(num).replace(/,/g,'');if(gain)$('wg').value=gain}$('imsg').textContent=`${k==='sale'?'販売':'作業'}へ取り込み：${num||'未検出'} / ${gain||'未検出'}%。確認してから計算してください。`}
+function parse(k){
+    let t=$('imp').value;
+    // 数量（販売数または回数）の抽出パターンを改善
+    let mSale = t.match(/([\d,]+)\s*(?:個)?\s*販売/);
+    let mWork = t.match(/([\d,]+)\s*(?:回)?\s*作業/);
+    if (!mWork) mWork = t.match(/([\d,]+)\s*回/); // 「50回」などの形式にも対応
+    
+    // 経験値（+0.01% や 0.25% など）の抽出パターンを改善
+    let g = t.match(/[＋\+]?\s*([0-9]+(?:\.[0-9]+)?)\s*%/);
+
+    let num = k === 'sale' ? (mSale ? mSale[1] : 0) : (mWork ? mWork[1] : 0);
+    let gain = g ? g[1] : 0;
+
+    if (k === 'sale') {
+        if (num) $('sn').value = String(num).replace(/,/g, '');
+        if (gain) $('sg').value = gain;
+    } else {
+        if (num) $('wn').value = String(num).replace(/,/g, '');
+        if (gain) $('wg').value = gain;
+    }
+    $('imsg').textContent = `${k === 'sale' ? '販売' : '作業'}へ取り込みました：数量[${num || '未検出'}] / 経験値[${gain || '未検出'}%]。確認してから計算してください。`;
+}
 function hist(){try{return JSON.parse(localStorage.xph||'[]')}catch(e){return[]}}
 function show(){let h=hist();$('hist').innerHTML=h.length?h.map((x,i)=>`<div class="history">${x.time}　<b>${F(x.a)}g</b>　<button class="light" onclick="del(${i})">削除</button></div>`).join(''):'<p class="note">受取履歴なし</p>'}
 function add(){let a=N('dn');if(a<=0)return;let h=hist();h.push({a,time:new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})});localStorage.xph=JSON.stringify(h);$('dn').value='';show();sum()}
