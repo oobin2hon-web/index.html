@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sold out2 住民売り適正価格算出ツール</title>
+    <style>
+        :root {
+            --primary: #d97706; /* キャメル・ゴールド系（ゲーム向け） */
+            --primary-hover: #b45309;
+            --bg-color: #fcfaf8;
+            --card-bg: #ffffff;
+            --text-main: #292524;
+            --text-muted: #78716c;
+            --border: #e7e5e4;
+            --success: #15803d;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border);
+        }
+        h1 {
+            font-size: 1.4rem;
+            margin-top: 0;
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        @media (max-width: 500px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+        .result-section {
+            margin-top: 25px;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .result-section h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            color: #b45309;
+            margin-bottom: 15px;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.95px;
+            border-bottom: 1px dashed #fef3c7;
+            padding-bottom: 8px;
+        }
+        .result-row:last-child {
+            border-bottom: none;
+        }
+        .result-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .result-value {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--text-main);
+        }
+        .result-value.highlight {
+            color: var(--success);
+            font-size: 1.25rem;
+        }
+        .download-btn {
+            margin-top: 15px;
+            background-color: #0d9488;
+        }
+        .download-btn:hover {
+            background-color: #0f766e;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Sold out2 住民売り適正価格算出</h1>
+    
+    <div class="form-group">
+        <label for="itemName">アイテム名</label>
+        <input type="text" id="itemName" value="ステーキ肉" placeholder="例: ステーキ肉">
+    </div>
+
+    <div class="grid-2">
+        <div class="form-group">
+            <label for="unitCost">製造原価 (1個あたり / G)</label>
+            <input type="number" id="unitCost" value="250" min="0">
+        </div>
+        <div class="form-group">
+            <label for="taxRate">販売税率 (%)</label>
+            <input type="number" id="taxRate" value="10" min="0" max="100" step="0.1">
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <div class="form-group">
+            <label for="targetProfitRate">目標利益率 (%)</label>
+            <input type="number" id="targetProfitRate" value="20" min="-100">
+        </div>
+        <div class="form-group">
+            <label for="marketPrice">住民の評価額 / 相場 (参考)</label>
+            <input type="number" id="marketPrice" value="300" min="0" placeholder="分かれば入力">
+        </div>
+    </div>
+
+    <button onclick="calculatePrice()">適正価格を計算する</button>
+
+    <div class="result-section" id="resultArea" style="display: none;">
+        <h2>計算結果・シミュレーション</h2>
+        
+        <div class="result-row">
+            <span class="result-label">損益分岐点（原価＋税金分の最低価格）</span>
+            <span class="result-value" id="resBreakEven">-</span>
+        </div>
+        <div class="result-row">
+            <span class="result-label">目標利益率を達成する推奨販売価格</span>
+            <span class="result-value highlight" id="resRecommended">-</span>
+        </div>
+        <div class="result-row">
+            <span class="result-label">1個あたりの純利益（税引後）</span>
+            <span class="result-value" id="resNetProfit">-</span>
+        </div>
+        <div class="result-row">
+            <span class="result-label">推定お財布オーバー判定</span>
+            <span class="result-value" id="resWalletCheck" style="font-size: 0.95rem;">-</span>
+        </div>
+
+        <button class="download-btn" onclick="downloadResult()">結果をテキストで保存</button>
+    </div>
+</div>
+
+<script>
+function calculatePrice() {
+    const itemName = document.getElementById('itemName').value || 'アイテム';
+    const cost = parseFloat(document.getElementById('unitCost').value) || 0;
+    const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+    const targetProfitRate = parseFloat(document.getElementById('targetProfitRate').value) || 0;
+    const marketPrice = parseFloat(document.getElementById('marketPrice').value) || 0;
+
+    // 計算ロジック
+    // 販売価格を P とすると、 手取り = P * (1 - taxRate / 100)
+    // 利益率目標から逆算: 手取り ＝ 原価 * (1 + 目標利益率 / 100)
+    // P * (1 - tax / 100) = cost * (1 + profit / 100)
+    // P = [ cost * (1 + profit / 100) ] / (1 - tax / 100)
+
+    // 1. 損益分岐点（利益率0%のときの価格、税金考慮）
+    // P_min = cost / (1 - taxRate / 100)  ※税率は販売額に対してかかる前提
+    const taxFactor = 1 - (taxRate / 100);
+    const breakEvenPrice = taxFactor > 0 ? Math.ceil(cost / taxFactor) : cost;
+
+    // 2. 目標利益率を達成する推奨価格
+    const targetMultiplier = 1 + (targetProfitRate / 100);
+    const rawRecommended = (cost * targetMultiplier) / (taxFactor > 0 ? taxFactor : 1);
+    const recommendedPrice = Math.ceil(rawRecommended);
+
+    // 3. 推奨価格での純利益と税額
+    const estimatedTax = recommendedPrice * (taxRate / 100);
+    const netProfit = recommendedPrice - estimatedTax - cost;
+    const actualProfitRate = cost > 0 ? (netProfit / cost) * 100 : 0;
+
+    // 4. 相場・お財布チェック
+    let walletMsg = "判定基準なし";
+    if (marketPrice > 0) {
+        if (recommendedPrice <= marketPrice) {
+            walletMsg = `✅ 住民評価額(${marketPrice}G)以内です（売れやすい）`;
+        } else {
+            walletMsg = `⚠️ 住民評価額(${marketPrice}G)より高いです（売れにくい可能性）`;
+        }
+    }
+
+    // 画面反映
+    document.getElementById('resBreakEven').innerText = breakEvenPrice + " G";
+    document.getElementById('resRecommended').innerText = recommendedPrice + " G";
+    document.getElementById('resNetProfit').innerText = netProfit.toFixed(1) + " G (実質利益率: " + actualProfitRate.toFixed(1) + "%)";
+    document.getElementById('resWalletCheck').innerText = walletMsg;
+
+    document.getElementById('resultArea').style.display = 'block';
+
+    // データを一時保存（ダウンロード用）
+    window.lastCalcData = {
+        itemName, cost, taxRate, targetProfitRate, marketPrice, breakEvenPrice, recommendedPrice, netProfit, actualProfitRate
+    };
+}
+
+function downloadResult() {
+    const d = window.lastCalcData;
+    if (!d) return;
+
+    const content = `=== Sold out2 住民売り価格算出結果 ===
+アイテム名: ${d.itemName}
+製造原価: ${d.cost} G
+販売税率: ${d.taxRate} %
+目標利益率: ${d.targetProfitRate} %
+住民評価額(相場): ${d.marketPrice > 0 ? d.marketPrice + ' G' : '未入力'}
+
+--- 計算結果 ---
+損益分岐点価格: ${d.breakEvenPrice} G
+推奨販売価格: ${d.recommendedPrice} G
+1個あたりの純利益: ${d.netProfit.toFixed(1)} G (実質利益率: ${d.actualProfitRate.toFixed(1)}%)
+`;
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${d.itemName}_price_calc.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+}
+</script>
+
+</body>
+</html>
