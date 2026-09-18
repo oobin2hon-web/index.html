@@ -51,12 +51,12 @@ hr{border:0;border-top:1px solid #ddd;margin:8px 0}
 <div class="card">
 <h2>作業経験値</h2>
 <div class="grid">
-<div><label>現在Lv</label><input id="wl" type="number" min="1" value="8"></div>
-<div><label>現在経験値（%）</label><input id="wc" type="number" min="0" max="99.999999" step="0.0000001" value="99.92"></div>
-<div><label>基礎作業時間（分）</label><input id="wb" type="number" min="0" step="0.001" placeholder="例：30"></div>
-<div><label>作業速度（%）</label><input id="ws" type="number" min="0.001" value="100" step="0.001"></div>
-<div><label>基準作業回数</label><input id="wn" type="number" min="1" value="1"></div>
-<div><label>実測経験値（%）</label><input id="wg" type="number" min="0" step="0.0000001" placeholder="例：0.0147"></div>
+<div><label>現在Lv</label><input id="wl" type="text" inputmode="numeric" value="8"></div>
+<div><label>現在経験値（%）</label><input id="wc" type="text" inputmode="decimal" value="99.92"></div>
+<div><label>基礎作業時間（分）</label><input id="wb" type="text" inputmode="decimal" placeholder="例：30"></div>
+<div><label>作業速度（%）</label><input id="ws" type="text" inputmode="decimal" value="100"></div>
+<div><label>基準作業回数</label><input id="wn" type="text" inputmode="numeric" value="1"></div>
+<div><label>実測経験値（%）</label><input id="wg" type="text" inputmode="decimal" placeholder="例：0.0147"></div>
 </div>
 <div class="actions">
 <button type="button" id="workBtn">作業を計算</button>
@@ -69,12 +69,12 @@ hr{border:0;border-top:1px solid #ddd;margin:8px 0}
 <div class="card">
 <h2>販売経験値</h2>
 <div class="grid">
-<div><label>現在Lv</label><input id="sl" type="number" min="1" value="8"></div>
-<div><label>現在経験値（%）</label><input id="sc" type="number" min="0" max="99.999999" step="0.0000001" value="99.92"></div>
-<div><label>販売数</label><input id="sn" type="number" min="1" value="19"></div>
-<div><label>今回の売上（g）</label><input id="sr" type="number" min="0" placeholder="例：100000"></div>
-<div><label>実測経験値（%）</label><input id="sg" type="number" min="0" step="0.0000001" placeholder="例：0.01"></div>
-<div><label>販売物</label><input id="sname" placeholder="例：ハイポーション"></div>
+<div><label>現在Lv</label><input id="sl" type="text" inputmode="numeric" value="8"></div>
+<div><label>現在経験値（%）</label><input id="sc" type="text" inputmode="decimal" value="99.92"></div>
+<div><label>販売数</label><input id="sn" type="text" inputmode="numeric" value="19"></div>
+<div><label>今回の売上（g）</label><input id="sr" type="text" inputmode="numeric" placeholder="例：100000"></div>
+<div><label>実測経験値（%）</label><input id="sg" type="text" inputmode="decimal" placeholder="例：0.01"></div>
+<div><label>販売物</label><input id="sname" type="text" placeholder="例：ハイポーション"></div>
 </div>
 <div class="actions">
 <button type="button" id="saleBtn">販売を計算</button>
@@ -89,10 +89,10 @@ hr{border:0;border-top:1px solid #ddd;margin:8px 0}
 <div class="card">
 <h2>販売経験値・減衰計算</h2>
 <div class="grid">
-<div><label>現在Lv</label><input id="dl" type="number" min="1" value="8"></div>
-<div><label>現在経験値（%）</label><input id="dc" type="number" min="0" max="99.999999" step="0.0000001" value="99.92"></div>
-<div><label>本日受け取り済み売上（g）</label><input id="dr" type="number" min="0" value="0"></div>
-<div><label>次に受け取る売上（g）</label><input id="dn" type="number" min="0" placeholder="例：100000"></div>
+<div><label>現在Lv</label><input id="dl" type="text" inputmode="numeric" value="8"></div>
+<div><label>現在経験値（%）</label><input id="dc" type="text" inputmode="decimal" value="99.92"></div>
+<div><label>本日受け取り済み売上（g）</label><input id="dr" type="text" inputmode="numeric" value="0"></div>
+<div><label>次に受け取る売上（g）</label><input id="dn" type="text" inputmode="numeric" placeholder="例：100000"></div>
 </div>
 <div class="actions">
 <button type="button" id="decayBtn">減衰を計算</button>
@@ -116,8 +116,25 @@ hr{border:0;border-top:1px solid #ddd;margin:8px 0}
 (function(){
 "use strict";
 const $=id=>document.getElementById(id);
-const N=id=>{const v=parseFloat($(id).value);return Number.isFinite(v)?v:0};
-const F=x=>Number(x).toLocaleString("ja-JP",{maximumFractionDigits:8});
+
+// 全角数字やカンマ、空白に対応した安全な数値変換
+const cleanNum = val => {
+ if (val == null) return 0;
+ let s = String(val).trim();
+ // 全角数字を半角に変換
+ s = s.replace(/[０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
+ // カンマを除去
+ s = s.replace(/,/g, '');
+ const n = parseFloat(s);
+ return Number.isFinite(n) ? n : 0;
+};
+
+const N = id => {
+ const el = $(id);
+ return el ? cleanNum(el.value) : 0;
+};
+
+const F = x => Number(x).toLocaleString("ja-JP",{maximumFractionDigits:8});
 
 function tab(id){
  document.querySelectorAll(".panel").forEach(x=>x.classList.toggle("on",x.id===id));
@@ -126,97 +143,160 @@ function tab(id){
 
 function work(){
  const c=N("wc"), n=N("wn"), measured=N("wg"), base=N("wb"), speed=N("ws");
- const t=base>0&&speed>0?base/(speed/100):0;
- const g=measured>0?measured:(t>0?t/100:0);
- if(c<0||c>=100||n<=0||g<=0){
-  $("wr").innerHTML='<div class="warn">現在経験値・回数・経験値、または基礎作業時間を確認してください。</div>';return;
+ const t = base > 0 && speed > 0 ? base / (speed / 100) : 0;
+ const g = measured > 0 ? measured : (t > 0 ? t / 100 : 0);
+ 
+ if(c < 0 || c >= 100 || n <= 0 || g <= 0){
+  $("wr").innerHTML='<div class="warn">現在経験値（0〜99.99...）、基準回数、または有効な実測経験値/基礎作業時間を入力してください。</div>';
+  return;
  }
- const p=g/n,r=100-c,q=r/p;
+ const p = g / n, r = 100 - c, q = r / p;
  $("wr").innerHTML=`現在Lv：${F(N("wl"))}<br>現在経験値：${F(c)}%<br>LVアップまで：${F(r)}%<hr>${t?`予想作業時間：${F(t)}分<br>`:""}1回あたり：+${F(p)}%<br>理論上あと：${F(q)}回<div class="big">あと ${Math.ceil(q).toLocaleString()}回でLVアップ（推定）</div>`;
 }
 
 function sale(){
- const c=N("sc"),n=N("sn"),g=N("sg");
- if(c<0||c>=100||n<=0||g<=0){
-  $("rr").innerHTML='<div class="warn">販売数・現在経験値・実測経験値を確認してください。</div>';return;
+ const c=N("sc"), n=N("sn"), g=N("sg");
+ if(c < 0 || c >= 100 || n <= 0 || g <= 0){
+  $("rr").innerHTML='<div class="warn">販売数・現在経験値・実測経験値を確認してください。</div>';
+  return;
  }
- const p=g/n,r=100-c,q=r/p;
+ const p = g / n, r = 100 - c, q = r / p;
  $("rr").innerHTML=`現在Lv：${F(N("sl"))}<br>現在経験値：${F(c)}%<br>LVアップまで：${F(r)}%<hr>${N("sr")?`今回の売上：${F(N("sr"))}g<br>`:""}1販売あたり：+${F(p)}%<br>理論上あと：${F(q)}販売<div class="big">あと ${Math.ceil(q).toLocaleString()}販売でLVアップ（推定）</div>`;
 }
 
 function parseImport(kind){
- const t=$("imp").value.trim();
- if(!t){$("imsg").textContent="取り込む文字を入力してください。";return}
- const saleMatch=t.match(/([\d,]+)\s*(?:個|件|本|組|回)?\s*販売/);
- const workMatch=t.match(/([\d,]+)\s*回\s*(?:作業)?/);
- const expMatches=[...t.matchAll(/(?:経験値|EXP)\s*(?:[:：+＋=＝]|増加)?\s*([0-9]+(?:\.[0-9]+)?)/gi)];
- const gain=expMatches.length?expMatches[0][1]:"";
- const num=kind==="sale"?(saleMatch?saleMatch[1]:""):(workMatch?workMatch[1]:"");
- if(kind==="sale"){
-  if(num)$("sn").value=num.replace(/,/g,"");
-  if(gain)$("sg").value=gain;
- }else{
-  if(num)$("wn").value=num.replace(/,/g,"");
-  if(gain)$("wg").value=gain;
+ const t = $("imp").value.trim();
+ if(!t){$("imsg").textContent="取り込む文字を入力してください。";return;}
+ 
+ // テキストから数値やキーワードを柔軟に抽出しやすくするため全角を半角に寄せる
+ const normalized = t.replace(/[０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
+ 
+ const saleMatch = normalized.match(/([\d,]+)\s*(?:個|件|本|組|回)?\s*販売/);
+ const workMatch = normalized.match(/([\d,]+)\s*回\s*(?:作業)?/);
+ const expMatch = normalized.match(/(?:経験値|EXP)\s*[:：+＋=＝増加]*\s*([0-9]+(?:\.[0-9]+)?)\s*%/i) || normalized.match(/([0-9]+(?:\.[0-9]+)?)\s*%/);
+ 
+ const gain = expMatch ? expMatch[1] : "";
+ const num = kind === "sale" ? (saleMatch ? saleMatch[1] : "") : (workMatch ? workMatch[1] : "");
+ 
+ if(kind === "sale"){
+  if(num) $("sn").value = num.replace(/,/g, "");
+  if(gain) $("sg").value = gain;
+ } else {
+  if(num) $("wn").value = num.replace(/,/g, "");
+  if(gain) $("wg").value = gain;
  }
- $("imsg").textContent=(kind==="sale"?"販売":"作業")+"へ取り込み："+(num||"未検出")+" / "+(gain||"未検出")+"%。確認してから計算してください。";
+ 
+ $("imsg").textContent = (kind === "sale" ? "販売" : "作業") + "へ取り込み：数量[" + (num || "未検出") + "] / 経験値[" + (gain || "未検出") + "%]。確認してから計算してください。";
 }
 
 function hist(){
- try{const x=JSON.parse(localStorage.getItem("xph")||"[]");return Array.isArray(x)?x:[]}
- catch(e){return []}
-}
-function saveHist(h){localStorage.setItem("xph",JSON.stringify(h))}
-function show(){
- const h=hist();
- $("hist").innerHTML=h.length?h.map((x,i)=>`<div class="history"><span>${x.time}　<b>${F(Number(x.a))}g</b></span><button type="button" class="light" data-del="${i}">削除</button></div>`).join(""):'<p class="note">受取履歴なし</p>';
- document.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>del(Number(b.dataset.del))));
-}
-function add(){
- const a=N("dn");
- if(a<=0){$("dres").innerHTML='<div class="warn">「次に受け取る売上（g）」を入力してください。</div>';return}
- const h=hist();
- h.push({a,time:new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})});
- saveHist(h);$("dn").value="";show();sum();
-}
-function sum(){$("dr").value=hist().reduce((a,x)=>a+(Number(x.a)||0),0)}
-function del(i){const h=hist();h.splice(i,1);saveHist(h);show();sum()}
-function clearH(){
- if(!hist().length)return;
- if(confirm("本日の受取履歴をすべて消去しますか？")){localStorage.removeItem("xph");show();sum()}
-}
-function decay(){
- const a=N("dr"),b=N("dn");
- $("dres").innerHTML=`現在Lv：${F(N("dl"))}<br>現在経験値：${F(N("dc"))}%<hr>本日受取済み：${F(a)}g<br>次回受取：${F(b)}g<br><b>次回受取後の累計：${F(a+b)}g</b><div class="big">減衰計算の入力状態を確認しました</div>`;
-}
-async function copyResult(id){
- const text=$(id).innerText.trim();
- if(!text)return;
  try{
-  if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text)}
-  else{
-   const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
-   document.body.appendChild(ta);ta.focus();ta.select();document.execCommand("copy");ta.remove();
+  const x = JSON.parse(localStorage.getItem("xph") || "[]");
+  return Array.isArray(x) ? x : [];
+ }catch(e){ return []; }
+}
+
+function saveHist(h){
+ localStorage.setItem("xph", JSON.stringify(h));
+}
+
+function show(){
+ const h = hist();
+ $("hist").innerHTML = h.length ? h.map((x,i)=>`<div class="history"><span>${x.time}　<b>${F(Number(x.a))}g</b></span><button type="button" class="light" data-del="${i}">削除</button></div>`).join("") : '<p class="note">受取履歴なし</p>';
+ document.querySelectorAll("[data-del]").forEach(b=>{
+  b.addEventListener("click", ()=>del(Number(b.dataset.del)));
+ });
+}
+
+function add(){
+ const a = N("dn");
+ if(a <= 0){
+  $("dres").innerHTML = '<div class="warn">「次に受け取る売上（g）」を入力してください。</div>';
+  return;
+ }
+ const h = hist();
+ h.push({a, time: new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})});
+ saveHist(h);
+ $("dn").value = "";
+ show();
+ sum();
+}
+
+function sum(){
+ $("dr").value = hist().reduce((acc, x) => acc + (Number(x.a) || 0), 0);
+}
+
+function del(i){
+ const h = hist();
+ h.splice(i, 1);
+ saveHist(h);
+ show();
+ sum();
+}
+
+function clearH(){
+ if(!hist().length) return;
+ if(confirm("本日の受取履歴をすべて消去しますか？")){
+  localStorage.removeItem("xph");
+  show();
+  sum();
+ }
+}
+
+function decay(){
+ const a = N("dr"), b = N("dn");
+ $("dres").innerHTML = `現在Lv：${F(N("dl"))}<br>現在経験値：${F(N("dc"))}%<hr>本日受取済み：${F(a)}g<br>次回受取：${F(b)}g<br><b>次回受取後の累計：${F(a+b)}g</b><div class="big">減衰計算の入力状態を確認しました</div>`;
+}
+
+async function copyResult(id){
+ const text = $(id).innerText.trim();
+ if(!text) return;
+ try{
+  if(navigator.clipboard && window.isSecureContext){
+   await navigator.clipboard.writeText(text);
+  } else {
+   const ta = document.createElement("textarea");
+   ta.value = text;
+   ta.style.position = "fixed";
+   ta.style.opacity = "0";
+   document.body.appendChild(ta);
+   ta.focus();
+   ta.select();
+   document.execCommand("copy");
+   ta.remove();
   }
   alert("コピーしました");
- }catch(e){alert("コピーできませんでした。結果を長押ししてコピーしてください。")}
+ }catch(e){
+  alert("コピーできませんでした。結果を長押しして手動でコピーしてください。");
+ }
 }
 
 function init(){
- document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>tab(b.dataset.tab)));
- $("parseSale").addEventListener("click",()=>parseImport("sale"));
- $("parseWork").addEventListener("click",()=>parseImport("work"));
- $("workBtn").addEventListener("click",work);
- $("saleBtn").addEventListener("click",sale);
- $("copyWork").addEventListener("click",()=>copyResult("wr"));
- $("copySale").addEventListener("click",()=>copyResult("rr"));
- $("decayBtn").addEventListener("click",decay);
- $("addBtn").addEventListener("click",add);
- $("sumBtn").addEventListener("click",sum);
- $("clearBtn").addEventListener("click",clearH);
- work();sale();show();
+ document.querySelectorAll(".tab").forEach(b=>{
+  b.addEventListener("click", ()=>tab(b.dataset.tab));
+ });
+ 
+ $("parseSale").addEventListener("click", ()=>parseImport("sale"));
+ $("parseWork").addEventListener("click", ()=>parseImport("work"));
+ $("workBtn").addEventListener("click", work);
+ $("saleBtn").addEventListener("click", sale);
+ $("copyWork").addEventListener("click", ()=>copyResult("wr"));
+ $("copySale").addEventListener("click", ()=>copyResult("rr"));
+ $("decayBtn").addEventListener("click", decay);
+ $("addBtn").addEventListener("click", add);
+ $("sumBtn").addEventListener("click", sum);
+ $("clearBtn").addEventListener("click", clearH);
+ 
+ work();
+ sale();
+ show();
 }
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+
+if(document.readyState === "loading"){
+ document.addEventListener("DOMContentLoaded", init);
+} else {
+ init();
+}
 })();
 </script>
 </body>
