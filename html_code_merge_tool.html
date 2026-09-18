@@ -1,360 +1,283 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HTMLコード保存・結合ツール</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>HTMLコード保存・軽量マージツール</title>
 <style>
-:root{
-  --bg:#f4f6f8;--panel:#fff;--line:#dfe4ea;--text:#20252b;
-  --muted:#68727d;--accent:#3478f6;--accent2:#eaf1ff;
-  --danger:#d9534f;--shadow:0 4px 18px rgba(20,30,40,.07);
-}
 *{box-sizing:border-box}
+:root{--bg:#f4f6f8;--card:#fff;--line:#dce2e8;--text:#20252b;--muted:#697582;--blue:#2563eb;--bluebg:#eef4ff;--red:#dc2626}
 body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
-button,input,textarea,select{font:inherit}
-button{cursor:pointer;border:0}
-header{padding:18px 16px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
-header h1{font-size:20px;margin:0 0 5px}
-header p{font-size:12px;color:var(--muted);margin:0}
-.wrap{max-width:1200px;margin:auto;padding:14px}
-.grid{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:14px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
-.panel-head{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px}
-.panel-head h2{font-size:15px;margin:0}
-.panel-body{padding:12px 14px}
-.row{display:flex;gap:8px;align-items:center}
-.row>*{min-width:0}
-input,textarea,select{width:100%;border:1px solid #cfd6dd;border-radius:9px;background:#fbfcfd;padding:9px;color:var(--text);outline:none}
-input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(52,120,246,.1)}
-textarea{resize:vertical;line-height:1.5}
-#codeInput{min-height:390px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
-.btn{padding:9px 12px;border-radius:9px;background:#eef1f4;color:#26313b;font-weight:600}
-.btn.primary{background:var(--accent);color:white}
-.btn.danger{background:#fff0ef;color:var(--danger)}
-.btn.small{padding:6px 9px;font-size:12px}
-.toolbar{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
-.list{display:flex;flex-direction:column;gap:7px;max-height:520px;overflow:auto}
-.item{border:1px solid var(--line);border-radius:10px;padding:9px;background:#fff}
-.item.selected{border-color:var(--accent);background:var(--accent2)}
-.item-top{display:flex;align-items:center;gap:7px}
-.item-top strong{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
-.item-meta{font-size:11px;color:var(--muted);margin-top:4px}
-.item-actions{display:flex;gap:4px;margin-top:7px}
-.item-actions button{flex:1}
-.badge{font-size:10px;padding:3px 6px;border-radius:999px;background:#e9edf2;color:#56616c}
-label{font-size:12px;font-weight:700;display:block;margin:0 0 5px}
+header{background:#fff;border-bottom:1px solid var(--line);padding:15px}
+h1{font-size:19px;margin:0 0 4px}header p{font-size:12px;color:var(--muted);margin:0}
+main{max-width:1100px;margin:auto;padding:12px}
+.layout{display:grid;grid-template-columns:350px 1fr;gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden}
+.card h2{font-size:14px;margin:0;padding:11px 13px;border-bottom:1px solid var(--line)}
+.body{padding:12px}
+label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}
 .field{margin-bottom:10px}
-.checks{display:flex;flex-direction:column;gap:7px}
-.check{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500}
-.check input{width:auto}
-#preview{width:100%;height:420px;border:1px solid var(--line);border-radius:10px;background:white}
-#mergedCode{min-height:260px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
-.hint{font-size:11px;color:var(--muted);line-height:1.5}
-.empty{padding:25px 10px;text-align:center;color:var(--muted);font-size:12px}
-.status{font-size:11px;color:var(--muted);min-height:18px}
-.order-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
-.order-item{display:flex;align-items:center;gap:6px;padding:7px;border:1px solid var(--line);border-radius:8px;font-size:12px;background:#fff}
-.order-item span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-@media(max-width:800px){
- .grid{grid-template-columns:1fr}
- header{position:static}
- #codeInput{min-height:280px}
- #preview{height:330px}
-}
+input[type=text],textarea{width:100%;border:1px solid #cbd4dd;border-radius:8px;padding:8px;background:#fcfdff;color:var(--text);outline:none}
+textarea{resize:vertical}
+#code{height:250px;font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+#result{height:230px;font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+button{border:0;border-radius:8px;padding:8px 10px;background:#edf1f5;color:#27313b;font-weight:650;cursor:pointer}
+button.primary{background:var(--blue);color:#fff}button.red{background:#fff0f0;color:var(--red)}
+button.small{padding:5px 7px;font-size:11px}
+.buttons{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.status{font-size:11px;color:var(--muted);min-height:17px}
+.list{max-height:390px;overflow:auto;display:flex;flex-direction:column;gap:6px}
+.item{border:1px solid var(--line);border-radius:9px;padding:7px}
+.item.sel{border-color:var(--blue);background:var(--bluebg)}
+.line{display:flex;align-items:center;gap:7px}.line input{margin:0}
+.name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;font-weight:700}
+.meta{font-size:10px;color:var(--muted);margin-top:3px}
+.actions{display:flex;gap:4px;margin-top:5px}.actions button{flex:1}
+.order{display:flex;flex-direction:column;gap:5px;margin:6px 0 11px}
+.orderrow{display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:8px;padding:6px;font-size:11px}
+.orderrow .n{width:20px;text-align:center}.orderrow .name{font-weight:600}
+.preview{display:block;width:100%;height:300px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.check{display:flex;align-items:center;gap:6px;font-weight:500}.check input{width:auto}
+.note{font-size:10px;color:var(--muted);line-height:1.45;margin:6px 0 9px}
+.empty{text-align:center;color:var(--muted);font-size:11px;padding:20px 5px}
+hr{border:0;border-top:1px solid var(--line);margin:12px 0}
+@media(max-width:760px){.layout{grid-template-columns:1fr}#code{height:230px}.preview{height:270px}}
 </style>
 </head>
 <body>
 <header>
-  <h1>HTMLコード保存・結合（マージ）ツール</h1>
-  <p>HTML断片やHTMLファイルを保存・編集し、選択した順番で1つのHTMLへ結合できます。</p>
+<h1>HTMLコード保存・軽量マージツール</h1>
+<p>普段は軽く動作し、結合・プレビュー時だけ処理します。</p>
 </header>
+<main><div class="layout">
 
-<main class="wrap">
-<div class="grid">
-
-<section class="panel">
-  <div class="panel-head">
-    <h2>① コード保存・管理</h2>
-    <button class="btn primary small" id="newBtn">＋新規</button>
-  </div>
-  <div class="panel-body">
-    <div class="field">
-      <label>名前（タイトル）</label>
-      <input id="titleInput" placeholder="例：トップページ">
-    </div>
-    <div class="field">
-      <label>HTMLコード</label>
-      <textarea id="codeInput" spellcheck="false" placeholder="ここにHTMLコードを貼り付けてください"></textarea>
-    </div>
-    <div class="toolbar">
-      <button class="btn primary" id="saveBtn">保存</button>
-      <button class="btn" id="fileBtn">HTMLファイル読込</button>
-      <button class="btn" id="clearBtn">入力クリア</button>
-      <input type="file" id="fileInput" accept=".html,.htm,text/html" hidden>
-    </div>
-    <div class="status" id="editStatus"></div>
-    <hr style="border:0;border-top:1px solid var(--line);margin:12px 0">
-    <label>保存済みコード</label>
-    <div class="list" id="savedList"></div>
-    <div class="toolbar" style="margin-top:9px">
-      <button class="btn small" id="exportDataBtn">管理データを書き出す</button>
-      <button class="btn small" id="importDataBtn">管理データを読込</button>
-      <input type="file" id="dataInput" accept=".json,application/json" hidden>
-    </div>
-  </div>
-</section>
-
-<section class="panel">
-  <div class="panel-head">
-    <h2>② 結合・プレビュー</h2>
-    <span class="badge" id="countBadge">0件選択</span>
-  </div>
-  <div class="panel-body">
-    <div class="field">
-      <label>結合するコード</label>
-      <div class="checks">
-        <label class="check"><input type="checkbox" id="smartMerge" checked> スマート結合（head/bodyを統合）</label>
-        <label class="check"><input type="checkbox" id="removeScripts"> プレビュー時のscript実行を無効化</label>
-      </div>
-    </div>
-
-    <div class="toolbar">
-      <button class="btn primary" id="mergeBtn">選択項目を結合</button>
-      <button class="btn" id="selectAllBtn">全選択</button>
-      <button class="btn" id="clearSelectBtn">選択解除</button>
-    </div>
-
-    <div class="hint">保存済みコードの「選択」を入れた順に、下の順番で結合します。▲▼で順番を変更できます。</div>
-    <div class="order-list" id="orderList"></div>
-
-    <div style="margin-top:14px">
-      <label>プレビュー</label>
-      <iframe id="preview" sandbox=""></iframe>
-    </div>
-
-    <div style="margin-top:14px">
-      <label>完成HTMLコード</label>
-      <textarea id="mergedCode" spellcheck="false" placeholder="「選択項目を結合」を押すとここに出力されます"></textarea>
-    </div>
-
-    <div class="toolbar" style="margin-top:9px">
-      <button class="btn primary" id="downloadBtn">完成HTMLをダウンロード</button>
-      <button class="btn" id="copyBtn">コードをコピー</button>
-      <button class="btn" id="previewBtn">プレビュー更新</button>
-    </div>
-  </div>
-</section>
-
+<section class="card">
+<h2>① 保存・管理</h2>
+<div class="body">
+<div class="field"><label>名前</label><input id="title" type="text" placeholder="例：xpcalc 本体"></div>
+<div class="field"><label>HTMLコード</label><textarea id="code" spellcheck="false" placeholder="HTMLコードを貼り付け"></textarea></div>
+<div class="buttons">
+<button class="primary" id="save">保存</button>
+<button id="new">新規</button>
+<button id="fileBtn">HTML読込</button>
+<input id="file" type="file" accept=".html,.htm,text/html" hidden>
 </div>
-</main>
+<div id="status" class="status"></div>
+<hr>
+<label>保存済みコード</label>
+<div id="list" class="list"></div>
+<div class="buttons">
+<button id="backup">バックアップ</button>
+<button id="restore">復元</button>
+<input id="json" type="file" accept=".json,application/json" hidden>
+</div>
+</div>
+</section>
+
+<section class="card">
+<h2>② 選択 → 順番 → 結合</h2>
+<div class="body">
+<div class="buttons">
+<button class="primary" id="merge">結合する</button>
+<button id="all">全選択</button>
+<button id="none">全解除</button>
+</div>
+<label class="check"><input id="smart" type="checkbox" checked> スマート結合</label>
+<div class="note">ON：HTML文書としてhead/bodyを整理して結合。OFF：各コードをbody内へそのまま並べます。大きなコードではOFFのほうが軽量です。</div>
+<label>結合順</label>
+<div id="order" class="order"></div>
+<label>プレビュー</label>
+<iframe id="preview" class="preview" sandbox=""></iframe>
+<div class="buttons">
+<button id="previewBtn">プレビュー更新</button>
+<button id="copy">コピー</button>
+<button class="primary" id="download">HTML保存</button>
+</div>
+<label>完成HTML</label>
+<textarea id="result" spellcheck="false" placeholder="「結合する」で生成"></textarea>
+</div>
+</section>
+
+</div></main>
 
 <script>
-(function(){
 "use strict";
-const KEY="htmlMergeToolRecords_v1";
+(function(){
+const KEY="html_merge_light_v1";
 let records=[];
-let editingId=null;
 let selected=new Set();
-let merged="";
+let editingId=null;
 
 const $=id=>document.getElementById(id);
-const titleInput=$("titleInput"), codeInput=$("codeInput"), savedList=$("savedList");
-const orderList=$("orderList"), mergedCode=$("mergedCode"), preview=$("preview");
-const status=$("editStatus");
+const title=$("title"),code=$("code"),list=$("list"),order=$("order"),result=$("result"),preview=$("preview"),status=$("status");
 
-function uid(){return Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}
-function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-
+function makeId(){return "r"+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function persist(){
+  try{localStorage.setItem(KEY,JSON.stringify(records));return true}
+  catch(e){status.textContent="保存容量を超えました。バックアップを利用してください。";return false}
+}
 function load(){
-  try{
-    const x=JSON.parse(localStorage.getItem(KEY)||"[]");
-    records=Array.isArray(x)?x:[];
-  }catch(e){records=[]}
-  renderList(); renderOrder(); updateBadge();
+  try{const x=JSON.parse(localStorage.getItem(KEY)||"[]");records=Array.isArray(x)?x:[]}
+  catch(e){records=[]}
+  renderList();renderOrder();
 }
-function persist(){localStorage.setItem(KEY,JSON.stringify(records))}
-
 function renderList(){
-  savedList.innerHTML="";
-  if(!records.length){savedList.innerHTML='<div class="empty">保存済みコードはありません。<br>名前とコードを入力して「保存」してください。</div>';return}
-  records.forEach((r,i)=>{
-    const el=document.createElement("div");
-    el.className="item"+(selected.has(r.id)?" selected":"");
-    el.innerHTML=`
-      <div class="item-top">
-        <input type="checkbox" class="pick" data-id="${r.id}" ${selected.has(r.id)?"checked":""}>
-        <strong title="${escapeHtml(r.title)}">${escapeHtml(r.title)}</strong>
-      </div>
-      <div class="item-meta">${r.code.length.toLocaleString()}文字　${new Date(r.updatedAt).toLocaleString("ja-JP")}</div>
-      <div class="item-actions">
-        <button class="btn small load">編集</button>
-        <button class="btn small up">▲</button>
-        <button class="btn small down">▼</button>
-        <button class="btn small danger del">削除</button>
-      </div>`;
-    el.querySelector(".pick").onchange=e=>{
-      if(e.target.checked) selected.add(r.id); else selected.delete(r.id);
-      renderList(); renderOrder(); updateBadge();
-    };
-    el.querySelector(".load").onclick=()=>edit(r.id);
-    el.querySelector(".up").onclick=()=>move(i,-1);
-    el.querySelector(".down").onclick=()=>move(i,1);
-    el.querySelector(".del").onclick=()=>{
-      if(confirm("この保存データを削除しますか？")){
-        records=records.filter(x=>x.id!==r.id);selected.delete(r.id);
-        persist();renderList();renderOrder();updateBadge();
-      }
-    };
-    savedList.appendChild(el);
-  });
+  const frag=document.createDocumentFragment();
+  if(!records.length){
+    const e=document.createElement("div");e.className="empty";e.innerHTML="まだ保存されていません。";frag.appendChild(e);
+  }else{
+    records.forEach((r,i)=>{
+      const e=document.createElement("div");e.className="item"+(selected.has(r.id)?" sel":"");
+      e.innerHTML='<div class="line"><input type="checkbox" '+(selected.has(r.id)?"checked":"")+'><div class="name">'+esc(r.title||"無題")+'</div></div>'+
+        '<div class="meta">'+Number(r.code.length).toLocaleString()+"文字"+(r.updated?"　"+new Date(r.updated).toLocaleString("ja-JP"):"")+'</div>'+
+        '<div class="actions"><button class="small edit">編集</button><button class="small up">▲</button><button class="small down">▼</button><button class="small red del">削除</button></div>';
+      e.querySelector("input").onchange=ev=>{
+        if(ev.target.checked)selected.add(r.id);else selected.delete(r.id);
+        // 選択変更では保存も全一覧再構築もしない
+        e.classList.toggle("sel",ev.target.checked);renderOrder();
+      };
+      e.querySelector(".edit").onclick=()=>edit(r.id);
+      e.querySelector(".up").onclick=()=>moveRecord(i,-1);
+      e.querySelector(".down").onclick=()=>moveRecord(i,1);
+      e.querySelector(".del").onclick=()=>{
+        if(confirm("「"+r.title+"」を削除しますか？")){
+          records.splice(i,1);selected.delete(r.id);
+          if(editingId===r.id)newEntry();
+          persist();renderList();renderOrder();
+        }
+      };
+      frag.appendChild(e);
+    });
+  }
+  list.replaceChildren(frag);
 }
-function edit(id){
-  const r=records.find(x=>x.id===id);if(!r)return;
-  editingId=id;titleInput.value=r.title;codeInput.value=r.code;
-  status.textContent="編集中："+r.title;
-  window.scrollTo({top:0,behavior:"smooth"});
+function renderOrder(){
+  const frag=document.createDocumentFragment();
+  const arr=records.filter(r=>selected.has(r.id));
+  if(!arr.length){
+    const e=document.createElement("div");e.className="empty";e.textContent="選択したコードの順番がここに表示されます。";frag.appendChild(e);
+  }else{
+    arr.forEach((r,i)=>{
+      const e=document.createElement("div");e.className="orderrow";
+      e.innerHTML='<span class="n">'+(i+1)+'</span><span class="name">'+esc(r.title||"無題")+'</span>'+
+        '<button class="small up">▲</button><button class="small down">▼</button><button class="small red remove">解除</button>';
+      e.querySelector(".up").onclick=()=>moveSelected(i,-1);
+      e.querySelector(".down").onclick=()=>moveSelected(i,1);
+      e.querySelector(".remove").onclick=()=>{selected.delete(r.id);renderList();renderOrder()};
+      frag.appendChild(e);
+    });
+  }
+  order.replaceChildren(frag);
 }
-function move(i,d){
+function moveRecord(i,d){
   const j=i+d;if(j<0||j>=records.length)return;
   [records[i],records[j]]=[records[j],records[i]];
   persist();renderList();renderOrder();
 }
-function renderOrder(){
-  orderList.innerHTML="";
-  const arr=records.filter(r=>selected.has(r.id));
-  if(!arr.length){orderList.innerHTML='<div class="empty">選択したコードの結合順がここに表示されます。</div>';return}
-  arr.forEach((r,k)=>{
-    const el=document.createElement("div");el.className="order-item";
-    el.innerHTML=`<b>${k+1}</b><span>${escapeHtml(r.title)}</span>
-      <button class="btn small" data-dir="-1">▲</button>
-      <button class="btn small" data-dir="1">▼</button>
-      <button class="btn small danger">解除</button>`;
-    el.querySelector('[data-dir="-1"]').onclick=()=>moveSelected(k,-1);
-    el.querySelector('[data-dir="1"]').onclick=()=>moveSelected(k,1);
-    el.querySelector(".danger").onclick=()=>{selected.delete(r.id);renderList();renderOrder();updateBadge()};
-    orderList.appendChild(el);
-  });
-}
-function moveSelected(k,d){
-  const arr=records.filter(r=>selected.has(r.id));
-  const target=k+d;if(target<0||target>=arr.length)return;
-  const a=arr[k],b=arr[target];
-  const ia=records.indexOf(a),ib=records.indexOf(b);
-  [records[ia],records[ib]]=[records[ib],records[ia]];
+function moveSelected(i,d){
+  const arr=records.filter(r=>selected.has(r.id)),j=i+d;
+  if(j<0||j>=arr.length)return;
+  const a=records.indexOf(arr[i]),b=records.indexOf(arr[j]);
+  [records[a],records[b]]=[records[b],records[a]];
   persist();renderList();renderOrder();
 }
-function updateBadge(){$("countBadge").textContent=selected.size+"件選択"}
-
-function save(){
-  const title=titleInput.value.trim()||"無題_"+new Date().toLocaleString("ja-JP");
-  const code=codeInput.value;
-  if(!code.trim()){alert("HTMLコードを入力してください。");return}
+function edit(id){
+  const r=records.find(x=>x.id===id);if(!r)return;
+  editingId=id;title.value=r.title;code.value=r.code;status.textContent="編集中："+r.title;
+  title.focus();
+}
+function newEntry(){editingId=null;title.value="";code.value="";status.textContent="新規入力";}
+function saveEntry(){
+  const c=code.value;
+  if(!c.trim()){alert("HTMLコードを入力してください。");return}
+  const t=title.value.trim()||"無題";
   if(editingId){
-    const r=records.find(x=>x.id===editingId);
-    if(r){r.title=title;r.code=code;r.updatedAt=Date.now()}
+    const r=records.find(x=>x.id===editingId);if(r){r.title=t;r.code=c;r.updated=Date.now()}
   }else{
-    const r={id:uid(),title,code,createdAt:Date.now(),updatedAt:Date.now()};
-    records.push(r);editingId=r.id;selected.add(r.id);
+    const r={id:makeId(),title:t,code:c,updated:Date.now()};
+    records.push(r);selected.add(r.id);editingId=r.id;
   }
-  persist();renderList();renderOrder();updateBadge();
-  status.textContent="保存しました："+title;
-}
-function newRecord(){
-  editingId=null;titleInput.value="";codeInput.value="";
-  status.textContent="新規入力";
-  titleInput.focus();
-}
-function smartMergeCodes(arr){
-  const docs=arr.map(x=>x.code);
-  const parser=new DOMParser();
-  let title="";
-  let heads=[], bodies=[], other=[];
-  docs.forEach(src=>{
-    const doc=parser.parseFromString(src,"text/html");
-    if(doc.title && !title) title=doc.title;
-    [...doc.head.children].forEach(n=>{
-      if(n.tagName.toLowerCase()==="title"){if(!title)title=n.textContent}
-      else heads.push(n.cloneNode(true));
-    });
-    [...doc.body.children].forEach(n=>bodies.push(n.cloneNode(true)));
-    if(!doc.head.children.length && !doc.body.children.length) other.push(src);
-  });
-  const out=document.implementation.createHTMLDocument(title||"Merged HTML");
-  heads.forEach(n=>out.head.appendChild(out.importNode(n,true)));
-  bodies.forEach(n=>out.body.appendChild(out.importNode(n,true)));
-  let result="<!DOCTYPE html>\\n"+out.documentElement.outerHTML;
-  if(other.length) result+="\\n<!-- 解析できなかった断片 -->\\n"+other.join("\\n");
-  return result;
+  persist();renderList();renderOrder();status.textContent="保存しました："+t;
 }
 function simpleMerge(arr){
-  return "<!DOCTYPE html>\\n<html lang=\"ja\">\\n<head>\\n<meta charset=\"UTF-8\">\\n</head>\\n<body>\\n"+
-    arr.map(r=>"<!-- ===== "+r.title+" ===== -->\\n"+r.code).join("\\n\\n")+
-    "\\n</body>\\n</html>";
+  return '<!doctype html>\n<html lang="ja">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n'+
+    arr.map(r=>'<!-- ===== '+r.title.replace(/-->/g,"")+' ===== -->\n'+r.code).join("\n\n")+
+    '\n</body>\n</html>';
+}
+function smartMerge(arr){
+  // DOMParserは結合時に1回だけ実行。通常操作では呼ばない。
+  const p=new DOMParser(),heads=[],bodies=[];let pageTitle="";
+  arr.forEach(r=>{
+    const d=p.parseFromString(r.code,"text/html");
+    if(!pageTitle && d.title)pageTitle=d.title;
+    Array.from(d.head.children).forEach(n=>{
+      if(n.tagName.toLowerCase()!=="title")heads.push(n.outerHTML);
+    });
+    Array.from(d.body.childNodes).forEach(n=>{
+      if(n.nodeType===1)bodies.push(n.outerHTML);
+      else if(n.nodeType===3 && n.textContent.trim())bodies.push(n.textContent);
+    });
+  });
+  return '<!doctype html>\n<html lang="ja">\n<head>\n<meta charset="utf-8">\n'+
+    (pageTitle?'<title>'+esc(pageTitle)+'</title>\n':'')+
+    heads.join("\n")+'\n</head>\n<body>\n'+bodies.join("\n")+
+    '\n</body>\n</html>';
 }
 function doMerge(){
   const arr=records.filter(r=>selected.has(r.id));
   if(!arr.length){alert("結合するコードを選択してください。");return}
-  merged=$("smartMerge").checked?smartMergeCodes(arr):simpleMerge(arr);
-  mergedCode.value=merged;
-  updatePreview();
+  status.textContent="結合処理中…";
+  // UI更新を1フレーム挟み、大きなコードでも固まったように見えにくくする
+  requestAnimationFrame(()=>{
+    try{
+      result.value=$("smart").checked?smartMerge(arr):simpleMerge(arr);
+      status.textContent=arr.length+"件を結合しました。";
+    }catch(e){alert("結合中にエラーが発生しました。");status.textContent="結合エラー";}
+  });
 }
 function updatePreview(){
-  if(!mergedCode.value.trim()){preview.srcdoc="";return}
-  let src=mergedCode.value;
-  if($("removeScripts").checked)src=src.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,"");
-  preview.srcdoc=src;
+  if(!result.value.trim()){alert("先に結合してください。");return}
+  preview.srcdoc=result.value;
+}
+async function copy(){
+  if(!result.value){alert("先に結合してください。");return}
+  try{await navigator.clipboard.writeText(result.value);status.textContent="コピーしました。"}
+  catch(e){result.focus();result.select();document.execCommand("copy");status.textContent="コピーしました。"}
 }
 function download(){
-  const src=mergedCode.value;
-  if(!src.trim()){alert("先にHTMLを結合してください。");return}
-  const blob=new Blob([src],{type:"text/html;charset=utf-8"});
-  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
-  a.download="merged_"+new Date().toISOString().slice(0,19).replace(/[:T]/g,"-")+".html";
-  document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  if(!result.value){alert("先に結合してください。");return}
+  const b=new Blob([result.value],{type:"text/html;charset=utf-8"}),u=URL.createObjectURL(b),a=document.createElement("a");
+  const d=new Date(),z=n=>String(n).padStart(2,"0");
+  a.href=u;a.download="merged_"+d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+"_"+z(d.getHours())+z(d.getMinutes())+z(d.getSeconds())+".html";
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
 }
-async function copyCode(){
-  if(!mergedCode.value){alert("コピーするコードがありません。");return}
-  try{await navigator.clipboard.writeText(mergedCode.value);alert("コードをコピーしました。")}
-  catch(e){mergedCode.select();document.execCommand("copy");alert("コードをコピーしました。")}
-}
-$("newBtn").onclick=newRecord;
-$("saveBtn").onclick=save;
-$("clearBtn").onclick=newRecord;
-$("mergeBtn").onclick=doMerge;
-$("downloadBtn").onclick=download;
-$("copyBtn").onclick=copyCode;
-$("previewBtn").onclick=updatePreview;
-$("selectAllBtn").onclick=()=>{records.forEach(r=>selected.add(r.id));renderList();renderOrder();updateBadge()};
-$("clearSelectBtn").onclick=()=>{selected.clear();renderList();renderOrder();updateBadge()};
-$("fileBtn").onclick=()=>$("fileInput").click();
-$("fileInput").onchange=async e=>{
+$("save").onclick=saveEntry;$("new").onclick=newEntry;$("merge").onclick=doMerge;
+$("previewBtn").onclick=updatePreview;$("copy").onclick=copy;$("download").onclick=download;
+$("all").onclick=()=>{selected=new Set(records.map(r=>r.id));renderList();renderOrder()};
+$("none").onclick=()=>{selected.clear();renderList();renderOrder()};
+$("fileBtn").onclick=()=>$("file").click();
+$("file").onchange=async e=>{
   const f=e.target.files[0];if(!f)return;
-  codeInput.value=await f.text();
-  titleInput.value=f.name.replace(/\.(html?|HTML?)$/,"");
-  editingId=null;status.textContent="ファイルを読み込みました："+f.name;
+  try{code.value=await f.text();title.value=f.name.replace(/\.(html?|HTML?)$/i,"");editingId=null;status.textContent="読み込み完了。確認して「保存」を押してください。"}
+  catch(err){alert("ファイルを読み込めませんでした。")}
   e.target.value="";
 };
-$("exportDataBtn").onclick=()=>{
-  const blob=new Blob([JSON.stringify(records,null,2)],{type:"application/json;charset=utf-8"});
-  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="html-code-backup.json";
-  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+$("backup").onclick=()=>{
+  const b=new Blob([JSON.stringify(records,null,2)],{type:"application/json;charset=utf-8"}),u=URL.createObjectURL(b),a=document.createElement("a");
+  a.href=u;a.download="html_merge_backup.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
 };
-$("importDataBtn").onclick=()=>$("dataInput").click();
-$("dataInput").onchange=async e=>{
+$("restore").onclick=()=>$("json").click();
+$("json").onchange=async e=>{
   const f=e.target.files[0];if(!f)return;
   try{
-    const data=JSON.parse(await f.text());
-    if(!Array.isArray(data))throw Error();
-    const incoming=data.filter(x=>x&&typeof x.title==="string"&&typeof x.code==="string")
-      .map(x=>({...x,id:uid(),updatedAt:x.updatedAt||Date.now(),createdAt:x.createdAt||Date.now()}));
-    records=records.concat(incoming);persist();renderList();
-    alert(incoming.length+"件を追加しました。");
-  }catch(err){alert("JSONデータを読み込めませんでした。")}
+    const data=JSON.parse(await f.text());if(!Array.isArray(data))throw Error();
+    let n=0;
+    data.forEach(x=>{if(x&&typeof x.code==="string"){records.push({id:makeId(),title:String(x.title||"無題"),code:x.code,updated:Date.now()});n++}});
+    persist();renderList();renderOrder();alert(n+"件を追加しました。");
+  }catch(err){alert("バックアップJSONを読み込めませんでした。")}
   e.target.value="";
 };
-mergedCode.addEventListener("input",()=>{merged=mergedCode.value});
 load();
 })();
 </script>
