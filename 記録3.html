@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>競馬レース結果記録帳</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            font-size: 22px;
+            color: #1a1a1a;
+            border-bottom: 2px solid #004d40;
+            padding-bottom: 10px;
+            margin-top: 0;
+            text-align: center;
+        }
+        .input-group {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+        select, input[type="date"], input[type="text"] {
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            outline: none;
+            background-color: #fff;
+        }
+        select:focus, input[type="date"]:focus, input[type="text"]:focus {
+            border-color: #00796b;
+        }
+        .date-select-area {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #e0f2f1;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .date-select-area label {
+            font-weight: bold;
+            color: #004d40;
+        }
+        button.action-submit {
+            background-color: #00796b;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+        button.action-submit:hover {
+            background-color: #004d40;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            color: #004d40;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            border-left: 4px solid #00796b;
+            padding-left: 8px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background: #fff;
+        }
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 10px 12px;
+            text-align: center;
+            font-size: 14px;
+        }
+        th {
+            background-color: #f1f8f6;
+            color: #004d40;
+            font-weight: bold;
+            width: 25%;
+        }
+        td.result-cell {
+            font-weight: bold;
+            color: #d32f2f;
+            background-color: #fff;
+        }
+        td.empty-cell {
+            color: #ccc;
+        }
+        .action-cell {
+            width: 15%;
+        }
+        .delete-btn {
+            background: #e0e0e0;
+            border: none;
+            color: #666;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background: #d32f2f;
+            color: white;
+        }
+        .reset-container {
+            text-align: right;
+            margin-top: 20px;
+        }
+        .reset-btn {
+            background: #9e9e9e;
+            color: white;
+            border: none;
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .reset-btn:hover {
+            background: #616161;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>競馬レース結果記録帳</h1>
+        
+        <!-- 日付選択 -->
+        <div class="date-select-area">
+            <label for="targetDate">記録・表示する日付:</label>
+            <input type="date" id="targetDate" onchange="renderTables()">
+        </div>
+
+        <!-- 入力フォーム -->
+        <div class="input-group">
+            <div class="input-row">
+                <select id="raceCourse">
+                    <option value="阪神">阪神競馬場</option>
+                    <option value="中山">中山競馬場</option>
+                </select>
+                
+                <select id="raceNumber">
+                    <script>
+                        for (let i = 1; i <= 12; i++) {
+                            document.write(`<option value="${i}">${i}レース</option>`);
+                        }
+                    </script>
+                </select>
+            </div>
+            
+            <div class="input-row">
+                <input type="text" id="raceResult" placeholder="例: 12-9-4" autocomplete="off">
+            </div>
+            
+            <button class="action-submit" onclick="addRecord()">この日付に記録を追加・更新</button>
+        </div>
+
+        <!-- 阪神競馬場テーブル -->
+        <div class="section-title">阪神競馬場 (<span class="display-date-str"></span>)</div>
+        <div id="hanshinTableContainer"></div>
+
+        <!-- 中山競馬場テーブル -->
+        <div class="section-title">中山競馬場 (<span class="display-date-str"></span>)</div>
+        <div id="nakayamaTableContainer"></div>
+
+        <div class="reset-container">
+            <button class="reset-btn" onclick="resetCurrentDateData()">選択中の日付の記録をリセット</button>
+        </div>
+    </div>
+
+    <script>
+        // ページ読み込み時に初期日付を設定して描画
+        document.addEventListener("DOMContentLoaded", () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById("targetDate").value = today;
+            renderTables();
+        });
+
+        // ストレージから全データを取得
+        function getAllData() {
+            const data = localStorage.getItem("keiba_master_data");
+            return data ? JSON.parse(data) : {};
+        }
+
+        // ストレージへ全データを保存
+        function saveAllData(data) {
+            localStorage.setItem("keiba_master_data", JSON.stringify(data));
+        }
+
+        // 記録を追加・更新する処理
+        function addRecord() {
+            const dateVal = document.getElementById("targetDate").value;
+            const courseVal = document.getElementById("raceCourse").value;
+            const numberVal = document.getElementById("raceNumber").value;
+            const resultInput = document.getElementById("raceResult");
+            const resultVal = resultInput.value.trim();
+
+            if (!dateVal) {
+                alert("日付を選択してください。");
+                return;
+            }
+            if (!resultVal) {
+                alert("着順（例: 12-9-4）を入力してください。");
+                return;
+            }
+
+            let allData = getAllData();
+
+            // 階層構造がなければ初期化
+            if (!allData[dateVal]) {
+                allData[dateVal] = {};
+            }
+            if (!allData[dateVal][courseVal]) {
+                allData[dateVal][courseVal] = {};
+            }
+
+            // データを格納
+            allData[dateVal][courseVal][numberVal] = resultVal;
+
+            // 保存
+            saveAllData(allData);
+
+            // 入力欄をクリアして再描画
+            resultInput.value = "";
+            renderTables();
+        }
+
+        // 削除処理
+        function deleteRecord(courseName, raceNum) {
+            const dateVal = document.getElementById("targetDate").value;
+            let allData = getAllData();
+
+            if (allData[dateVal] && allData[dateVal][courseName]) {
+                delete allData[dateVal][courseName][raceNum];
+                saveAllData(allData);
+                renderTables();
+            }
+        }
+
+        // 選択中日付のリセット処理
+        function resetCurrentDateData() {
+            const dateVal = document.getElementById("targetDate").value;
+            if (confirm(`${dateVal} のすべての記録をリセットしますか？`)) {
+                let allData = getAllData();
+                if (allData[dateVal]) {
+                    delete allData[dateVal];
+                    saveAllData(allData);
+                    renderTables();
+                }
+            }
+        }
+
+        // 画面のテーブルを描画する処理
+        function renderTables() {
+            const dateVal = document.getElementById("targetDate").value;
+            
+            // 日付表示の更新
+            document.querySelectorAll(".display-date-str").forEach(el => {
+                el.textContent = dateVal;
+            });
+
+            const allData = getAllData();
+            const dateData = allData[dateVal] || {};
+
+            renderSingleTable("hanshinTableContainer", "阪神", dateData["阪神"] || {});
+            renderSingleTable("nakayamaTableContainer", "中山", dateData["中山"] || {});
+        }
+
+        // 個別のテーブルを生成するヘルパー関数
+        function renderSingleTable(containerId, courseName, courseData) {
+            const container = document.getElementById(containerId);
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>レース</th>
+                            <th>着順</th>
+                            <th class="action-cell">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            for (let i = 1; i <= 12; i++) {
+                const res = courseData[i];
+                if (res) {
+                    html += `
+                        <tr>
+                            <th>${i}レース</th>
+                            <td class="result-cell">${escapeHTML(res)}</td>
+                            <td class="action-cell"><button class="delete-btn" onclick="deleteRecord('${courseName}', ${i})">削除</button></td>
+                        </tr>
+                    `;
+                } else {
+                    html += `
+                        <tr>
+                            <th>${i}レース</th>
+                            <td class="empty-cell">-</td>
+                            <td class="action-cell">-</td>
+                        </tr>
+                    `;
+                }
+            }
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+            container.innerHTML = html;
+        }
+
+        // HTMLエスケープ処理
+        function escapeHTML(str) {
+            return str.replace(/[&'`"<>]/g, function(match) {
+                return {
+                    '&': '&amp;',
+                    "'": '&#x27;',
+                    '`': '&#x60;',
+                    '"': '&quot;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                }[match];
+            });
+        }
+    </script>
+
+</body>
+</html>
