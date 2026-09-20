@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>競馬レース結果記録帳</title>
+    <title>資材屋 営業・資金記録帳</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -13,7 +13,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 900px;
+            max-width: 950px;
             margin: 0 auto;
             background: #fff;
             padding: 30px;
@@ -28,31 +28,6 @@
             margin-top: 0;
             text-align: center;
         }
-        .input-group {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .input-row {
-            display: flex;
-            gap: 10px;
-        }
-        select, input[type="date"], input[type="text"] {
-            flex: 1;
-            padding: 10px 14px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            outline: none;
-            background-color: #fff;
-        }
-        select:focus, input[type="date"]:focus, input[type="text"]:focus {
-            border-color: #00796b;
-        }
         .date-select-area {
             display: flex;
             align-items: center;
@@ -66,12 +41,48 @@
             font-weight: bold;
             color: #004d40;
         }
+        .section-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid #e0e0e0;
+        }
+        .section-title {
+            font-size: 16px;
+            color: #004d40;
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        select, input[type="date"], input[type="text"], textarea {
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            outline: none;
+            background-color: #fff;
+        }
+        textarea {
+            resize: vertical;
+            height: 90px;
+            font-family: monospace;
+        }
+        select:focus, input:focus, textarea:focus {
+            border-color: #00796b;
+        }
         button.action-submit {
             background-color: #00796b;
             color: white;
             border: none;
-            padding: 12px 20px;
-            font-size: 16px;
+            padding: 10px 20px;
+            font-size: 15px;
             font-weight: bold;
             border-radius: 6px;
             cursor: pointer;
@@ -82,44 +93,28 @@
             background-color: #004d40;
         }
         
-        .section-title {
-            font-size: 18px;
-            color: #004d40;
-            margin-top: 25px;
-            margin-bottom: 10px;
-            border-left: 4px solid #00796b;
-            padding-left: 8px;
-        }
-        
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-top: 15px;
             background: #fff;
         }
         th, td {
             border: 1px solid #e0e0e0;
             padding: 10px 12px;
-            text-align: center;
+            text-align: left;
             font-size: 14px;
         }
         th {
             background-color: #f1f8f6;
             color: #004d40;
             font-weight: bold;
-            width: 25%;
         }
-        td.result-cell {
-            font-weight: bold;
-            color: #d32f2f;
-            background-color: #fff;
-        }
-        td.empty-cell {
-            color: #ccc;
-        }
-        .action-cell {
-            width: 15%;
-        }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .income { color: #2e7d32; font-weight: bold; }
+        .expense { color: #d32f2f; font-weight: bold; }
+        
         .delete-btn {
             background: #e0e0e0;
             border: none;
@@ -149,189 +144,225 @@
         .reset-btn:hover {
             background: #616161;
         }
+        .empty-msg {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>競馬レース結果記録帳</h1>
+        <h1>資材屋 営業・資金記録帳</h1>
         
         <!-- 日付選択 -->
         <div class="date-select-area">
             <label for="targetDate">記録・表示する日付:</label>
-            <input type="date" id="targetDate" onchange="renderTables()">
+            <input type="date" id="targetDate" onchange="renderTable()">
         </div>
 
-        <!-- 入力フォーム -->
-        <div class="input-group">
-            <div class="input-row">
-                <select id="raceCourse">
-                    <option value="阪神">阪神競馬場</option>
-                    <option value="中山">中山競馬場</option>
-                </select>
-                
-                <select id="raceNumber">
-                    <script>
-                        for (let i = 1; i <= 12; i++) {
-                            document.write(`<option value="${i}">${i}レース</option>`);
-                        }
-                    </script>
-                </select>
+        <!-- まとめて登録エリア（テキスト一括貼り付け） -->
+        <div class="section-box">
+            <div class="section-title">📋 まとめて登録（テキスト一括貼り付け解析）</div>
+            <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
+                ゲーム内のログなどをそのまま貼り付けると、自動で資金増減やアイテム名・数量などを抽出して登録します。
             </div>
-            
-            <div class="input-row">
-                <input type="text" id="raceResult" placeholder="例: 12-9-4" autocomplete="off">
+            <textarea id="bulkInput" placeholder="例:
+資材屋LV 11 (+0%)
+67.64%
+資金の増減 +290G
+販売棚 薬草 982本 単価 @290G
+販売税(10%) 29G
+販売数 1本"></textarea>
+            <div style="margin-top: 10px;">
+                <button class="action-submit" onclick="addBulkRecord()">一括テキストから登録する</button>
             </div>
-            
-            <button class="action-submit" onclick="addRecord()">この日付に記録を追加・更新</button>
         </div>
 
-        <!-- 阪神競馬場テーブル -->
-        <div class="section-title">阪神競馬場 (<span class="display-date-str"></span>)</div>
-        <div id="hanshinTableContainer"></div>
+        <!-- 個別追加フォーム -->
+        <div class="section-box">
+            <div class="section-title">✍️ 個別で詳細を指定して追加</div>
+            <div class="input-row">
+                <select id="recordType">
+                    <option value="資金・売買">資金・売買取引</option>
+                    <option value="レベル・状況">レベル・状況ステータス</option>
+                    <option value="その他メモ">その他メモ</option>
+                </select>
+                <input type="text" id="itemName" placeholder="アイテム・内容 (例: 薬草 982本)" autocomplete="off">
+            </div>
+            <div class="input-row">
+                <input type="text" id="moneyChange" placeholder="資金増減 (例: +290G または -29G)" autocomplete="off">
+                <input type="text" id="detailNote" placeholder="備考・税金など (例: 販売数1本 / 税29G)" autocomplete="off">
+            </div>
+            <button class="action-submit" onclick="addManualRecord()">この項目を追加する</button>
+        </div>
 
-        <!-- 中山競馬場テーブル -->
-        <div class="section-title">中山競馬場 (<span class="display-date-str"></span>)</div>
-        <div id="nakayamaTableContainer"></div>
+        <!-- 記録一覧テーブル -->
+        <div class="section-title">📊 登録された記録一覧 (<span class="display-date-str"></span>)</div>
+        <div id="tableContainer"></div>
 
         <div class="reset-container">
-            <button class="reset-btn" onclick="resetCurrentDateData()">選択中の日付の記録をリセット</button>
+            <button class="reset-btn" onclick="resetCurrentDateData()">選択中の日付の記録をすべてリセット</button>
         </div>
     </div>
 
     <script>
-        // ページ読み込み時に初期日付を設定して描画
         document.addEventListener("DOMContentLoaded", () => {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById("targetDate").value = today;
-            renderTables();
+            renderTable();
         });
 
-        // ストレージから全データを取得
         function getAllData() {
-            const data = localStorage.getItem("keiba_master_data");
+            const data = localStorage.getItem("material_shop_master");
             return data ? JSON.parse(data) : {};
         }
 
-        // ストレージへ全データを保存
         function saveAllData(data) {
-            localStorage.setItem("keiba_master_data", JSON.stringify(data));
+            localStorage.setItem("material_shop_master", JSON.stringify(data));
         }
 
-        // 記録を追加・更新する処理
-        function addRecord() {
+        // 個別追加
+        function addManualRecord() {
             const dateVal = document.getElementById("targetDate").value;
-            const courseVal = document.getElementById("raceCourse").value;
-            const numberVal = document.getElementById("raceNumber").value;
-            const resultInput = document.getElementById("raceResult");
-            const resultVal = resultInput.value.trim();
+            const type = document.getElementById("recordType").value;
+            const item = document.getElementById("itemName").value.trim();
+            const money = document.getElementById("moneyChange").value.trim();
+            const note = document.getElementById("detailNote").value.trim();
 
             if (!dateVal) {
                 alert("日付を選択してください。");
                 return;
             }
-            if (!resultVal) {
-                alert("着順（例: 12-9-4）を入力してください。");
+            if (!item && !money && !note) {
+                alert("何かデータを入力してください。");
                 return;
             }
 
+            const record = { type, item: item || "-", money: money || "-", note: note || "-" };
+
             let allData = getAllData();
-
-            // 階層構造がなければ初期化
-            if (!allData[dateVal]) {
-                allData[dateVal] = {};
-            }
-            if (!allData[dateVal][courseVal]) {
-                allData[dateVal][courseVal] = {};
-            }
-
-            // データを格納
-            allData[dateVal][courseVal][numberVal] = resultVal;
-
-            // 保存
+            if (!allData[dateVal]) allData[dateVal] = [];
+            allData[dateVal].push(record);
             saveAllData(allData);
 
-            // 入力欄をクリアして再描画
-            resultInput.value = "";
-            renderTables();
+            // クリア
+            document.getElementById("itemName").value = "";
+            document.getElementById("moneyChange").value = "";
+            document.getElementById("detailNote").value = "";
+            renderTable();
         }
 
-        // 削除処理
-        function deleteRecord(courseName, raceNum) {
+        // 一括テキスト解析追加
+        function addBulkRecord() {
+            const dateVal = document.getElementById("targetDate").value;
+            const text = document.getElementById("bulkInput").value.trim();
+
+            if (!dateVal) {
+                alert("日付を選択してください。");
+                return;
+            }
+            if (!text) {
+                alert("テキストを入力してください。");
+                return;
+            }
+
+            // テキストから簡易的に情報を抽出し、1つのまとめデータとして作成
+            let moneyFound = "-";
+            const moneyMatch = text.match(/([+-]\d+G)/g);
+            if (moneyMatch) {
+                moneyFound = moneyMatch.join(" / ");
+            }
+
+            // 1行目をタイトル代わりにする、または全体の要約
+            const lines = text.split("\n").map(l => l.trim()).filter(l => l);
+            const summaryItem = lines[0] ? lines[0] : "一括登録データ";
+            const fullNote = lines.slice(1).join(" | ") || text;
+
+            const record = {
+                type: "一括登録",
+                item: summaryItem,
+                money: moneyFound,
+                note: fullNote
+            };
+
+            let allData = getAllData();
+            if (!allData[dateVal]) allData[dateVal] = [];
+            allData[dateVal].push(record);
+            saveAllData(allData);
+
+            document.getElementById("bulkInput").value = "";
+            renderTable();
+        }
+
+        // 削除
+        function deleteRecord(index) {
             const dateVal = document.getElementById("targetDate").value;
             let allData = getAllData();
-
-            if (allData[dateVal] && allData[dateVal][courseName]) {
-                delete allData[dateVal][courseName][raceNum];
+            if (allData[dateVal]) {
+                allData[dateVal].splice(index, 1);
+                if (allData[dateVal].length === 0) delete allData[dateVal];
                 saveAllData(allData);
-                renderTables();
+                renderTable();
             }
         }
 
-        // 選択中日付のリセット処理
+        // リセット
         function resetCurrentDateData() {
             const dateVal = document.getElementById("targetDate").value;
             if (confirm(`${dateVal} のすべての記録をリセットしますか？`)) {
                 let allData = getAllData();
-                if (allData[dateVal]) {
-                    delete allData[dateVal];
-                    saveAllData(allData);
-                    renderTables();
-                }
+                delete allData[dateVal];
+                saveAllData(allData);
+                renderTable();
             }
         }
 
-        // 画面のテーブルを描画する処理
-        function renderTables() {
+        // テーブル描画
+        function renderTable() {
             const dateVal = document.getElementById("targetDate").value;
-            
-            // 日付表示の更新
-            document.querySelectorAll(".display-date-str").forEach(el => {
-                el.textContent = dateVal;
-            });
+            document.querySelectorAll(".display-date-str").forEach(el => el.textContent = dateVal);
 
             const allData = getAllData();
-            const dateData = allData[dateVal] || {};
+            const records = (allData[dateVal] && Array.isArray(allData[dateVal])) ? allData[dateVal] : [];
 
-            renderSingleTable("hanshinTableContainer", "阪神", dateData["阪神"] || {});
-            renderSingleTable("nakayamaTableContainer", "中山", dateData["中山"] || {});
-        }
+            const container = document.getElementById("tableContainer");
 
-        // 個別のテーブルを生成するヘルパー関数
-        function renderSingleTable(containerId, courseName, courseData) {
-            const container = document.getElementById(containerId);
+            if (records.length === 0) {
+                container.innerHTML = '<div class="empty-msg">この日付の記録はまだありません</div>';
+                return;
+            }
+
             let html = `
                 <table>
                     <thead>
                         <tr>
-                            <th>レース</th>
-                            <th>着順</th>
-                            <th class="action-cell">操作</th>
+                            <th>分類</th>
+                            <th>内容 / 項目</th>
+                            <th>資金増減</th>
+                            <th>備考・詳細</th>
+                            <th style="width: 10%; text-align: center;">操作</th>
                         </tr>
                     </thead>
                     <tbody>
             `;
 
-            for (let i = 1; i <= 12; i++) {
-                const res = courseData[i];
-                if (res) {
-                    html += `
-                        <tr>
-                            <th>${i}レース</th>
-                            <td class="result-cell">${escapeHTML(res)}</td>
-                            <td class="action-cell"><button class="delete-btn" onclick="deleteRecord('${courseName}', ${i})">削除</button></td>
-                        </tr>
-                    `;
-                } else {
-                    html += `
-                        <tr>
-                            <th>${i}レース</th>
-                            <td class="empty-cell">-</td>
-                            <td class="action-cell">-</td>
-                        </tr>
-                    `;
-                }
-            }
+            records.forEach((rec, index) => {
+                let moneyClass = "";
+                if (rec.money.includes("+")) moneyClass = "income";
+                else if (rec.money.includes("-")) moneyClass = "expense";
+
+                html += `
+                    <tr>
+                        <td>${escapeHTML(rec.type)}</td>
+                        <td>${escapeHTML(rec.item)}</td>
+                        <td class="${moneyClass}">${escapeHTML(rec.money)}</td>
+                        <td><small style="white-space: pre-wrap;">${escapeHTML(rec.note)}</small></td>
+                        <td class="text-center"><button class="delete-btn" onclick="deleteRecord(${index})">削除</button></td>
+                    </tr>
+                `;
+            });
 
             html += `
                     </tbody>
@@ -340,9 +371,8 @@
             container.innerHTML = html;
         }
 
-        // HTMLエスケープ処理
         function escapeHTML(str) {
-            return str.replace(/[&'`"<>]/g, function(match) {
+            return String(str).replace(/[&'`"<>]/g, function(match) {
                 return {
                     '&': '&amp;',
                     "'": '&#x27;',
