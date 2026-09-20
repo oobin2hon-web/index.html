@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>競馬レース記録帳</title>
+    <title>競馬レース結果一覧表</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -13,7 +13,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 600px;
+            max-width: 900px;
             margin: 0 auto;
             background: #fff;
             padding: 30px;
@@ -32,7 +32,7 @@
             background: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -68,102 +68,128 @@
         button:hover {
             background-color: #004d40;
         }
-        .record-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .record-card {
-            background: #fff;
-            border: 1px solid #e0e0e0;
-            border-left: 4px solid #00796b;
-            padding: 12px 16px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-        .race-info {
-            font-weight: bold;
-            font-size: 16px;
-            color: #263238;
-        }
-        .race-result {
+        
+        .section-title {
             font-size: 18px;
+            color: #004d40;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            border-left: 4px solid #00796b;
+            padding-left: 8px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background: #fff;
+        }
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 10px 12px;
+            text-align: center;
+            font-size: 14px;
+        }
+        th {
+            background-color: #f1f8f6;
+            color: #004d40;
+            font-weight: bold;
+            width: 25%;
+        }
+        td.result-cell {
             font-weight: bold;
             color: #d32f2f;
-            background: #ffebee;
-            padding: 4px 10px;
-            border-radius: 15px;
+            background-color: #fff;
+        }
+        td.empty-cell {
+            color: #ccc;
+        }
+        .action-cell {
+            width: 15%;
         }
         .delete-btn {
-            background: none;
+            background: #e0e0e0;
             border: none;
-            color: #9e9e9e;
-            font-size: 18px;
+            color: #666;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
             cursor: pointer;
-            padding: 0 5px;
         }
         .delete-btn:hover {
-            color: #d32f2f;
+            background: #d32f2f;
+            color: white;
         }
-        .empty-msg {
-            text-align: center;
-            color: #888;
-            padding: 20px;
+        .reset-container {
+            text-align: right;
+            margin-top: 20px;
+        }
+        .reset-btn {
+            background: #9e9e9e;
+            font-size: 12px;
+            padding: 6px 12px;
+            width: auto;
+        }
+        .reset-btn:hover {
+            background: #616161;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>競馬レース記録帳</h1>
+        <h1>競馬レース結果一覧表 (1R〜12R)</h1>
         
         <!-- 入力フォーム -->
         <div class="input-group">
             <div class="input-row">
-                <!-- 競馬場選択プルダウン -->
                 <select id="raceCourse">
                     <option value="阪神">阪神競馬場</option>
                     <option value="中山">中山競馬場</option>
                 </select>
                 
-                <!-- レース番号選択プルダウン -->
                 <select id="raceNumber">
                     <script>
                         for (let i = 1; i <= 12; i++) {
-                            document.write(`<option value="${i}レース">${i}レース</option>`);
+                            document.write(`<option value="${i}">${i}レース</option>`);
                         }
                     </script>
                 </select>
             </div>
             
             <div class="input-row">
-                <!-- 着順入力 -->
                 <input type="text" id="raceResult" placeholder="例: 12-9-4" autocomplete="off">
             </div>
             
-            <button onclick="addRecord()">記録を追加する</button>
+            <button onclick="addRecord()">記録を追加・更新する</button>
         </div>
 
-        <!-- 記録リスト表示エリア -->
-        <div id="recordList" class="record-list">
-            <!-- JavaScriptでここにデータが動的に挿入されます -->
+        <!-- 阪神競馬場テーブル -->
+        <div class="section-title">阪神競馬場</div>
+        <div id="hanshinTableContainer"></div>
+
+        <!-- 中山競馬場テーブル -->
+        <div class="section-title">中山競馬場</div>
+        <div id="nakayamaTableContainer"></div>
+
+        <div class="reset-container">
+            <button class="reset-btn" onclick="resetAllData()">すべての記録をリセット</button>
         </div>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", loadRecords);
 
+        // データの構造: { "阪神": { "1": "12-9-4", "2": "", ... }, "中山": { ... } }
+        let allRecords = {
+            "阪神": {},
+            "中山": {}
+        };
+
         function addRecord() {
-            const courseSelect = document.getElementById("raceCourse");
-            const numberSelect = document.getElementById("raceNumber");
+            const course = document.getElementById("raceCourse").value;
+            const number = document.getElementById("raceNumber").value;
             const resultInput = document.getElementById("raceResult");
-            
-            const course = courseSelect.value;
-            const number = numberSelect.value;
-            const name = `${course} ${number}`;
             const result = resultInput.value.trim();
 
             if (!result) {
@@ -171,55 +197,87 @@
                 return;
             }
 
-            const newRecord = { name, result };
+            // データを格納
+            allRecords[course][number] = result;
             
             // ローカルストレージに保存
-            let records = JSON.parse(localStorage.getItem("keibaRecords")) || [];
-            records.unshift(newRecord);
-            localStorage.setItem("keibaRecords", JSON.stringify(records));
+            localStorage.setItem("keibaTableRecords", JSON.stringify(allRecords));
 
-            // 入力欄をクリアして再描画
+            // 入力欄クリアと再描画
             resultInput.value = "";
-            renderRecords(records);
+            renderTables();
         }
 
         function loadRecords() {
-            let records = JSON.parse(localStorage.getItem("keibaRecords")) || [];
-            if (records.length === 0) {
-                records = [{ name: "阪神 1レース", result: "12-9-4" }];
-                localStorage.setItem("keibaRecords", JSON.stringify(records));
+            const saved = localStorage.getItem("keibaTableRecords");
+            if (saved) {
+                allRecords = JSON.parse(saved);
+            } else {
+                // 初期サンプルとして阪神1Rにデータをセット
+                allRecords["阪神"]["1"] = "12-9-4";
             }
-            renderRecords(records);
+            renderTables();
         }
 
-        function renderRecords(records) {
-            const listContainer = document.getElementById("recordList");
-            listContainer.innerHTML = "";
-
-            if (records.length === 0) {
-                listContainer.innerHTML = '<div class="empty-msg">記録がありません</div>';
-                return;
-            }
-
-            records.forEach((rec, index) => {
-                const card = document.createElement("div");
-                card.className = "record-card";
-                card.innerHTML = `
-                    <div class="race-info">${escapeHTML(rec.name)}</div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div class="race-result">${escapeHTML(rec.result)}</div>
-                        <button class="delete-btn" onclick="deleteRecord(${index})" title="削除">×</button>
-                    </div>
-                `;
-                listContainer.appendChild(card);
-            });
+        function renderTables() {
+            renderSingleTable("Hanshin", "阪神");
+            renderSingleTable("Nakayama", "中山");
         }
 
-        function deleteRecord(index) {
-            let records = JSON.parse(localStorage.getItem("keibaRecords")) || [];
-            records.splice(index, 1);
-            localStorage.setItem("keibaRecords", JSON.stringify(records));
-            renderRecords(records);
+        function renderSingleTable(containerId, courseName) {
+            const container = document.getElementById(containerId.toLowerCase() + "TableContainer");
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>レース</th>
+                            <th>着順</th>
+                            <th class="action-cell">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            for (let i = 1; i <= 12; i++) {
+                const res = allRecords[courseName][i];
+                if (res) {
+                    html += `
+                        <tr>
+                            <th>${i}レース</th>
+                            <td class="result-cell">${escapeHTML(res)}</td>
+                            <td class="action-cell"><button class="delete-btn" onclick="deleteRecord('${courseName}', ${i})">削除</button></td>
+                        </tr>
+                    `;
+                } else {
+                    html += `
+                        <tr>
+                            <th>${i}レース</th>
+                            <td class="empty-cell">-</td>
+                            <td class="action-cell">-</td>
+                        </tr>
+                    `;
+                }
+            }
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+            container.innerHTML = html;
+        }
+
+        function deleteRecord(courseName, raceNum) {
+            delete allRecords[courseName][raceNum];
+            localStorage.setItem("keibaTableRecords", JSON.stringify(allRecords));
+            renderTables();
+        }
+
+        function resetAllData() {
+            if (confirm("すべての記録をリセットしますか？")) {
+                allRecords = { "阪神": {}, "中山": {} };
+                localStorage.removeItem("keibaTableRecords");
+                renderTables();
+            }
         }
 
         function escapeHTML(str) {
