@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作業データ高度分析ダッシュボード</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen font-sans">
+
+    <!-- ヘッダー -->
+    <header class="bg-indigo-600 text-white shadow">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-lg font-bold">🛠️ 作業データ高度分析ダッシュボード</h1>
+            <span class="text-xs bg-indigo-700 px-3 py-1 rounded-full">Analyzer v1.0</span>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
+
+        <!-- データインポートセクション -->
+        <section class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+            <h2 class="text-sm font-bold text-slate-700 mb-3">📁 解析データの読み込み</h2>
+            <div class="flex flex-wrap items-center gap-4">
+                <label class="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition shadow-sm">
+                    📂 HTMLまたはJSONファイルを選択
+                    <input type="file" id="file-input" accept=".html,.json" class="hidden">
+                </label>
+                <span id="file-name-display" class="text-xs text-slate-500">※初期状態では内蔵のサンプルデータを分析しています</span>
+                <button id="reset-sample-btn" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-2.5 rounded-lg transition font-medium ml-auto">サンプルデータに戻す</button>
+            </div>
+        </section>
+
+        <!-- サマリーカード群 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <span class="text-xs font-bold text-slate-400">総記録件数</span>
+                <div id="stat-total-records" class="text-2xl font-black text-indigo-600 mt-1">0件</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <span class="text-xs font-bold text-slate-400">総作業回数</span>
+                <div id="stat-total-operations" class="text-2xl font-black text-emerald-600 mt-1">0回</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <span class="text-xs font-bold text-slate-400">登録カテゴリ数</span>
+                <div id="stat-total-categories" class="text-2xl font-black text-amber-600 mt-1">0種類</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <span class="text-xs font-bold text-slate-400">総成果物アイテム数</span>
+                <div id="stat-total-items" class="text-2xl font-black text-blue-600 mt-1">0種類</div>
+            </div>
+        </div>
+
+        <!-- グラフセクション -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- カテゴリ別作業割合 -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col">
+                <h3 class="text-sm font-bold text-slate-700 mb-4">📈 カテゴリ別 記録件数内訳</h3>
+                <div class="relative flex-grow flex items-center justify-center" style="height: 280px;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 作業回数トップカテゴリ -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col">
+                <h3 class="text-sm font-bold text-slate-700 mb-4">📊 カテゴリ別 総作業回数</h3>
+                <div class="relative flex-grow flex items-center justify-center" style="height: 280px;">
+                    <canvas id="operationsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ランキング・詳細テーブル -->
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="text-sm font-bold text-slate-700 mb-4">🏆 成果物アイテム別 総獲得数ランキング</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-600 border-b border-slate-200">
+                            <th class="p-3">順位</th>
+                            <th class="p-3">アイテム名</th>
+                            <th class="p-3 text-right">総獲得数量</th>
+                            <th class="p-3 text-right">平均獲得効率 (回あたり)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-table-body" class="divide-y divide-slate-100">
+                        <!-- 動的生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- フッター -->
+    <footer class="text-center py-6 text-xs text-slate-400">
+        © 2026 作業データ高度分析ダッシュボード
+    </footer>
+
+    <!-- スクリプト -->
+    <script>
+        // 初期サンプルデータ（ご提示いただいたHTML内のデータ）
+        const SAMPLE_RECORDS = [
+            {"id":11,"title":"調理師LV 7 (+2.08%)","percentage":"66.95%","operations":50,"baseTime":1,"speedRate":100,"efficiency":"1.0000","items":[{"name":"竜の寝息酒","quantity":480,"unit":"杯","average":9.6}],"createdAt":"2026-09-21 07:35:53"},
+            {"id":10,"title":"錬金術師LV 7 (+0.1%)","percentage":"47.27%","operations":17,"baseTime":1,"speedRate":100,"efficiency":"1.0000","items":[{"name":"エーテル","quantity":199,"unit":"本","average":11.7059}],"createdAt":"2026-09-19 12:39:00"},
+            {"id":9,"title":"錬金術師LV 7 (+0.1%)","percentage":"47.27%","operations":5,"baseTime":1,"speedRate":100,"efficiency":"1.0000","items":[{"name":"エーテル","quantity":72,"unit":"本","average":14.4}],"createdAt":"2026-09-19 12:35:27"},
+            {"id":8,"title":"鋳物師LV 8 (+0.09%)","percentage":"70.06%","operations":4,"baseTime":1,"speedRate":100,"efficiency":"1.0000","items":[{"name":"ガラス","quantity":59,"unit":"枚","average":14.75}],"createdAt":"2026-09-19 12:31:00"},
+            {"id":7,"title":"細工師LV 8 (+0.11%)","percentage":"24.31%","operations":5,"baseTime":1,"speedRate":100,"efficiency":"1.0000","items":[{"name":"ビン","quantity":171,"unit":"瓶","average":34.2}],"createdAt":"2026-09-18 17:46:09"},
+            {"id":6,"title":"鋳物師LV 8 (+0.09%)","percentage":"69.98%","operations":4,"baseTime":1,"speedRate":100,"efficiency":"1.0000","items":[{"name":"ガラス","quantity":65,"unit":"枚","average":16.25}],"createdAt":"2026-09-18 12:20:59"},
+            {"id":4,"title":"木工師LV 9 (+0.01%)","percentage":"47.24%","operations":1,"baseTime":1,"speedRate":100,"efficiency":"1.0000","items":[{"name":"木槌","quantity":10,"unit":"本","average":10}],"createdAt":"2026-09-18 08:15:01"},
+            {"id":3,"title":"石工師LV 8 (+0.02%)","percentage":"45.43%","operations":1,"baseTime":1,"speedRate":100,"efficiency":"1.0000","items":[{"name":"炉","quantity":8,"unit":"基","average":8}],"createdAt":"2026-09-18 08:13:07"},
+            {"id":1,"title":"肉屋LV 9 (+0.22%)","percentage":"3.8%","operations":20,"baseTime":1,"speedRate":100,"efficiency":"1.0000","items":[{"name":"獣の肉","quantity":200,"unit":"塊","average":10},{"name":"獣の皮","quantity":178,"unit":"枚","average":8.9},{"name":"獣の骨","quantity":149,"unit":"個","average":7.45}],"createdAt":"2026-06-03 10:00:00"}
+        ];
+
+        let currentRecords = [...SAMPLE_RECORDS];
+        let categoryChartInstance = null;
+        let operationsChartInstance = null;
+
+        const fileInput = document.getElementById('file-input');
+        const fileNameDisplay = document.getElementById('file-name-display');
+        const resetSampleBtn = document.getElementById('reset-sample-btn');
+
+        function getCategory(title) {
+            if (!title) return "その他";
+            const cleaned = title.replace(/【|】/g, "").trim();
+            const match = cleaned.match(/^([^\dLVLvレベル\s]+)/i);
+            return match && match[1] ? match[1].trim() : "その他";
+        }
+
+        function analyzeData(records) {
+            // サマリー計算
+            const totalRecords = records.length;
+            const totalOperations = records.reduce((sum, r) => sum + (Number(r.operations) || 0), 0);
+            
+            const categories = {};
+            const itemMap = {};
+
+            records.forEach(r => {
+                const cat = getCategory(r.title);
+                categories[cat] = (categories[cat] || { count: 0, ops: 0 });
+                categories[cat].count += 1;
+                categories[cat].ops += (Number(r.operations) || 0);
+
+                if (Array.isArray(r.items)) {
+                    r.items.forEach(item => {
+                        if (!item.name) return;
+                        if (!itemMap[item.name]) {
+                            itemMap[item.name] = { totalQty: 0, unit: item.unit || '', sumAvg: 0, countAvg: 0 };
+                        }
+                        const qty = Number(item.quantity) || 0;
+                        itemMap[item.name].totalQty += qty;
+                        if (item.average != null) {
+                            itemMap[item.name].sumAvg += Number(item.average);
+                            itemMap[item.name].countAvg += 1;
+                        }
+                    });
+                }
+            });
+
+            document.getElementById('stat-total-records').textContent = totalRecords + '件';
+            document.getElementById('stat-total-operations').textContent = totalOperations.toLocaleString() + '回';
+            document.getElementById('stat-total-categories').textContent = Object.keys(categories).length + '種類';
+            
+            const allItems = Object.keys(itemMap);
+            document.getElementById('stat-total-items').textContent = allItems.length + '種類';
+
+            // グラフ描画
+            renderCharts(categories);
+            renderRanking(itemMap);
+        }
+
+        function renderCharts(categories) {
+            const labels = Object.keys(categories);
+            const counts = labels.map(l => categories[l].count);
+            const ops = labels.map(l => categories[l].ops);
+
+            if (categoryChartInstance) categoryChartInstance.destroy();
+            if (operationsChartInstance) operationsChartInstance.destroy();
+
+            const ctx1 = document.getElementById('categoryChart').getContext('2d');
+            categoryChartInstance = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{ data: counts, backgroundColor: ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            const ctx2 = document.getElementById('operationsChart').getContext('2d');
+            operationsChartInstance = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{ label: '総作業回数', data: ops, backgroundColor: '#4f46e5' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+        }
+
+        function renderRanking(itemMap) {
+            const tbody = document.getElementById('ranking-table-body');
+            tbody.innerHTML = '';
+
+            const sortedItems = Object.entries(itemMap).sort((a, b) => b[1].totalQty - a[1].totalQty);
+
+            if (sortedItems.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">データがありません</td></tr>`;
+                return;
+            }
+
+            sortedItems.forEach(([name, data], index) => {
+                const avg = data.countAvg > 0 ? (data.sumAvg / data.countAvg).toFixed(2) : '---';
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-indigo-600">#${index + 1}</td>
+                    <td class="p-3 font-semibold text-slate-700">${escapeHtml(name)}</td>
+                    <td class="p-3 text-right font-bold">${data.totalQty.toLocaleString()} ${escapeHtml(data.unit)}</td>
+                    <td class="p-3 text-right text-slate-600">${avg} ${escapeHtml(data.unit)}/回</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ファイル取り込み処理
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            fileNameDisplay.textContent = `読み込みファイル: ${file.name}`;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const content = event.target.result;
+                try {
+                    let parsedData = null;
+                    if (file.name.endsWith('.json')) {
+                        parsedData = JSON.parse(content);
+                    } else if (file.name.endsWith('.html')) {
+                        // HTMLファイルから INITIAL_RECORDS の配列文字列を抽出する
+                        const match = content.match(/INITIAL_RECORDS\s*=\s*(\[[\s\S]*?\]);/);
+                        if (match && match[1]) {
+                            parsedData = JSON.parse(match[1]);
+                        } else {
+                            throw new Error("HTML内からデータ構造を見つけられませんでした。");
+                        }
+                    }
+                    if (Array.isArray(parsedData)) {
+                        currentRecords = parsedData;
+                        analyzeData(currentRecords);
+                        alert("データの解析が完了しました！");
+                    } else {
+                        throw new Error("配列データではありません。");
+                    }
+                } catch (err) {
+                    alert("ファイルの解析に失敗しました: " + err.message);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        resetSampleBtn.addEventListener('click', () => {
+            currentRecords = [...SAMPLE_RECORDS];
+            fileNameDisplay.textContent = "※初期状態では内蔵のサンプルデータを分析しています";
+            fileInput.value = "";
+            analyzeData(currentRecords);
+            alert("サンプルデータに戻しました。");
+        });
+
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str).replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t));
+        }
+
+        // 初期実行
+        window.addEventListener('DOMContentLoaded', () => {
+            analyzeData(currentRecords);
+        });
+    </script>
+</body>
+</html>
