@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>競馬レース記録帳</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            font-size: 22px;
+            color: #1a1a1a;
+            border-bottom: 2px solid #004d40;
+            padding-bottom: 10px;
+            margin-top: 0;
+            text-align: center;
+        }
+        .input-group {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+        select, input[type="text"] {
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            outline: none;
+            background-color: #fff;
+        }
+        select:focus, input[type="text"]:focus {
+            border-color: #00796b;
+        }
+        button {
+            background-color: #00796b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #004d40;
+        }
+        .record-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .record-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-left: 4px solid #00796b;
+            padding: 12px 16px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .race-info {
+            font-weight: bold;
+            font-size: 16px;
+            color: #263238;
+        }
+        .race-result {
+            font-size: 18px;
+            font-weight: bold;
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 4px 10px;
+            border-radius: 15px;
+        }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #9e9e9e;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+        .delete-btn:hover {
+            color: #d32f2f;
+        }
+        .empty-msg {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>競馬レース記録帳</h1>
+        
+        <!-- 入力フォーム -->
+        <div class="input-group">
+            <div class="input-row">
+                <!-- 競馬場選択プルダウン -->
+                <select id="raceCourse">
+                    <option value="阪神">阪神競馬場</option>
+                    <option value="中山">中山競馬場</option>
+                </select>
+                
+                <!-- レース番号選択プルダウン -->
+                <select id="raceNumber">
+                    <script>
+                        for (let i = 1; i <= 12; i++) {
+                            document.write(`<option value="${i}レース">${i}レース</option>`);
+                        }
+                    </script>
+                </select>
+            </div>
+            
+            <div class="input-row">
+                <!-- 着順入力 -->
+                <input type="text" id="raceResult" placeholder="例: 12-9-4" autocomplete="off">
+            </div>
+            
+            <button onclick="addRecord()">記録を追加する</button>
+        </div>
+
+        <!-- 記録リスト表示エリア -->
+        <div id="recordList" class="record-list">
+            <!-- JavaScriptでここにデータが動的に挿入されます -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", loadRecords);
+
+        function addRecord() {
+            const courseSelect = document.getElementById("raceCourse");
+            const numberSelect = document.getElementById("raceNumber");
+            const resultInput = document.getElementById("raceResult");
+            
+            const course = courseSelect.value;
+            const number = numberSelect.value;
+            const name = `${course} ${number}`;
+            const result = resultInput.value.trim();
+
+            if (!result) {
+                alert("着順（例: 12-9-4）を入力してください。");
+                return;
+            }
+
+            const newRecord = { name, result };
+            
+            // ローカルストレージに保存
+            let records = JSON.parse(localStorage.getItem("keibaRecords")) || [];
+            records.unshift(newRecord);
+            localStorage.setItem("keibaRecords", JSON.stringify(records));
+
+            // 入力欄をクリアして再描画
+            resultInput.value = "";
+            renderRecords(records);
+        }
+
+        function loadRecords() {
+            let records = JSON.parse(localStorage.getItem("keibaRecords")) || [];
+            if (records.length === 0) {
+                records = [{ name: "阪神 1レース", result: "12-9-4" }];
+                localStorage.setItem("keibaRecords", JSON.stringify(records));
+            }
+            renderRecords(records);
+        }
+
+        function renderRecords(records) {
+            const listContainer = document.getElementById("recordList");
+            listContainer.innerHTML = "";
+
+            if (records.length === 0) {
+                listContainer.innerHTML = '<div class="empty-msg">記録がありません</div>';
+                return;
+            }
+
+            records.forEach((rec, index) => {
+                const card = document.createElement("div");
+                card.className = "record-card";
+                card.innerHTML = `
+                    <div class="race-info">${escapeHTML(rec.name)}</div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="race-result">${escapeHTML(rec.result)}</div>
+                        <button class="delete-btn" onclick="deleteRecord(${index})" title="削除">×</button>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        function deleteRecord(index) {
+            let records = JSON.parse(localStorage.getItem("keibaRecords")) || [];
+            records.splice(index, 1);
+            localStorage.setItem("keibaRecords", JSON.stringify(records));
+            renderRecords(records);
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&'`"<>]/g, function(match) {
+                return {
+                    '&': '&amp;',
+                    "'": '&#x27;',
+                    '`': '&#x60;',
+                    '"': '&quot;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                }[match];
+            });
+        }
+    </script>
+
+</body>
+</html>
