@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>マイ錬金術図鑑</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #d4af37;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 10px;
+        }
+        .entry {
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        h2 {
+            color: #ffcc00;
+            margin-top: 0;
+            border-bottom: 1px dashed #555;
+            padding-bottom: 8px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background-color: #222;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .stats div span {
+            color: #aaa;
+        }
+        .losses {
+            background-color: #3a1c1c;
+            border-left: 4px solid #ff4444;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 0 5px 5px 0;
+        }
+        .losses ul {
+            margin: 5px 0 0 20px;
+            padding: 0;
+        }
+        .flavor {
+            font-style: italic;
+            background-color: #222;
+            padding: 15px;
+            border-left: 4px solid #d4af37;
+            border-radius: 0 5px 5px 0;
+            line-height: 1.6;
+            color: #dcdcdc;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📖 錬金術アイテム図鑑</h1>
+
+    <!-- ==========================================
+      ▼ ここから下の 「entry」 ブロックをコピーして
+         下に継ぎ足していくことで図鑑が増やせます
+    ========================================== -->
+
+    <div class="entry">
+        <h2>🧪 エーテル（II）</h2>
+        
+        <div class="stats">
+            <div><span>作業回数：</span> 26回</div>
+            <div><span>ステータス：</span> 作業完了（事故・破損あり）</div>
+        </div>
+
+        <div class="losses">
+            <strong>⚠️ 失われた代償：</strong>
+            <ul>
+                <li>乳鉢：2個（完全に破損）</li>
+                <li>獣の骨：260個</li>
+                <li>ビン：520瓶</li>
+            </ul>
+        </div>
+
+        <div class="flavor">
+            「それは物質の理を歪め、未知の力を引き出す高次の錬金術。作成の難易度は極めて高く、一歩間違えば暴走を引き起こす。<br>
+            今回の26回に及ぶ過酷な作業では、膨大な触媒が瞬く間に消費し尽くされた。さらに、あまりの高熱と圧力に耐えきれず、錬金術師の相棒である『乳鉢』が2つ同時に粉々に砕け散るという痛恨の事故も記録されている。<br>
+            失った代償は小さくないが、それと引き換えに生み出された『エーテル（II）』の輝きは、すべての苦労を忘れさせるほどの神秘を秘めている……かもしれない。」
+        </div>
+    </div>
+
+    <!-- 
+      【追加用テンプレート（これを上のブロックの下に貼り付けて使ってください）】
+      
+      <div class="entry" style="margin-top: 20px;">
+          <h2>🧪 アイテム名</h2>
+          <div class="stats">
+              <div><span>作業回数：</span> 0回</div>
+              <div><span>ステータス：</span> ステータス</div>
+          </div>
+          <div class="losses">
+              <strong>⚠️ 失われた代償：</strong>
+              <ul>
+                  <li>素材A：0個</li>
+              </ul>
+          </div>
+          <div class="flavor">
+              ここに解説文（フレーバーテキスト）を書きます。
+          </div>
+      </div>
+    -->
+
+</body>
+</html>
