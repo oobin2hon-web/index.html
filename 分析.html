@@ -153,7 +153,7 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 20px;
-            width: 95%; max-width: 550px;
+            width: 95%; max-width: 600px;
             max-height: 85vh; overflow-y: auto;
         }
         .modal-header {
@@ -162,7 +162,11 @@
             padding-bottom: 8px; margin-bottom: 12px;
         }
         .close-btn { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; }
+        /* 材料行のレイアウト修正：材料名を広く、個数・単価を適切に */
         .material-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+        .material-row .mat-name { flex: 3; }
+        .material-row .mat-count { flex: 1; min-width: 60px; }
+        .material-row .mat-price { flex: 1.5; min-width: 80px; }
     </style>
 </head>
 <body>
@@ -284,13 +288,19 @@
         updateAllMasters();
     }
 
-    function saveData() {
+    // 保存処理の安定化（エラーが出ないように調整）
+    function saveData(showAlert = true) {
         try {
             localStorage.setItem('alchemy_records_v6', JSON.stringify(records));
             localStorage.setItem('alchemy_masters_v6', JSON.stringify(masters));
-            alert('データを保存しました！');
+            if (showAlert) {
+                alert('データを保存しました！');
+            }
+            return true;
         } catch (e) {
-            alert('保存に失敗しました');
+            console.error("保存エラー:", e);
+            alert('保存に失敗しました（容量制限やブラウザ設定をご確認ください）');
+            return false;
         }
     }
 
@@ -300,7 +310,7 @@
         document.getElementById('professionFilter').addEventListener('change', renderTable);
         document.getElementById('searchKeyword').addEventListener('input', renderTable);
         
-        document.getElementById('saveBtn').addEventListener('click', saveData);
+        document.getElementById('saveBtn').addEventListener('click', () => saveData(true));
         document.getElementById('exportBtn').addEventListener('click', exportHTMLFile);
         document.getElementById('markdownBtn').addEventListener('click', copyForBear);
         document.getElementById('importFile').addEventListener('change', importDataFile);
@@ -342,7 +352,6 @@
         masters.materials = [...matSet];
     }
 
-    // 修正されたテキスト解析ロジック
     function parseAndAddLog() {
         const rawText = document.getElementById('logInput').value;
         if (!rawText.trim()) {
@@ -358,7 +367,6 @@
         let amount = 0;
         let workCount = 1;
 
-        // 1. 職種の検出
         for (let line of lines) {
             for (let prof of masters.professions) {
                 if (line.includes(prof)) {
@@ -368,7 +376,6 @@
             }
         }
 
-        // 2. 作業回数の検出
         for (let line of lines) {
             if (line.includes("作業回数")) {
                 let workMatch = line.match(/([\d,]+)/);
@@ -376,7 +383,6 @@
             }
         }
 
-        // 3. 「獲得したもの」の次の行をアイテム名、その数値を獲得数として正確に取得
         for (let i = 0; i < lines.length; i++) {
             if (lines[i] === "獲得したもの" || lines[i].includes("獲得")) {
                 if (i + 1 < lines.length) {
@@ -392,7 +398,6 @@
             }
         }
 
-        // フォールバック（もし「獲得したもの」が見つからない場合の保険）
         if (!itemName && lines.length >= 2) {
             itemName = lines[lines.length - 2];
             let amtMatch = lines[lines.length - 1].match(/^([\d,]+)/);
@@ -418,7 +423,7 @@
         updateAllMasters();
         updateProfessionFilterOptions();
         renderTable();
-        saveData();
+        saveData(false);
         document.getElementById('logInput').value = '';
         alert(`✅ 追加成功: ${itemName} (${amount}個 / 作業回数:${workCount})`);
     }
@@ -439,7 +444,7 @@
         updateAllMasters();
         updateProfessionFilterOptions();
         renderTable();
-        saveData();
+        saveData(false);
     }
 
     function updateProfessionFilterOptions() {
@@ -539,7 +544,7 @@
                 let idx = e.target.getAttribute('data-index');
                 records[idx].profession = e.target.value;
                 updateProfessionFilterOptions();
-                saveData();
+                saveData(false);
             });
         });
         document.querySelectorAll('.row-item').forEach(el => {
@@ -547,7 +552,7 @@
                 let idx = e.target.getAttribute('data-index');
                 records[idx].itemName = e.target.value;
                 updateAllMasters();
-                saveData();
+                saveData(false);
             });
         });
         document.querySelectorAll('.row-amount').forEach(el => {
@@ -555,21 +560,21 @@
                 let idx = e.target.getAttribute('data-index');
                 records[idx].amount = parseFloat(e.target.value) || 0;
                 renderTable();
-                saveData();
+                saveData(false);
             });
         });
         document.querySelectorAll('.row-work').forEach(el => {
             el.addEventListener('change', (e) => {
                 let idx = e.target.getAttribute('data-index');
                 records[idx].workCount = parseFloat(e.target.value) || 0;
-                saveData();
+                saveData(false);
             });
         });
         document.querySelectorAll('.row-price').forEach(el => {
             el.addEventListener('change', (e) => {
                 let idx = e.target.getAttribute('data-index');
                 records[idx].price = parseFloat(e.target.value) || 0;
-                saveData();
+                saveData(false);
             });
         });
         document.querySelectorAll('.row-speed').forEach(el => {
@@ -577,7 +582,7 @@
                 let idx = e.target.getAttribute('data-index');
                 records[idx].speed = parseFloat(e.target.value) || 0;
                 renderTable();
-                saveData();
+                saveData(false);
             });
         });
         document.querySelectorAll('.btn-modal').forEach(el => {
@@ -593,7 +598,7 @@
                     records.splice(idx, 1);
                     updateProfessionFilterOptions();
                     renderTable();
-                    saveData();
+                    saveData(false);
                 }
             });
         });
@@ -630,7 +635,7 @@
         row.className = 'material-row';
         
         row.innerHTML = `
-            <input type="text" placeholder="材料名" value="${name}" class="mat-name" style="flex: 2; font-size:13px;">
+            <input type="text" placeholder="材料名" value="${name}" class="mat-name" style="font-size:13px;">
             <input type="number" placeholder="個数" value="${count}" class="mat-count" style="font-size:13px;">
             <input type="number" placeholder="G" value="${unitPrice}" class="mat-price" style="font-size:13px;">
             <button type="button" class="mat-del" style="background-color: var(--danger); padding: 4px 8px; margin:0;">×</button>
@@ -681,11 +686,11 @@
         updateAllMasters();
         closeModal();
         renderTable();
-        saveData();
+        saveData(false);
     }
 
     function exportHTMLFile() {
-        saveData();
+        saveData(false);
         const htmlContent = document.documentElement.outerHTML;
         const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
         const url = URL.createObjectURL(blob);
@@ -720,7 +725,7 @@
                 updateAllMasters();
                 updateProfessionFilterOptions();
                 renderTable();
-                saveData();
+                saveData(false);
                 alert('読み込み成功！');
             } catch (err) { alert('読み込み失敗: ' + err.message); }
             event.target.value = '';
