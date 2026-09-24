@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>生産・作業分析ツール (全機能搭載・スマホ完全対応版)</title>
+    <title>生産・作業分析ツール</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -342,6 +342,7 @@
         masters.materials = [...matSet];
     }
 
+    // 修正されたテキスト解析ロジック
     function parseAndAddLog() {
         const rawText = document.getElementById('logInput').value;
         if (!rawText.trim()) {
@@ -354,9 +355,10 @@
 
         let profession = "錬金術師";
         let itemName = "";
-        let amount = 1;
+        let amount = 0;
         let workCount = 1;
 
+        // 1. 職種の検出
         for (let line of lines) {
             for (let prof of masters.professions) {
                 if (line.includes(prof)) {
@@ -366,6 +368,7 @@
             }
         }
 
+        // 2. 作業回数の検出
         for (let line of lines) {
             if (line.includes("作業回数")) {
                 let workMatch = line.match(/([\d,]+)/);
@@ -373,38 +376,31 @@
             }
         }
 
+        // 3. 「獲得したもの」の次の行をアイテム名、その数値を獲得数として正確に取得
         for (let i = 0; i < lines.length; i++) {
             if (lines[i] === "獲得したもの" || lines[i].includes("獲得")) {
-                for (let j = i + 1; j < lines.length; j++) {
-                    let textCandidate = lines[j];
-                    if (!textCandidate.match(/^[\d,]+(?:本|個|枚)?$/) && !textCandidate.includes("作業回数")) {
-                        itemName = textCandidate;
-                        for (let k = j + 1; k < lines.length; k++) {
-                            let amtMatch = lines[k].match(/^([\d,]+)/);
-                            if (amtMatch) {
-                                amount = parseInt(amtMatch[1].replace(/,/g, ''));
-                                break;
-                            }
-                        }
-                        break;
+                if (i + 1 < lines.length) {
+                    itemName = lines[i + 1];
+                }
+                if (i + 2 < lines.length) {
+                    let amtMatch = lines[i + 2].match(/^([\d,]+)/);
+                    if (amtMatch) {
+                        amount = parseInt(amtMatch[1].replace(/,/g, ''));
                     }
                 }
                 break;
             }
         }
 
-        if (!itemName) {
-            for (let i = 0; i < lines.length; i++) {
-                let m = lines[i].match(/^([\d,]+)\s*(?:本|個|枚)?$/);
-                if (m) {
-                    amount = parseInt(m[1].replace(/,/g, ''));
-                    if (i > 0) itemName = lines[i-1];
-                    break;
-                }
-            }
+        // フォールバック（もし「獲得したもの」が見つからない場合の保険）
+        if (!itemName && lines.length >= 2) {
+            itemName = lines[lines.length - 2];
+            let amtMatch = lines[lines.length - 1].match(/^([\d,]+)/);
+            if (amtMatch) amount = parseInt(amtMatch[1].replace(/,/g, ''));
         }
 
         if (!itemName) itemName = "スノーフラワー";
+        if (isNaN(amount) || amount <= 0) amount = 1;
 
         const newRecord = {
             id: Date.now(),
@@ -424,7 +420,7 @@
         renderTable();
         saveData();
         document.getElementById('logInput').value = '';
-        alert(`✅ 追加成功: ${itemName} (${amount}個)`);
+        alert(`✅ 追加成功: ${itemName} (${amount}個 / 作業回数:${workCount})`);
     }
 
     function addNewManualRecord() {
