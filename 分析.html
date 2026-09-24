@@ -162,7 +162,6 @@
             padding-bottom: 8px; margin-bottom: 12px;
         }
         .close-btn { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; }
-        /* 材料行のレイアウト修正：材料名を広く、個数・単価を適切に */
         .material-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
         .material-row .mat-name { flex: 3; }
         .material-row .mat-count { flex: 1; min-width: 60px; }
@@ -288,18 +287,36 @@
         updateAllMasters();
     }
 
-    // 保存処理の安定化（エラーが出ないように調整）
+    // ローカルストレージ保存の見直し：無駄なデータを削って容量を最適化し、エラーを防止
     function saveData(showAlert = true) {
         try {
-            localStorage.setItem('alchemy_records_v6', JSON.stringify(records));
+            // 保存前にデータをクリーンアップ（空の材料行などを除外して容量節約）
+            const cleanedRecords = records.map(r => ({
+                id: r.id,
+                profession: r.profession,
+                itemName: r.itemName,
+                amount: r.amount,
+                workCount: r.workCount,
+                materials: (r.materials || []).filter(m => m.name && m.name.trim() !== ''),
+                cost: r.cost,
+                price: r.price,
+                speed: r.speed
+            }));
+
+            localStorage.setItem('alchemy_records_v6', JSON.stringify(cleanedRecords));
             localStorage.setItem('alchemy_masters_v6', JSON.stringify(masters));
+            
             if (showAlert) {
                 alert('データを保存しました！');
             }
             return true;
         } catch (e) {
-            console.error("保存エラー:", e);
-            alert('保存に失敗しました（容量制限やブラウザ設定をご確認ください）');
+            console.error("ローカルストレージ保存エラー:", e);
+            if (e.name === 'QuotaExceededError' || e.code === 22) {
+                alert('保存に失敗しました：ブラウザの保存容量（LocalStorage）がいっぱいです。「ファイル出力」機能を使ってバックアップを取ることをお勧めします。');
+            } else {
+                alert('保存に失敗しました（プライベートモードやブラウザの設定をご確認ください）');
+            }
             return false;
         }
     }
