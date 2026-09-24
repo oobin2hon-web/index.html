@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>錬金術師 効率・原価分析ツール</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent: #10b981;
+            --border: #334155;
+            --danger: #ef4444;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        h1, h2, h3 {
+            color: #f1f5f9;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            background-color: #0f172a;
+            color: var(--text-color);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 10px;
+            box-sizing: border-box;
+            font-family: monospace;
+            resize: vertical;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+        .filter-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-bar select {
+            background-color: #0f172a;
+            color: var(--text-color);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 6px 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+            font-size: 14px;
+        }
+        th {
+            background-color: #0f172a;
+            cursor: pointer;
+            user-select: none;
+        }
+        th:hover {
+            background-color: #334155;
+        }
+        input[type="text"], input[type="number"] {
+            background-color: #0f172a;
+            color: var(--text-color);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 5px;
+            width: 90px;
+        }
+        .highlight {
+            color: var(--accent);
+            font-weight: bold;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            align-items: center;
+        }
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        .file-input-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .btn-file {
+            background-color: #8b5cf6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .btn-file:hover {
+            background-color: #7c3aed;
+        }
+
+        /* モーダルウィンドウのスタイル */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 25px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            margin: 0;
+        }
+        .close-btn:hover {
+            color: var(--text-color);
+        }
+        .material-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .material-row input {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>錬金術師 作業分析 & 売切予測ツール</h1>
+
+    <!-- 入力セクション -->
+    <div class="card">
+        <h2>作業結果の貼り付け・追加</h2>
+        <p>sold out2 などの作業結果テキストをそのまま貼り付けて解析・記録できます。</p>
+        <textarea id="logInput" placeholder="例:
+錬金術師LV 7 (+1.44%)
+28.52%
+獲得したもの
+スノーフラワー
+494本
+作業回数：40回"></textarea>
+        <button onclick="parseAndAddLog()">解析して記録に追加</button>
+    </div>
+
+    <!-- 記録・管理セクション -->
+    <div class="card">
+        <h2>記録・原価・シミュレーション一覧</h2>
+        
+        <!-- フィルターバー -->
+        <div class="filter-bar">
+            <label>🔍 職種フィルター: 
+                <select id="professionFilter" onchange="renderTable()">
+                    <option value="all">すべて表示</option>
+                </select>
+            </label>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table id="recordTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('profession')">職種 ↕</th>
+                        <th onclick="sortTable('itemName')">アイテム名 ↕</th>
+                        <th onclick="sortTable('amount')">獲得数 ↕</th>
+                        <th onclick="sortTable('workCount')">作業回数 ↕</th>
+                        <th>原価詳細 (材料)</th>
+                        <th onclick="sortTable('cost')">原価合計 (G) ↕</th>
+                        <th onclick="sortTable('price')">販売価格 (G) ↕</th>
+                        <th onclick="sortTable('speed')">1h販売数 ↕</th>
+                        <th>売切予測時間</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- JavaScriptで動的生成 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="button-group">
+            <button onclick="saveData()" style="background-color: var(--accent);">ブラウザに状態を保存する</button>
+            <button onclick="exportHTMLFile()" style="background-color: #3b82f6;">📥 データをファイルに書き出す</button>
+            <button onclick="copyForBear()" style="background-color: #f59e0b;">🐻 Bear用Markdownをコピー</button>
+            
+            <div class="file-input-wrapper">
+                <button class="btn-file">📂 保存したファイルを読み込む</button>
+                <input type="file" id="importFile" accept=".html,.json" onchange="importDataFile(event)">
+            </div>
+            
+            <button onclick="clearAllData()" style="background-color: var(--danger);">⚠️ 全データ削除</button>
+        </div>
+    </div>
+</div>
+
+<!-- 材料編集モーダル -->
+<div id="materialModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">材料設定 & 原価計算</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <p>このアイテムを作るための材料、必要個数、単価を入力してください。自動で原価合計が計算されます。</p>
+        <div id="materialListContainer">
+            <!-- 動的生成 -->
+        </div>
+        <button onclick="addMaterialRow()" style="background-color: #334155; margin-bottom: 15px;">＋ 材料行を追加</button>
+        <div style="text-align: right; border-top: 1px solid var(--border); padding-top: 15px;">
+            <p style="font-size: 16px;">計算された原価合計: <span id="modalCalculatedCost" class="highlight" style="font-size: 20px;">0</span> G</p>
+            <button onclick="saveModalMaterials()" style="background-color: var(--accent);">確定して保存</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let records = [];
+    let currentSort = { column: null, ascending: true };
+    let editingIndex = null;
+
+    window.onload = function() {
+        const saved = localStorage.getItem('alchemy_records');
+        if (saved) {
+            try {
+                records = JSON.parse(saved);
+                records.forEach(r => {
+                    if (!r.materials) r.materials = [];
+                });
+            } catch (e) {
+                console.error("ローカルストレージの読み込みに失敗しました", e);
+            }
+        }
+        updateProfessionFilterOptions();
+        renderTable();
+    }
+
+    // テキスト解析して追加（エラーセーフ版）
+    function parseAndAddLog() {
+        try {
+            const text = document.getElementById('logInput').value;
+            if (!text.trim()) {
+                alert('テキストを入力してください。');
+                return;
+            }
+
+            let profession = "錬金術師";
+            let itemName = "スノーフラワー";
+            let amount = 1;
+            let workCount = 1;
+
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+            // 1. 職種の検出
+            for (let line of lines) {
+                if (line.includes("錬金術師")) { profession = "錬金術師"; break; }
+                if (line.includes("木こり")) { profession = "木こり"; break; }
+                if (line.includes("採掘師")) { profession = "採掘師"; break; }
+                if (line.includes("狩人")) { profession = "狩人"; break; }
+                if (line.includes("農家")) { profession = "農家"; break; }
+                if (line.includes("紡績工")) { profession = "紡績工"; break; }
+                if (line.includes("裁縫師")) { profession = "裁縫師"; break; }
+                if (line.includes("鍛冶師")) { profession = "鍛冶師"; break; }
+                if (line.includes("彫金師")) { profession = "彫金師"; break; }
+                if (line.includes("薬師")) { profession = "薬師"; break; }
+                if (line.includes("料理人")) { profession = "料理人"; break; }
+                
+                let matchProf = line.match(/^([^\dLVlv]+?)(?:LV|Lv|レベル|\d)/);
+                if (matchProf && matchProf[1].trim().length < 10) {
+                    profession = matchProf[1].trim();
+                    break;
+                }
+            }
+
+            // 2. アイテム名と獲得数の検出
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i] === "獲得したもの" && i + 1 < lines.length) {
+                    itemName = lines[i+1];
+                    if (i + 2 < lines.length) {
+                        let amtMatch = lines[i+2].match(/([\d,]+)/);
+                        if (amtMatch) {
+                            amount = parseInt(amtMatch[1].replace(/,/g, ''));
+                        }
+                    }
+                }
+                if (lines[i].includes("作業回数")) {
+                    let workMatch = lines[i].match(/([\d,]+)/);
+                    if (workMatch) {
+                        workCount = parseInt(workMatch[1].replace(/,/g, ''));
+                    }
+                }
+            }
+
+            // 万が一「獲得したもの」が見つからない場合のフォールバック（数字行の直前をアイテム名にするなど）
+            if (itemName === "スノーフラワー" && lines.length > 0) {
+                for (let i = 0; i < lines.length; i++) {
+                    let m = lines[i].match(/^([\d,]+)\s*(?:本|個|枚|個数)?$/);
+                    if (m) {
+                        amount = parseInt(m[1].replace(/,/g, ''));
+                        if (i > 0) itemName = lines[i-1];
+                        break;
+                    }
+                }
+            }
+
+            const newRecord = {
+                id: Date.now(),
+                profession: profession,
+                itemName: itemName,
+                amount: amount,
+                workCount: workCount,
+                materials: [],
+                cost: 0,
+                price: 0,
+                speed: 10
+            };
+
+            records.push(newRecord);
+            updateProfessionFilterOptions();
+            renderTable();
+            saveData();
+            document.getElementById('logInput').value = '';
+            alert(`✅ 追加成功！\n職種: ${profession}\nアイテム: ${itemName}\n獲得数: ${amount}`);
+
+        } catch (err) {
+            console.error(err);
+            alert('解析中にエラーが発生しました: ' + err.message);
+        }
+    }
+
+    function updateProfessionFilterOptions() {
+        const select = document.getElementById('professionFilter');
+        const currentValue = select.value;
+        const professions = [...new Set(records.map(r => r.profession))];
+        
+        select.innerHTML = '<option value="all">すべて表示</option>';
+        professions.forEach(prof => {
+            const opt = document.createElement('option');
+            opt.value = prof;
+            opt.textContent = prof;
+            select.appendChild(opt);
+        });
+        
+        if (professions.includes(currentValue) || currentValue === 'all') {
+            select.value = currentValue;
+        }
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        const selectedProf = document.getElementById('professionFilter').value;
+        tbody.innerHTML = '';
+
+        let filteredRecords = records.filter(rec => {
+            if (selectedProf === 'all') return true;
+            return rec.profession === selectedProf;
+        });
+
+        if (currentSort.column) {
+            filteredRecords.sort((a, b) => {
+                let valA = a[currentSort.column];
+                let valB = b[currentSort.column];
+                
+                if (typeof valA === 'string') {
+                    return currentSort.ascending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                } else {
+                    return currentSort.ascending ? valA - valB : valB - valA;
+                }
+            });
+        }
+
+        if (filteredRecords.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted);">記録がありません。上のフォームから追加してください。</td></tr>';
+            return;
+        }
+
+        filteredRecords.forEach((rec) => {
+            const index = records.findIndex(r => r.id === rec.id);
+
+            let calculatedCost = 0;
+            if (rec.materials && rec.materials.length > 0) {
+                calculatedCost = rec.materials.reduce((sum, m) => sum + ((parseFloat(m.count) || 0) * (parseFloat(m.unitPrice) || 0)), 0);
+                rec.cost = calculatedCost;
+            }
+
+            let timeText = "予測不可";
+            if (rec.speed > 0 && rec.amount > 0) {
+                let hours = rec.amount / rec.speed;
+                let h = Math.floor(hours);
+                let m = Math.round((hours - h) * 60);
+                timeText = `${h}時間 ${m}分`;
+            }
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><span style="background: #334155; padding: 2px 6px; border-radius: 4px; font-size: 12px;">${rec.profession}</span></td>
+                <td><strong>${rec.itemName}</strong></td>
+                <td>${rec.amount}</td>
+                <td>${rec.workCount}</td>
+                <td><button onclick="openModal(${index})" style="background-color: #334155; padding: 5px 10px; margin:0; font-size: 12px;">🧪 材料編集 (${rec.materials ? rec.materials.length : 0})</button></td>
+                <td><strong>${rec.cost.toLocaleString()} G</strong></td>
+                <td><input type="number" value="${rec.price}" onchange="updateValue(${index}, 'price', this.value)"></td>
+                <td><input type="number" value="${rec.speed}" onchange="updateValue(${index}, 'speed', this.value)"></td>
+                <td><span class="highlight">${timeText}</span></td>
+                <td><button onclick="deleteRecord(${index})" style="background-color: var(--danger); padding: 5px 10px; margin:0;">削除</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function openModal(index) {
+        editingIndex = index;
+        const rec = records[index];
+        document.getElementById('modalTitle').textContent = `材料設定: ${rec.itemName}`;
+        
+        const container = document.getElementById('materialListContainer');
+        container.innerHTML = '';
+
+        if (!rec.materials || rec.materials.length === 0) {
+            rec.materials = [{ name: '', count: 1, unitPrice: 0 }];
+        }
+
+        rec.materials.forEach((mat) => {
+            appendMaterialRow(mat.name, mat.count, mat.unitPrice);
+        });
+
+        calculateModalCost();
+        document.getElementById('materialModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('materialModal').style.display = 'none';
+        editingIndex = null;
+    }
+
+    function appendMaterialRow(name = '', count = 1, unitPrice = 0) {
+        const container = document.getElementById('materialListContainer');
+        const row = document.createElement('div');
+        row.className = 'material-row';
+        row.innerHTML = `
+            <input type="text" placeholder="材料名" value="${name}" class="mat-name" style="flex: 2;">
+            <input type="number" placeholder="個数" value="${count}" class="mat-count" oninput="calculateModalCost()">
+            <input type="number" placeholder="単価(G)" value="${unitPrice}" class="mat-price" oninput="calculateModalCost()">
+            <button onclick="this.parentElement.remove(); calculateModalCost();" style="background-color: var(--danger); padding: 5px 10px; margin:0;">×</button>
+        `;
+        container.appendChild(row);
+    }
+
+    function addMaterialRow() {
+        appendMaterialRow('', 1, 0);
+    }
+
+    function calculateModalCost() {
+        const rows = document.querySelectorAll('#materialListContainer .material-row');
+        let total = 0;
+        rows.forEach(row => {
+            let count = parseFloat(row.querySelector('.mat-count').value) || 0;
+            let price = parseFloat(row.querySelector('.mat-price').value) || 0;
+            total += count * price;
+        });
+        document.getElementById('modalCalculatedCost').textContent = total.toLocaleString();
+    }
+
+    function saveModalMaterials() {
+        if (editingIndex === null) return;
+        const rows = document.querySelectorAll('#materialListContainer .material-row');
+        let newMaterials = [];
+        let totalCost = 0;
+
+        rows.forEach(row => {
+            let name = row.querySelector('.mat-name').value.trim();
+            let count = parseFloat(row.querySelector('.mat-count').value) || 0;
+            let unitPrice = parseFloat(row.querySelector('.mat-price').value) || 0;
+            if (name) {
+                newMaterials.push({ name, count, unitPrice });
+                totalCost += count * unitPrice;
+            }
+        });
+
+        records[editingIndex].materials = newMaterials;
+        records[existingIndex = editingIndex].cost = totalCost;
+
+        closeModal();
+        renderTable();
+        saveData();
+    }
+
+    function sortTable(column) {
+        if (currentSort.column === column) {
+            currentSort.ascending = !currentSort.ascending;
+        } else {
+            currentSort.column = column;
+            currentSort.ascending = true;
+        }
+        renderTable();
+    }
+
+    function updateValue(index, field, value) {
+        records[index][field] = parseFloat(value) || 0;
+        renderTable();
+        saveData();
+    }
+
+    function deleteRecord(index) {
+        if (confirm(`「${records[index].itemName}」の記録を削除しますか？`)) {
+            records.splice(index, 1);
+            updateProfessionFilterOptions();
+            renderTable();
+            saveData();
+        }
+    }
+
+    function clearAllData() {
+        if (confirm("本当にすべての記録を削除しますか？この操作は元に戻せません。")) {
+            records = [];
+            updateProfessionFilterOptions();
+            renderTable();
+            localStorage.removeItem('alchemy_records');
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem('alchemy_records', JSON.stringify(records));
+    }
+
+    function copyForBear() {
+        if (records.length === 0) {
+            alert('コピーするデータがありません。');
+            return;
+        }
+
+        let md = `# 錬金術師 作業・原価分析レポート\n\n`;
+        md += `> 記録日時: ${new Date().toLocaleString()}\n\n`;
+        md += `| 職種 | アイテム名 | 獲得数 | 作業回数 | 原価合計 | 販売価格 | 1h販売数 | 売切予測 |\n`;
+        md += `| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |\n`;
+
+        records.forEach(rec => {
+            let timeText = "予測不可";
+            if (rec.speed > 0 && rec.amount > 0) {
+                let hours = rec.amount / rec.speed;
+                let h = Math.floor(hours);
+                let m = Math.round((hours - h) * 60);
+                timeText = `${h}時間 ${m}分`;
+            }
+            md += `| ${rec.profession} | ${rec.itemName} | ${rec.amount} | ${rec.workCount} | ${rec.cost.toLocaleString()}G | ${rec.price.toLocaleString()}G | ${rec.speed}個 | ${timeText} |\n`;
+        });
+
+        navigator.clipboard.writeText(md).then(() => {
+            alert('🐻 Bear用のMarkdown形式でクリップボードにコピーしました！そのままBearに貼り付けられます。');
+        }).catch(err => {
+            console.error('コピー失敗', err);
+            alert('コピーに失敗しました。');
+        });
+    }
+
+    function exportHTMLFile() {
+        saveData();
+        const htmlContent = document.documentElement.outerHTML;
+        const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `alchemy_tracker_${new Date().toISOString().slice(0,10)}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function importDataFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const content = e.target.result;
+            try {
+                let importedRecords = [];
+                if (file.name.endsWith('.json')) {
+                    importedRecords = JSON.parse(content);
+                } else {
+                    const match = content.match(/let records = (\[[\s\S]*?\]);/);
+                    if (match && match[1]) {
+                        importedRecords = JSON.parse(match[1]);
+                    } else {
+                        throw new Error("有効なデータが見つかりませんでした。");
+                    }
+                }
+
+                if (Array.isArray(importedRecords) && importedRecords.length > 0) {
+                    if (confirm(`ファイルから ${importedRecords.length} 件のデータを読み込みました。現在のデータに追加しますか？\n（キャンセルすると上書きされます）`)) {
+                        records = records.concat(importedRecords);
+                    } else {
+                        records = importedRecords;
+                    }
+                    updateProfessionFilterOptions();
+                    renderTable();
+                    saveData();
+                    alert('データの読み込みが完了しました！');
+                } else {
+                    alert('読み込んだファイルにデータが含まれていませんでした。');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('ファイルの読み込みに失敗しました。正しいフォーマットか確認してください。');
+            }
+            event.target.value = '';
+        };
+        reader.readAsText(file);
+    }
+</script>
+
+</body>
+</html>
