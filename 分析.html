@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>生産・作業分析ツール</title>
+    <title>生産・作業分析ツール (全機能搭載・スマホ完全対応版)</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -153,7 +153,7 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 20px;
-            width: 95%; max-width: 600px;
+            width: 95%; max-width: 550px;
             max-height: 85vh; overflow-y: auto;
         }
         .modal-header {
@@ -163,9 +163,6 @@
         }
         .close-btn { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; }
         .material-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
-        .material-row .mat-name { flex: 3; }
-        .material-row .mat-count { flex: 1; min-width: 60px; }
-        .material-row .mat-price { flex: 1.5; min-width: 80px; }
     </style>
 </head>
 <body>
@@ -207,11 +204,14 @@
             <thead>
                 <tr>
                     <th data-sort="profession">職種 ↕</th>
+                    <th data-sort="profLevel">LV ↕</th>
                     <th data-sort="itemName">アイテム ↕</th>
                     <th data-sort="amount">獲得数 ↕</th>
                     <th data-sort="workCount">回数 ↕</th>
+                    <th>1回獲得平均</th>
                     <th>原価詳細</th>
                     <th data-sort="cost">原価合計 ↕</th>
+                    <th>1回原価平均</th>
                     <th data-sort="price">販売価格 ↕</th>
                     <th data-sort="speed">1h販売 ↕</th>
                     <th>売切予測</th>
@@ -224,7 +224,7 @@
         <div class="button-group">
             <button id="saveBtn" style="background-color: var(--accent);">保存</button>
             <button id="exportBtn" style="background-color: #3b82f6;">📥 ファイル出力</button>
-            <button id="markdownBtn" style="background-color: #f59e0b;">🐻 Markdown</button>
+            <button id="markdownBtn" style="background-color: #f59e0b;">🐻 Bear連携</button>
             
             <div class="file-input-wrapper">
                 <button class="btn-file">📂 読込</button>
@@ -272,12 +272,17 @@
 
     function loadDataFromStorage() {
         try {
-            const savedRecords = localStorage.getItem('alchemy_records_v6');
+            const savedRecords = localStorage.getItem('alchemy_records_v7');
             if (savedRecords) {
                 records = JSON.parse(savedRecords);
-                records.forEach(r => { if (!r.materials) r.materials = []; });
+                records.forEach(r => { 
+                    if (!r.materials) r.materials = []; 
+                    if (r.profLevel === undefined) r.profLevel = 1;
+                    if (r.expGain === undefined) r.expGain = "";
+                    if (r.totalExp === undefined) r.totalExp = "";
+                });
             }
-            const savedMasters = localStorage.getItem('alchemy_masters_v6');
+            const savedMasters = localStorage.getItem('alchemy_masters_v7');
             if (savedMasters) {
                 masters = JSON.parse(savedMasters);
             }
@@ -287,37 +292,13 @@
         updateAllMasters();
     }
 
-    // ローカルストレージ保存の見直し：無駄なデータを削って容量を最適化し、エラーを防止
-    function saveData(showAlert = true) {
+    function saveData() {
         try {
-            // 保存前にデータをクリーンアップ（空の材料行などを除外して容量節約）
-            const cleanedRecords = records.map(r => ({
-                id: r.id,
-                profession: r.profession,
-                itemName: r.itemName,
-                amount: r.amount,
-                workCount: r.workCount,
-                materials: (r.materials || []).filter(m => m.name && m.name.trim() !== ''),
-                cost: r.cost,
-                price: r.price,
-                speed: r.speed
-            }));
-
-            localStorage.setItem('alchemy_records_v6', JSON.stringify(cleanedRecords));
-            localStorage.setItem('alchemy_masters_v6', JSON.stringify(masters));
-            
-            if (showAlert) {
-                alert('データを保存しました！');
-            }
-            return true;
+            localStorage.setItem('alchemy_records_v7', JSON.stringify(records));
+            localStorage.setItem('alchemy_masters_v7', JSON.stringify(masters));
+            alert('データを保存しました！');
         } catch (e) {
-            console.error("ローカルストレージ保存エラー:", e);
-            if (e.name === 'QuotaExceededError' || e.code === 22) {
-                alert('保存に失敗しました：ブラウザの保存容量（LocalStorage）がいっぱいです。「ファイル出力」機能を使ってバックアップを取ることをお勧めします。');
-            } else {
-                alert('保存に失敗しました（プライベートモードやブラウザの設定をご確認ください）');
-            }
-            return false;
+            alert('保存に失敗しました');
         }
     }
 
@@ -327,7 +308,7 @@
         document.getElementById('professionFilter').addEventListener('change', renderTable);
         document.getElementById('searchKeyword').addEventListener('input', renderTable);
         
-        document.getElementById('saveBtn').addEventListener('click', () => saveData(true));
+        document.getElementById('saveBtn').addEventListener('click', saveData);
         document.getElementById('exportBtn').addEventListener('click', exportHTMLFile);
         document.getElementById('markdownBtn').addEventListener('click', copyForBear);
         document.getElementById('importFile').addEventListener('change', importDataFile);
@@ -380,17 +361,36 @@
         const lines = normalizedText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
         let profession = "錬金術師";
+        let profLevel = 1;
+        let expGain = "";
+        let totalExp = "";
         let itemName = "";
-        let amount = 0;
+        let amount = 1;
         let workCount = 1;
 
         for (let line of lines) {
             for (let prof of masters.professions) {
                 if (line.includes(prof)) {
                     profession = prof;
+                    let lvMatch = line.match(/LV\s*([\d,]+)/i);
+                    if (lvMatch) profLevel = parseInt(lvMatch[1].replace(/,/g, ''));
+
+                    let expMatch = line.match(/\(([\+\-][\d\.]+%?)\)/);
+                    if (expMatch) expGain = expMatch[1];
                     break;
                 }
             }
+        }
+
+        let percentMatches = [];
+        for (let line of lines) {
+            let pMatch = line.match(/^([\d\.]+)%$/);
+            if (pMatch) {
+                percentMatches.push(pMatch[1] + "%");
+            }
+        }
+        if (percentMatches.length > 0) {
+            totalExp = percentMatches[percentMatches.length - 1];
         }
 
         for (let line of lines) {
@@ -402,31 +402,43 @@
 
         for (let i = 0; i < lines.length; i++) {
             if (lines[i] === "獲得したもの" || lines[i].includes("獲得")) {
-                if (i + 1 < lines.length) {
-                    itemName = lines[i + 1];
-                }
-                if (i + 2 < lines.length) {
-                    let amtMatch = lines[i + 2].match(/^([\d,]+)/);
-                    if (amtMatch) {
-                        amount = parseInt(amtMatch[1].replace(/,/g, ''));
+                for (let j = i + 1; j < lines.length; j++) {
+                    let textCandidate = lines[j];
+                    if (!textCandidate.match(/^[\d,]+(?:本|個|枚)?$/) && !textCandidate.includes("作業回数")) {
+                        itemName = textCandidate;
+                        for (let k = j + 1; k < lines.length; k++) {
+                            let amtMatch = lines[k].match(/^([\d,]+)/);
+                            if (amtMatch) {
+                                amount = parseInt(amtMatch[1].replace(/,/g, ''));
+                                break;
+                            }
+                        }
+                        break;
                     }
                 }
                 break;
             }
         }
 
-        if (!itemName && lines.length >= 2) {
-            itemName = lines[lines.length - 2];
-            let amtMatch = lines[lines.length - 1].match(/^([\d,]+)/);
-            if (amtMatch) amount = parseInt(amtMatch[1].replace(/,/g, ''));
+        if (!itemName) {
+            for (let i = 0; i < lines.length; i++) {
+                let m = lines[i].match(/^([\d,]+)\s*(?:本|個|枚)?$/);
+                if (m) {
+                    amount = parseInt(m[1].replace(/,/g, ''));
+                    if (i > 0) itemName = lines[i-1];
+                    break;
+                }
+            }
         }
 
         if (!itemName) itemName = "スノーフラワー";
-        if (isNaN(amount) || amount <= 0) amount = 1;
 
         const newRecord = {
             id: Date.now(),
             profession: profession,
+            profLevel: profLevel,
+            expGain: expGain,
+            totalExp: totalExp,
             itemName: itemName,
             amount: amount,
             workCount: workCount,
@@ -440,15 +452,18 @@
         updateAllMasters();
         updateProfessionFilterOptions();
         renderTable();
-        saveData(false);
+        saveData();
         document.getElementById('logInput').value = '';
-        alert(`✅ 追加成功: ${itemName} (${amount}個 / 作業回数:${workCount})`);
+        alert(`✅ 解析追加成功: ${profession} LV${profLevel} / ${itemName} (${amount}個)`);
     }
 
     function addNewManualRecord() {
         const newRecord = {
             id: Date.now(),
             profession: masters.professions[0] || "錬金術師",
+            profLevel: 1,
+            expGain: "",
+            totalExp: "",
             itemName: "新しいアイテム",
             amount: 1,
             workCount: 1,
@@ -461,7 +476,7 @@
         updateAllMasters();
         updateProfessionFilterOptions();
         renderTable();
-        saveData(false);
+        saveData();
     }
 
     function updateProfessionFilterOptions() {
@@ -508,7 +523,7 @@
         }
 
         if (filteredRecords.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted);">記録がありません</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="13" style="text-align: center; color: var(--text-muted);">記録がありません</td></tr>';
             return;
         }
 
@@ -518,6 +533,10 @@
             if (rec.materials && rec.materials.length > 0) {
                 rec.cost = rec.materials.reduce((sum, m) => sum + ((parseFloat(m.count) || 0) * (parseFloat(m.unitPrice) || 0)), 0);
             }
+
+            // 1回あたりのアベレージ計算
+            let avgAmount = (rec.workCount > 0) ? (rec.amount / rec.workCount).toFixed(2) : 0;
+            let avgCost = (rec.workCount > 0) ? Math.round(rec.cost / rec.workCount) : 0;
 
             let timeText = "-";
             if (rec.speed > 0 && rec.amount > 0) {
@@ -539,11 +558,14 @@
 
             tr.innerHTML = `
                 <td>${profHtml}</td>
+                <td><input type="number" value="${rec.profLevel !== undefined ? rec.profLevel : 1}" class="small-input row-level" data-index="${index}"></td>
                 <td>${itemHtml}</td>
                 <td><input type="number" value="${rec.amount}" class="small-input row-amount" data-index="${index}"></td>
                 <td><input type="number" value="${rec.workCount}" class="small-input row-work" data-index="${index}"></td>
+                <td><span class="highlight">${avgAmount}個</span></td>
                 <td><button class="btn-modal" data-index="${index}" style="background-color: #334155; padding: 4px 8px; margin:0; font-size: 11px;">🧪編集 (${rec.materials ? rec.materials.length : 0})</button></td>
                 <td><strong>${rec.cost.toLocaleString()}G</strong></td>
+                <td><span class="highlight">${avgCost.toLocaleString()}G</span></td>
                 <td><input type="number" value="${rec.price}" class="small-input row-price" data-index="${index}"></td>
                 <td><input type="number" value="${rec.speed}" class="small-input row-speed" data-index="${index}"></td>
                 <td><span class="highlight">${timeText}</span></td>
@@ -561,7 +583,14 @@
                 let idx = e.target.getAttribute('data-index');
                 records[idx].profession = e.target.value;
                 updateProfessionFilterOptions();
-                saveData(false);
+                saveData();
+            });
+        });
+        document.querySelectorAll('.row-level').forEach(el => {
+            el.addEventListener('change', (e) => {
+                let idx = e.target.getAttribute('data-index');
+                records[idx].profLevel = parseInt(e.target.value) || 1;
+                saveData();
             });
         });
         document.querySelectorAll('.row-item').forEach(el => {
@@ -569,7 +598,7 @@
                 let idx = e.target.getAttribute('data-index');
                 records[idx].itemName = e.target.value;
                 updateAllMasters();
-                saveData(false);
+                saveData();
             });
         });
         document.querySelectorAll('.row-amount').forEach(el => {
@@ -577,21 +606,22 @@
                 let idx = e.target.getAttribute('data-index');
                 records[idx].amount = parseFloat(e.target.value) || 0;
                 renderTable();
-                saveData(false);
+                saveData();
             });
         });
         document.querySelectorAll('.row-work').forEach(el => {
             el.addEventListener('change', (e) => {
                 let idx = e.target.getAttribute('data-index');
                 records[idx].workCount = parseFloat(e.target.value) || 0;
-                saveData(false);
+                renderTable();
+                saveData();
             });
         });
         document.querySelectorAll('.row-price').forEach(el => {
             el.addEventListener('change', (e) => {
                 let idx = e.target.getAttribute('data-index');
                 records[idx].price = parseFloat(e.target.value) || 0;
-                saveData(false);
+                saveData();
             });
         });
         document.querySelectorAll('.row-speed').forEach(el => {
@@ -599,7 +629,7 @@
                 let idx = e.target.getAttribute('data-index');
                 records[idx].speed = parseFloat(e.target.value) || 0;
                 renderTable();
-                saveData(false);
+                saveData();
             });
         });
         document.querySelectorAll('.btn-modal').forEach(el => {
@@ -615,7 +645,7 @@
                     records.splice(idx, 1);
                     updateProfessionFilterOptions();
                     renderTable();
-                    saveData(false);
+                    saveData();
                 }
             });
         });
@@ -652,7 +682,7 @@
         row.className = 'material-row';
         
         row.innerHTML = `
-            <input type="text" placeholder="材料名" value="${name}" class="mat-name" style="font-size:13px;">
+            <input type="text" placeholder="材料名" value="${name}" class="mat-name" style="flex: 2; font-size:13px;">
             <input type="number" placeholder="個数" value="${count}" class="mat-count" style="font-size:13px;">
             <input type="number" placeholder="G" value="${unitPrice}" class="mat-price" style="font-size:13px;">
             <button type="button" class="mat-del" style="background-color: var(--danger); padding: 4px 8px; margin:0;">×</button>
@@ -703,11 +733,11 @@
         updateAllMasters();
         closeModal();
         renderTable();
-        saveData(false);
+        saveData();
     }
 
     function exportHTMLFile() {
-        saveData(false);
+        saveData();
         const htmlContent = document.documentElement.outerHTML;
         const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
         const url = URL.createObjectURL(blob);
@@ -742,7 +772,7 @@
                 updateAllMasters();
                 updateProfessionFilterOptions();
                 renderTable();
-                saveData(false);
+                saveData();
                 alert('読み込み成功！');
             } catch (err) { alert('読み込み失敗: ' + err.message); }
             event.target.value = '';
@@ -751,18 +781,54 @@
     }
 
     function copyForBear() {
-        if (records.length === 0) { alert('データがありません'); return; }
-        let md = `# 生産・作業分析レポート\n\n| 職種 | アイテム | 獲得数 | 原価合計 |\n| :--- | :--- | :---: | :---: |\n`;
-        records.forEach(rec => {
-            md += `| ${rec.profession} | ${rec.itemName} | ${rec.amount} | ${rec.cost.toLocaleString()}G |\n`;
+        if (records.length === 0) { 
+            alert('データがありません'); 
+            return; 
+        }
+        
+        let md = `# 生産・作業分析レポート\n\n`;
+        records.forEach((rec, i) => {
+            let avgAmount = (rec.workCount > 0) ? (rec.amount / rec.workCount).toFixed(2) : 0;
+            let avgCost = (rec.workCount > 0) ? Math.round(rec.cost / rec.workCount) : 0;
+
+            let timeText = "-";
+            if (rec.speed > 0 && rec.amount > 0) {
+                let hours = rec.amount / rec.speed;
+                let h = Math.floor(hours);
+                let m = Math.round((hours - h) * 60);
+                timeText = `${h}h ${m}m`;
+            }
+
+            md += `### ${i + 1}. ${rec.itemName}\n`;
+            md += `- **職種**: ${rec.profession} (LV ${rec.profLevel || 1})\n`;
+            if (rec.expGain) md += `- **獲得経験値**: ${rec.expGain}\n`;
+            if (rec.totalExp) md += `- **進捗率**: ${rec.totalExp}\n`;
+            md += `- **獲得数**: ${rec.amount.toLocaleString()}個（作業回数: ${rec.workCount}回）\n`;
+            md += `- **1回あたり獲得平均**: ${avgAmount}個/回\n`;
+            md += `- **原価合計**: ${rec.cost.toLocaleString()}G（1回あたり平均: ${avgCost.toLocaleString()}G）\n`;
+            md += `- **販売価格**: ${rec.price.toLocaleString()}G\n`;
+            md += `- **1h販売速度**: ${rec.speed}個/h\n`;
+            md += `- **売切予測**: ${timeText}\n`;
+            
+            if (rec.materials && rec.materials.length > 0) {
+                md += `- **材料内訳**:\n`;
+                rec.materials.forEach(m => {
+                    md += `  - ${m.name}: ${m.count}個 × ${m.unitPrice}G\n`;
+                });
+            }
+            md += `\n---\n\n`;
         });
-        navigator.clipboard.writeText(md).then(() => { alert('Markdownをコピーしました！'); });
+
+        const title = "生産・作業分析レポート_" + new Date().toISOString().slice(0,10);
+        const bearUrl = `bear://x-callback-url/create?title=${encodeURIComponent(title)}&text=${encodeURIComponent(md)}`;
+        
+        window.location.href = bearUrl;
     }
 
     function clearAllData() {
         if (confirm("全データを削除しますか？")) {
             records = [];
-            localStorage.removeItem('alchemy_records_v6');
+            localStorage.removeItem('alchemy_records_v7');
             updateProfessionFilterOptions();
             renderTable();
             alert('全データを削除しました。');
