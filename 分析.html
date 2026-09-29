@@ -162,7 +162,17 @@
             padding-bottom: 8px; margin-bottom: 12px;
         }
         .close-btn { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; }
-        .material-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+        /* 修正: 材料行の崩れ防止 */
+        .material-row { 
+            display: flex; 
+            gap: 8px; 
+            margin-bottom: 8px; 
+            align-items: center; 
+        }
+        .material-row .mat-name { flex: 2; min-width: 0; }
+        .material-row .mat-count { flex: 1; min-width: 50px; }
+        .material-row .mat-price { flex: 1.2; min-width: 60px; }
+        .material-row .mat-del { flex: 0 0 auto; width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
@@ -258,7 +268,7 @@
     let editingIndex = null;
 
     let masters = {
-        professions: ["錬金術師", "木こり", "採掘師", "狩人", "農家", "紡績工", "裁縫師", "鍛冶師", "彫金師", "薬師", "料理人"],
+        professions: [],
         items: [],
         materials: []
     };
@@ -360,7 +370,7 @@
         const normalizedText = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
         const lines = normalizedText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
-        let profession = "錬金術師";
+        let profession = "";
         let profLevel = 1;
         let expGain = "";
         let totalExp = "";
@@ -369,17 +379,21 @@
         let workCount = 1;
 
         for (let line of lines) {
-            for (let prof of masters.professions) {
-                if (line.includes(prof)) {
-                    profession = prof;
-                    let lvMatch = line.match(/LV\s*([\d,]+)/i);
-                    if (lvMatch) profLevel = parseInt(lvMatch[1].replace(/,/g, ''));
-
-                    let expMatch = line.match(/\(([\+\-][\d\.]+%?)\)/);
-                    if (expMatch) expGain = expMatch[1];
-                    break;
+            let profMatch = line.match(/^([^\d\s]+)(?:[\s]*)(?:LV|Lv|ＬＶ)?[\s\.]*([\d,]+)?/i);
+            if (profMatch && profMatch[1]) {
+                profession = profMatch[1].trim();
+                if (profMatch[2]) {
+                    let parsedLv = parseInt(profMatch[2].replace(/,/g, ''));
+                    if (!isNaN(parsedLv)) profLevel = parsedLv;
                 }
+                let expMatch = line.match(/\(([\+\-][\d\.]+%?)\)/);
+                if (expMatch) expGain = expMatch[1];
+                break;
             }
+        }
+
+        if (!profession) {
+            profession = lines[0] ? lines[0].split(/[\s0-9]/)[0] : "未分類";
         }
 
         let percentMatches = [];
@@ -431,7 +445,7 @@
             }
         }
 
-        if (!itemName) itemName = "スノーフラワー";
+        if (!itemName) itemName = "アイテム";
 
         const newRecord = {
             id: Date.now(),
@@ -458,9 +472,10 @@
     }
 
     function addNewManualRecord() {
+        const defaultProf = masters.professions.length > 0 ? masters.professions[0] : "未分類";
         const newRecord = {
             id: Date.now(),
-            profession: masters.professions[0] || "錬金術師",
+            profession: defaultProf,
             profLevel: 1,
             expGain: "",
             totalExp: "",
@@ -534,7 +549,6 @@
                 rec.cost = rec.materials.reduce((sum, m) => sum + ((parseFloat(m.count) || 0) * (parseFloat(m.unitPrice) || 0)), 0);
             }
 
-            // 1回あたりのアベレージ計算
             let avgAmount = (rec.workCount > 0) ? (rec.amount / rec.workCount).toFixed(2) : 0;
             let avgCost = (rec.workCount > 0) ? Math.round(rec.cost / rec.workCount) : 0;
 
@@ -548,12 +562,7 @@
 
             const tr = document.createElement('tr');
             
-            let profHtml = `<select class="row-prof" data-index="${index}">`;
-            masters.professions.forEach(p => {
-                profHtml += `<option value="${p}" ${p === rec.profession ? 'selected' : ''}>${p}</option>`;
-            });
-            profHtml += `</select>`;
-
+            let profHtml = `<input type="text" class="row-prof" data-index="${index}" value="${rec.profession}">`;
             let itemHtml = `<input type="text" class="row-item" data-index="${index}" value="${rec.itemName}">`;
 
             tr.innerHTML = `
@@ -581,7 +590,8 @@
         document.querySelectorAll('.row-prof').forEach(el => {
             el.addEventListener('change', (e) => {
                 let idx = e.target.getAttribute('data-index');
-                records[idx].profession = e.target.value;
+                records[idx].profession = e.target.value.trim();
+                updateAllMasters();
                 updateProfessionFilterOptions();
                 saveData();
             });
@@ -643,6 +653,7 @@
                 let idx = e.target.getAttribute('data-index');
                 if (confirm('削除しますか？')) {
                     records.splice(idx, 1);
+                    updateAllMasters();
                     updateProfessionFilterOptions();
                     renderTable();
                     saveData();
@@ -682,16 +693,16 @@
         row.className = 'material-row';
         
         row.innerHTML = `
-            <input type="text" placeholder="材料名" value="${name}" class="mat-name" style="flex: 2; font-size:13px;">
+            <input type="text" placeholder="材料名" value="${name}" class="mat-name" style="font-size:13px;">
             <input type="number" placeholder="個数" value="${count}" class="mat-count" style="font-size:13px;">
             <input type="number" placeholder="G" value="${unitPrice}" class="mat-price" style="font-size:13px;">
-            <button type="button" class="mat-del" style="background-color: var(--danger); padding: 4px 8px; margin:0;">×</button>
+            <button type="button" class="mat-del" style="background-color: var(--danger); font-size:13px;">×</button>
         `;
 
         row.querySelector('.mat-count').addEventListener('input', calculateModalCost);
         row.querySelector('.mat-price').addEventListener('input', calculateModalCost);
         row.querySelector('.mat-del').addEventListener('click', (e) => {
-            e.target.parentElement.remove();
+            e.target.closest('.material-row').remove();
             calculateModalCost();
         });
 
@@ -829,6 +840,8 @@
         if (confirm("全データを削除しますか？")) {
             records = [];
             localStorage.removeItem('alchemy_records_v7');
+            localStorage.removeItem('alchemy_masters_v7');
+            updateAllMasters();
             updateProfessionFilterOptions();
             renderTable();
             alert('全データを削除しました。');
