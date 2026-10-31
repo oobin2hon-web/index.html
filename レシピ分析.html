@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クラフト生産・進捗総合レポート</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --accent-green: #22c55e;
+            --accent-blue: #38bdf8;
+            --accent-yellow: #facc15;
+            --border-color: #334155;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 24px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 1.75rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+        .update-note {
+            background-color: rgba(56, 189, 248, 0.1);
+            border-left: 4px solid var(--accent-blue);
+            padding: 10px 16px;
+            margin-bottom: 24px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9rem;
+            color: var(--accent-blue);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .card.highlight {
+            border-color: var(--accent-yellow);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .item-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-main);
+            margin: 0;
+        }
+        .job-tag {
+            background-color: #334155;
+            color: var(--text-main);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        .job-tag.updated {
+            background-color: #166534;
+            color: #86efac;
+            font-weight: bold;
+        }
+        .progress-section {
+            margin-bottom: 14px;
+            background-color: #0f172a;
+            padding: 10px 12px;
+            border-radius: 8px;
+        }
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            background-color: var(--border-color);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--accent-green);
+            border-radius: 3px;
+        }
+        .stats-table {
+            width: 100%;
+            font-size: 0.85rem;
+            border-collapse: collapse;
+        }
+        .stats-table td {
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .stats-table td:nth-child(odd) {
+            color: var(--text-sub);
+            width: 40%;
+        }
+        .stats-table td:nth-child(even) {
+            text-align: right;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>⚔️ 生産・進捗分析レポート</h1>
+    <div class="update-note">
+        💡 「食用蠍」のデータを最新の計測結果（石工師LV8 / 進捗49.57% / 獲得163針 / 作業18回）に更新して反映しています。
+    </div>
+
+    <div class="grid">
+        <!-- 1. ムスクの香水 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="item-title">1. ムスクの香水</h2>
+                <span class="job-tag">錬金術師LV 7</span>
+            </div>
+            <div class="progress-section">
+                <div class="progress-info">
+                    <span>進捗率 (+0.24%)</span>
+                    <span><strong>74.54%</strong></span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: 74.54%;"></div>
+                </div>
+            </div>
+            <table class="stats-table">
+                <tr><td>獲得数</td><td>137個（13回）</td></tr>
+                <tr><td>1回あたり平均</td><td>10.54個/回</td></tr>
+                <tr><td>原価合計</td><td>0G（平均: 0G）</td></tr>
+                <tr><td>販売価格 / 速度</td><td>0G / 10個/h</td></tr>
+                <tr><td>売切予測</td><td>13h 42m</td></tr>
+            </table>
+        </div>
+
+        <!-- 2. 食用蠍 (更新版) -->
+        <div class="card highlight">
+            <div class="card-header">
+                <h2 class="item-title">2. 食用蠍 ★更新</h2>
+                <span class="job-tag updated">石工師LV 8</span>
+            </div>
+            <div class="progress-section">
+                <div class="progress-info">
+                    <span>進捗率 <span style="color: var(--accent-green);">(+0.7%)</span></span>
+                    <span><strong>49.57%</strong></span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: 49.57%;"></div>
+                </div>
+            </div>
+            <table class="stats-table">
+                <tr><td>獲得数</td><td>163針（18回）</td></tr>
+                <tr><td>1回あたり平均</td><td>9.05針/回</td></tr>
+                <tr><td>原価合計</td><td>0G（平均: 0G）</td></tr>
+                <tr><td>販売価格 / 速度</td><td>0G / 10個/h</td></tr>
+                <tr><td>売切予測</td><td>18h 12m（目安）</td></tr>
+            </table>
+        </div>
+
+        <!-- 3. にくてんこもり -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="item-title">3. にくてんこもり</h2>
+                <span class="job-tag">勇者LV 5</span>
+            </div>
+            <div class="progress-section">
+                <div class="progress-info">
+                    <span>進捗率 (+5.55%)</span>
+                    <span><strong>17.83%</strong></span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: 17.83%;"></div>
+                </div>
+            </div>
+            <table class="stats-table">
+                <tr><td>獲得数</td><td>613個（33回）</td></tr>
+                <tr><td>1回あたり平均</td><td>18.58個/回</td></tr>
+                <tr><td>原価合計</td><td>0G（平均: 0G）</td></tr>
+                <tr><td>販売価格 / 速度</td><td>0G / 10個/h</td></tr>
+                <tr><td>売切予測</td><td>61h 18m</td></tr>
+            </table>
+        </div>
+
+        <!-- 4. 氷のワニ -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="item-title">4. 氷のワニ</h2>
+                <span class="job-tag">錬金術師LV 7</span>
+            </div>
+            <div class="progress-section">
+                <div class="progress-info">
+                    <span>進捗率 (+0.58%)</span>
+                    <span><strong>74.31%</strong></span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: 74.31%;"></div>
+                </div>
+            </div>
+            <table class="stats-table">
+                <tr><td>獲得数</td><td>44個（16回）</td></tr>
+                <tr><td>1回あたり平均</td><td>2.75個/回</td></tr>
+                <tr><td>原価合計</td><td>0G（平均: 0G）</td></tr>
+                <tr><td>販売価格 / 速度</td><td>0G / 10個/h</td></tr>
+                <tr><td>売切予測</td><td>4h 24m</td></tr>
+            </table>
+        </div>
+
+        <!-- 5. ドラゴーレム -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="item-title">5. ドラゴーレム</h2>
+                <span class="job-tag">錬金術師LV 7</span>
+            </div>
+            <div class="progress-section">
+                <div class="progress-info">
+                    <span>進捗率 (+0.62%)</span>
+                    <span><strong>73.56%</strong></span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: 73.56%;"></div>
+                </div>
+            </div>
+            <table class="stats-table">
+                <tr><td>獲得数</td><td>985個（50回）</td></tr>
+                <tr><td>1回あたり平均</td><td>19.70個/回</td></tr>
+                <tr><td>原価合計</td><td>0G（平均: 0G）</td></tr>
+                <tr><td>販売価格 / 速度</td><td>0G / 10個/h</td></tr>
+                <tr><td>売切予測</td><td>98h 30m</td></tr>
+            </table>
+        </div>
+
+        <!-- 6. スノーフラワー -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="item-title">6. スノーフラワー</h2>
+                <span class="job-tag">錬金術師LV 7</span>
+            </div>
+            <div class="progress-section">
+                <div class="progress-info">
+                    <span>進捗率 (+0.14%)</span>
+                    <span><strong>73.71%</strong></span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: 73.71%;"></div>
+                </div>
+            </div>
+            <table class="stats-table">
+                <tr><td>獲得数</td><td>56個（4回）</td></tr>
+                <tr><td>1回あたり平均</td><td>14.00個/回</td></tr>
+                <tr><td>原価合計</td><td>0G（平均: 0G）</td></tr>
+                <tr><td>販売価格 / 速度</td><td>0G / 10個/h</td></tr>
+                <tr><td>売切予測</td><td>5h 36m</td></tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
