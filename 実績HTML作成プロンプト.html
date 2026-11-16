@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作業成果量メモ＆データ検索 ＋ プロンプト解説ガイド</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            font-size: 1.4rem;
+            color: #222;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+        
+        /* セクション共通スタイル */
+        .section-box {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        h2 {
+            font-size: 1.1rem;
+            color: #0066cc;
+            border-left: 4px solid #0066cc;
+            padding-left: 10px;
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+        h3 {
+            font-size: 1rem;
+            color: #444;
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+        
+        /* プロンプト表示エリア */
+        .prompt-area {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        .copy-btn {
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background-color 0.2s;
+        }
+        .copy-btn:hover {
+            background-color: #0052a3;
+        }
+        
+        /* 解説リスト */
+        ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+        li {
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        .highlight-text {
+            background-color: #fffde7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>作業成果量メモ＆データ検索システム</h1>
+    <div class="subtitle">―― このツールの設計図（プロンプト）と仕組みの解説 ――</div>
+
+    <!-- セクション1: プロンプト（指示書） -->
+    <div class="section-box">
+        <h2>🤖 AIにこのコードを作らせるための「プロンプト（指示書）」</h2>
+        <p>AI（ChatGPTやClaudeなど）に以下のような指示文（プロンプト）を投げることで、このWebアプリのコードを一発で生成させることができます。</p>
+        
+        <div class="prompt-area" id="promptText">以下の要件を満たす、1つのHTMLファイル（HTML/CSS/JS一体型）を作成してください。
+
+【要件】
+1. 画面上部に、キーワードを入力して検索するためのテキストボックスと検索ボタンを配置する。
+2. データは複数の「カード（投稿日やタイトルごと）」に分かれており、さらにその中に「カテゴリ」と「個別のデータ行」が構造化されている。
+3. 検索機能の仕様：
+   - 初期状態ではすべてのデータ行（およびカード）は非表示にしておく。
+   - ユーザーがキーワードを入力して検索すると、一致した行だけを抽出し、背景をハイライト（薄い黄色など）して表示する。
+   - マッチした行が含まれるカードだけを表示状態にする。
+   - スペース区切りの複数キーワード（AND検索）に対応させる。
+   - 1件もヒットしなかった場合は「一致する項目が見つかりませんでした」というメッセージを表示する。
+4. デザインはシンプルで見やすく、スマホ対応（レスポンシブ）にする。</div>
+
+        <button class="copy-btn" onclick="copyPrompt()">プロンプトをコピーする</button>
+    </div>
+
+    <!-- セクション2: プロンプトの解説 -->
+    <div class="section-box">
+        <h2>💡 プロンプトの構成と書き方のコツ</h2>
+        <p>AIから期待通りのコードを引き出すために、このプロンプトには重要な3つの要素が含まれています。</p>
+        
+        <ul>
+            <li><strong>成果物の形式を指定する：</strong><br>「1つのHTMLファイル（HTML/CSS/JS一体型）」と指定することで、別々のファイルをバラバラに作らせず、そのままブラウザで動く完成形のコードを一度に出力させることができます。</li>
+            <li><strong>UI（見た目・配置）を明確にする：</strong><br>「上部に検索ボックス」「カード構造」「ハイライト表示」など、ユーザーが目にする見た目や挙動を具体的に指示しています。</li>
+            <li><strong>アルゴリズムの挙動を指定する：</strong><br>「初期状態は非表示」「AND検索への対応」「ヒットしない場合のメッセージ表示」など、検索時の細かい条件をあらかじめ決めておくことで、修正の手間を減らせます。</li>
+        </ul>
+    </div>
+
+    <!-- セクション3: 検索メカニズムの復習 -->
+    <div class="section-box">
+        <h2>⚙️ 検索メカニズムの仕組み（おさらい）</h2>
+        <p>このシステムがブラウザ上で軽快に動作する裏側には、JavaScriptの以下の処理ステップがあります。</p>
+        
+        <ul>
+            <li><span class="highlight-text">input.trim().toLowerCase()</span><br>入力された文字の余分な空白を消し、すべて小文字に統一して大文字・小文字のズレを防ぎます。</li>
+            <li><span class="highlight-text">split(/[\s　]+/)</span><br>半角・全角スペースで文字を分割し、複数のキーワードを同時に満たす「AND検索」を実現します。</li>
+            <li><span class="highlight-text">rowText.includes(kw)</span><br>すべてのデータ行を巡回し、キーワードが含まれている行だけを <span class="highlight-text">matched</span> クラスによって画面に浮かび上がらせます。</li>
+        </ul>
+    </div>
+
+    <script>
+        // プロンプトをクリップボードにコピーする機能
+        function copyPrompt() {
+            const promptText = document.getElementById('promptText').innerText;
+            navigator.clipboard.writeText(promptText).then(() => {
+                alert('プロンプトをクリップボードにコピーしました！');
+            }).catch(err => {
+                alert('コピーに失敗しました。手動でコピーしてください。');
+            });
+        }
+    </script>
+
+</body>
+</html>
