@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作業成果量メモ＆データ検索</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+            max-width: 750px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 1.25rem;
+            color: #444;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 14px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s;
+            background: white;
+        }
+        input[type="text"]:focus {
+            border-color: #0066cc;
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 1rem;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0052a3;
+        }
+        .hint {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .post-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: none; /* 初期状態は非表示 */
+        }
+        .post-card.active {
+            display: block;
+        }
+        .post-header {
+            font-size: 0.85rem;
+            color: #777;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .post-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        /* 項目別の絞り込み用スタイル */
+        .category-block {
+            margin-bottom: 14px;
+        }
+        .category-title {
+            font-weight: bold;
+            color: #0066cc;
+            margin-bottom: 4px;
+            border-left: 3px solid #0066cc;
+            padding-left: 6px;
+            font-size: 0.9rem;
+        }
+        .item-row {
+            padding: 2px 0 2px 12px;
+            white-space: pre-wrap;
+            display: none; /* デフォルトは非表示、一致したものだけ表示 */
+        }
+        .item-row.matched {
+            display: block;
+            background-color: #fffde7; /* マッチした行を薄い黄色でハイライト */
+            border-radius: 4px;
+        }
+        .no-result {
+            text-align: center;
+            color: #888;
+            margin-top: 40px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>作業成果量メモ＆データ検索</h1>
+    
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="アイテム名を入力 (例: 紙束, ポーション, トロール, ルタバガ)">
+        <button onclick="searchPosts()">検索</button>
+    </div>
+    <div class="hint">ヒント：特定のアイテム名（「紙束」「ポーション」「小麦」など）で細かい項目別にヒットします</div>
+
+    <div id="resultsContainer">
+        
+        <!-- メモ1: 10月7日 最新版の作業成果量メモ -->
+        <div class="post-card" data-card-id="card1">
+            <div class="post-header">
+                <span>投稿日: 10月 7 日</span>
+                <span>最新版の作業成果量メモ</span>
+            </div>
+            <div class="post-content" id="content1">
+                最新版の作業成果量メモです。パプリカ系の作業をまあまあな数回していたのでそれなりに需要はありそう？<br><br>
+                成果量メモ:合計成果量/作業回数=1回あたりの成果量<br>
+                (良立地とは…付近にいくつか店舗があるがそれ以外は全て「土資源が影響する作業での地面マス」などの地形資源が十分にある状態のこと)<br><br>
+
+                <div class="category-block" data-category="原料">
+                    <div class="category-title">ーー原料ーーーーーーーーー</div>
+                    <div class="item-row">紙束:木工7#8363/400=20.91(工夫して紙をすく)</div>
+                    <div class="item-row">サンフラワーオイル:農家6#3062/200=15.31</div>
+                    <div class="item-row">土:鉱夫7良立地地面#10460/400=26.15(土を取ってくる)</div>
+                    <div class="item-row">石:鉱夫6良立地地面#4743/400=11.86(石を取ってくる)</div>
+                    <div class="item-row">石:鉱夫7良立地地面#3711/300=12.37(石を取ってくる)</div>
+                    <div class="item-row">石:鉱夫8良立地地面#3502/250=14.0</div>
+                    <div class="item-row">色石:鉱夫6良立地地面#4797/400=11.99(石を取ってくる)</div>
+                    <div class="item-row">色石:鉱夫7良立地地面#3697/300=12.32(石を取ってくる)</div>
+                    <div class="item-row">色石:鉱夫8良立地地面#3488/250=14.0</div>
+                    <div class="item-row">肥料:農家7#2186/200=11.0</div>
+                    <div class="item-row">パプリカの種:錬金術師8#11926/1800=6.63</div>
+                    <div class="item-row">ガラス:鋳物師3#576/50=11.5</div>
+                    <div class="item-row">ガラス:鋳物師4#1821/150=12.1</div>
+                    <div class="item-row">ガラス:鋳物師5#1926/150=12.8</div>
+                    <div class="item-row">ガラス:鋳物師6#4915/360=13.7</div>
+                    <div class="item-row">ビン:細工師5#9895/384=25.8</div>
+                    <div class="item-row">ビン:細工師6#10696/376=28.4</div>
+                    <div class="item-row">ササ:計11良立地針葉樹林帯#173/250=0.69</div>
+                    <div class="item-row">ササ:計13良立地針葉樹林帯#640/800=0.8</div>
+                    <div class="item-row">ササ:計14良立地針葉樹林帯#310/400=0.78</div>
+                    <div class="item-row">ブラッディウム鉱石:鉱夫7地面良立地#1704/400=4.26</div>
+                    <div class="item-row">薪:木こり6#3825/475=8.05</div>
+                    <div class="item-row">薪:木こり7#3492/400=8.73</div>
+                    <div class="item-row">革:革細工8#5239/559=9.37</div>
+                    <div class="item-row">革:革細工7#4136/467=8.86</div>
+                    <div class="item-row">革:革細工6#3263/400=8.16</div>
+                </div>
+
+                <div class="category-block" data-category="本">
+                    <div class="category-title">ーー本ーーーーーーーーーー</div>
+                    <div class="item-row">木工細工入門:作家3#37/50=0.74</div>
+                    <div class="item-row">木工細工入門:作家4#123/160=0.77</div>
+                    <div class="item-row">薬調合入門:作家4#222/250=0.89</div>
+                    <div class="item-row">薬調合入門:作家5#481/550=0.87</div>
+                    <div class="item-row">革細工入門:作家5#158/200=0.79</div>
+                    <div class="item-row">グリモワール:計21#39/80=0.488</div>
+                    <div class="item-row">グリモワール:計23#118/200=0.59</div>
+                    <div class="item-row">盾の作り方:作家6#292/360=0.81</div>
+                    <div class="item-row">鎧の作り方:作家6#317/360=0.88</div>
+                    <div class="item-row">杖の作り方:作家6#84/100=0.84</div>
+                </div>
+
+                <div class="category-block" data-category="薬">
+                    <div class="category-title">ーー薬ーーーーーーーーーー</div>
+                    <div class="item-row">ポーション:錬金術師6#2445/150=16.3</div>
+                    <div class="item-row">ポーション:錬金術師7#3910/225=17.38</div>
+                    <div class="item-row">ハイポーション:錬金術師7#1102/125=8.82</div>
+                    <div class="item-row">ハイポーション:錬金術師8#1189/126=9.44</div>
+                    <div class="item-row">エーテル:錬金術師7#1577/200=7.89</div>
+                    <div class="item-row">ハイエーテル:錬金術師7#3178/391=8.13</div>
+                    <div class="item-row">マインドポーション:錬金術師7#4561/300=15.20</div>
+                    <div class="item-row">ルタバガの奇蹟:計11#166/315=0.53</div>
+                </div>
+
+                <div class="category-block" data-category="剣">
+                    <div class="category-title">ーー剣ーーーーーーーーーー</div>
+                    <div class="item-row">木刀:木工3#1233/100=12.3</div>
+                    <div class="item-row">木刀:木工4#685/50=13.7</div>
+                    <div class="item-row">木刀:木工5#751/50=15.02</div>
+                    <div class="item-row">カラフルソード:石工5#1443/200=7.22</div>
+                    <div class="item-row">カラフルソード:石工6#3234/400=8.09</div>
+                    <div class="item-row">カラフルソード:石工7#1750/200=8.75</div>
+                </div>
+
+                <div class="category-block" data-category="鎧">
+                    <div class="category-title">ーー鎧ーーーーーーーーー</div>
+                    <div class="item-row">革の盾:革細工師9#固定20</div>
+                    <div class="item-row">木の胸当て:木工5#981/75=13.1</div>
+                    <div class="item-row">木の胸当て:木工6#686/50=13.72</div>
+                    <div class="item-row">木の胸当て:木工7#1533/100=15.33</div>
+                    <div class="item-row">木の胸当て:木工8#858/50=17.16</div>
+                </div>
+
+                <div class="category-block" data-category="盾">
+                    <div class="category-title">ーー盾ーーーーーーーーーー</div>
+                    <div class="item-row">革の胸当て:革細工師9#1791/100=17.91</div>
+                    <div class="item-row">木の盾:木工4#356/25=14.2</div>
+                    <div class="item-row">木の盾:木工5#741/50=14.8</div>
+                    <div class="item-row">木の盾:木工6#810/50=16.20</div>
+                    <div class="item-row">木の盾:木工7#881/=17.62</div>
+                </div>
+
+                <div class="category-block" data-category="杖">
+                    <div class="category-title">ーー杖ーーーーーーーーーー</div>
+                    <div class="item-row">木の杖:木工4#2311/200=11.6</div>
+                    <div class="item-row">木の杖:木工5#1293/100=12.93</div>
+                </div>
+
+                <div class="category-block" data-category="アクセサリー">
+                    <div class="category-title">ーーアクセサリーーーーーー</div>
+                    <div class="item-row">魔法の知識:錬金術師7#90/115=0.78</div>
+                    <div class="item-row">魔法の知識:錬金術師8#252/300=0.84</div>
+                    <div class="item-row">壺:計11#2344/150=15.6</div>
+                    <div class="item-row">湯飲み:計11#4624/150=30.8</div>
+                    <div class="item-row">グローブ:革細工7#1104/150=7.4</div>
+                    <div class="item-row">グローブ:革細工9#1797/200=8.985</div>
+                    <div class="item-row">パプリカマンの兜:計17#427/75=5.70</div>
+                    <div class="item-row">パプリカマント:計18#1187/225=6.16</div>
+                    <div class="item-row">カラーストーンブローチ:細工師3#632/100=6.32</div>
+                    <div class="item-row">カラーストーンブローチ:細工師4#2241/350=6.40</div>
+                    <div class="item-row">カラーストーンブローチ:細工師5#355/50=7.10</div>
+                    <div class="item-row">ふわふわ帽子:計14#2039/300=6.80</div>
+                    <div class="item-row">もこもこブーツ:計14#2096/300=6.99</div>
+                </div>
+
+                <div class="category-block" data-category="地図">
+                    <div class="category-title">ーー地図ーーーーーーーーー</div>
+                    <div class="item-row">近くの山への地図:行商人7#152/170=0.89</div>
+                    <div class="item-row">近くの山への地図:行商人8#448/468=0.96</div>
+                    <div class="item-row">近くの鉱山への地図:行商人8#194/200=0.97</div>
+                    <div class="item-row">スライムの巣への地図:行商人9#固定1</div>
+                    <div class="item-row">ゴブリンの巣への地図:行商人9# 188/200=0.94</div>
+                    <div class="item-row">トロールの巣への地図:行商人8#87/144=0.60</div>
+                    <div class="item-row">ドラゴンの巣への地図:行商人9#103/175=0.59</div>
+                </div>
+
+                <div class="category-block" data-category="道具">
+                    <div class="category-title">ーー道具ーーーーーーーーー</div>
+                    <div class="item-row">石窯:石工3#296/50=5.92</div>
+                    <div class="item-row">石窯:石工4#1331/200=6.66</div>
+                    <div class="item-row">石窯:石工5#2276/300=7.57</div>
+                    <div class="item-row">石窯:石工6#1982/250=7.93</div>
+                    <div class="item-row">砥石:石工6#2413/300=8.04</div>
+                    <div class="item-row">木製食器:木工3#329/50=6.58</div>
+                    <div class="item-row">木製食器:木工4#744/100=7.44</div>
+                    <div class="item-row">木製食器:木工5#745/100=7.45</div>
+                    <div class="item-row">木製食器:木工6#413/50=8.26</div>
+                    <div class="item-row">木製食器:木工7#3466/400=8.67</div>
+                    <div class="item-row">革製装備一式:道具屋7#873/100=8.73</div>
+                    <div class="item-row">木製装備一式:道具屋7#2614/200=13.07</div>
+                </div>
+
+                <div class="category-block" data-category="生物">
+                    <div class="category-title">ーー生物ーーーーーーーーー</div>
+                    <div class="item-row">ミノタウロス:49/900=0.054(ミノチーズを食べる)</div>
+                    <div class="item-row">ゴーレム:計15#38/50=0.76</div>
+                </div>
+
+                <div class="category-block" data-category="食物">
+                    <div class="category-title">ーー食物ーーーーーーーー</div>
+                    <div class="item-row">小麦:農家7良立地地面#5235/161=32.5</div>
+                    <div class="item-row">小麦:農家8良立地地面#3473/100=34.7</div>
+                    <div class="item-row">キャベツ:農家7良立地地面#7384/200=37.0</div>
+                    <div class="item-row">キャベツ:農家8良立地地面#1695/50=33.9</div>
+                    <div class="item-row">サンフラワー:農家7良立地地面#9629/200=48.1</div>
+                    <div class="item-row">メイプルシロップ:木こり6良立地針葉樹林帯#569/200=2.85</div>
+                    <div class="item-row">ハチミツ:畜産8#297/50=5.94</div>
+                    <div class="item-row">パプリカの実:農家6良立地地面#1363/40=34.08</div>
+                    <div class="item-row">パプリカの実:農家7良立地地面#4021/100=40.21</div>
+                    <div class="item-row">パプケーキ:調理師9#1375/225=6.11</div>
+                    <div class="item-row">パプクッキー:調理師6#1114/100=11.14</div>
+                    <div class="item-row">パプクッキー:調理師9#5609/350=16.9</div>
+                    <div class="item-row">キャンデー:調理師6#1969/279=7.06</div>
+                    <div class="item-row">キャンデー:調理師9#1487/150=9.91</div>
+                    <div class="item-row">チョッコレイト:調理師8#4365/240=18.19</div>
+                    <div class="item-row">食パン:パン5#207/28=7.39</div>
+                    <div class="item-row">ダンゴ:調理師7#1421/274=5.19</div>
+                    <div class="item-row">謎肉:肉屋8:#2161/100=21.6</div>
+                    <div class="item-row">ステーキ肉:肉屋8#1663/100=16.63</div>
+                    <div class="item-row">ソーセージ:肉屋8#2962/100=29.62</div>
+                    <div class="item-row">獣肉の燻製:調理師8#5600/600=9.33</div>
+                    <div class="item-row">なななくさがゆ:調理師7#21895/1400=15.64</div>
+                    <div class="item-row">ハーブティー:調理師7#4411/100=44.11</div>
+                    <div class="item-row">ハーブティー:調理師8#18778/400=46.95</div>
+                    <div class="item-row">コーヒー:調理師7#2296/100=22.96</div>
+                    <div class="item-row">コーヒー:調理師8#4976/200=24.88</div>
+                    <div class="item-row">カフェラテ:調理師9#647/100=6.47</div>
+                    <div class="item-row">ツナポコ:調理師8#18714/200=93.57</div>
+                    <div class="item-row">ツナポコ:調理師9#成果量100固定</div>
+                    <div class="item-row">アイスクリーム:調理師8#4060/200=20.3</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- メモ2: 10月17日 トロールの巣襲撃データ -->
+        <div class="post-card" data-card-id="card2">
+            <div class="post-header">
+                <span>投稿日: 10月 17 日</span>
+                <span>トロールの巣を襲撃するデータ</span>
+            </div>
+            <div class="post-content" id="content2">
+                ☆トロールの巣を襲撃する<br><br>
+                <div class="category-block" data-category="襲撃データ">
+                    <div class="item-row">ルタバガの奇蹟:32/900=0.036</div>
+                    <div class="item-row">ルタバガの若芽:41/900=0.046</div>
+                    <div class="item-row">ルタバガ塩飴:35/900=0.039</div>
+                    <div class="item-row">なんか丸いもの:12/900=0.013</div>
+                    <div class="item-row">コイン:2124/900=2.36</div>
+                </div>
+                <br>真面目に襲撃作業をした記念にデータ貼ります。何というか…成果量がその…
+            </div>
+        </div>
+
+    </div>
+
+    <div id="noResult" class="no-result">一致する項目が見つかりませんでした。</div>
+
+    <script>
+        // 入力欄でEnterキーを押したときも検索できるようにする
+        document.getElementById('searchInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                searchPosts();
+            }
+        });
+
+        function searchPosts() {
+            const input = document.getElementById('searchInput').value.trim().toLowerCase();
+            const cards = document.querySelectorAll('.post-card');
+            const noResult = document.getElementById('noResult');
+            let totalMatchCount = 0;
+
+            // 入力が空の場合はすべて非表示にする
+            if (input === "") {
+                cards.forEach(card => {
+                    card.classList.remove('active');
+                    card.querySelectorAll('.item-row').forEach(row => row.classList.remove('matched'));
+                });
+                noResult.style.display = 'none';
+                return;
+            }
+
+            // スペース区切りで複数キーワード（AND検索）に対応
+            const keywords = input.split(/[\s　]+/);
+
+            cards.forEach(card => {
+                let cardHasMatch = false;
+                const rows = card.querySelectorAll('.item-row');
+
+                rows.forEach(row => {
+                    const rowText = row.textContent.toLowerCase();
+                    // 行のテキストにすべてのキーワードが含まれているかチェック
+                    const isMatch = keywords.every(kw => rowText.includes(kw));
+
+                    if (isMatch) {
+                        row.classList.add('matched');
+                        cardHasMatch = true;
+                        totalMatchCount++;
+                    } else {
+                        row.classList.remove('matched');
+                    }
+                });
+
+                // カード内にマッチした行があればカードを表示、なければ非表示
+                if (cardHasMatch) {
+                    card.classList.add('active');
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+
+            // 1件もヒットしなかった場合の表示切り替え
+            noResult.style.display = (totalMatchCount > 0) ? 'none' : 'block';
+        }
+    </script>
+</body>
+</html>
