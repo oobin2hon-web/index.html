@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作業成果量メモ＆データ検索・管理ツール</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        h1 {
+            font-size: 1.4rem;
+            color: #222;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 25px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        h2 {
+            font-size: 1.05rem;
+            color: #0066cc;
+            border-left: 4px solid #0066cc;
+            padding-left: 10px;
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+        p {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 12px;
+        }
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 0.9rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+            box-sizing: border-box;
+            background: #fff;
+            margin-bottom: 10px;
+        }
+        textarea {
+            resize: vertical;
+            height: 100px;
+            font-family: monospace;
+        }
+        input[type="text"]:focus, textarea:focus {
+            border-color: #0066cc;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 18px;
+            font-size: 0.9rem;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0052a3;
+        }
+        button.secondary {
+            background-color: #555;
+        }
+        button.secondary:hover {
+            background-color: #333;
+        }
+        .file-input-wrapper {
+            margin-bottom: 10px;
+        }
+        /* 検索セクション */
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .search-box input {
+            margin-bottom: 0;
+        }
+        .hint {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        /* 結果表示カード */
+        .post-card {
+            background: #fff;
+            border: 1px solid #e1e4e8;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 14px;
+            display: none;
+        }
+        .post-card.active {
+            display: block;
+        }
+        .post-header {
+            font-size: 0.8rem;
+            color: #777;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .category-title {
+            font-weight: bold;
+            color: #0066cc;
+            margin: 10px 0 4px 0;
+            border-left: 3px solid #0066cc;
+            padding-left: 6px;
+            font-size: 0.85rem;
+        }
+        .item-row {
+            padding: 2px 0 2px 10px;
+            white-space: pre-wrap;
+            display: none;
+            font-size: 0.9rem;
+        }
+        .item-row.matched {
+            display: block;
+            background-color: #fffde7;
+            border-radius: 4px;
+        }
+        .no-result {
+            text-align: center;
+            color: #888;
+            margin: 20px 0;
+            display: none;
+            font-size: 0.9rem;
+        }
+        /* プロンプト表示用 */
+        .prompt-area {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 14px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>作業成果量メモ＆データ検索・管理ツール</h1>
+    <div class="subtitle">―― データの検索、インポート、HTML出力、AIプロンプト確認がこれ一つで可能 ――</div>
+
+    <!-- セクション1: データ検索 -->
+    <div class="card">
+        <h2>🔍 実績データの検索</h2>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="キーワードを入力 (例: 紙束, ポーション, トロール, 小麦など複数の単語も可)">
+            <button onclick="searchPosts()">検索</button>
+        </div>
+        <div class="hint">ヒント：スペース区切りで複数キーワードを入れるとAND検索になります</div>
+
+        <div id="resultsContainer">
+            <!-- 動的にカードが挿入されます -->
+        </div>
+        <div id="noResult" class="no-result">一致する項目が見つかりませんでした。</div>
+    </div>
+
+    <!-- セクション2: データインポート & HTML生成 -->
+    <div class="card">
+        <h2>📂 データのインポート ＆ HTMLエクスポート</h2>
+        <p>既存の検索用HTMLファイルを読み込ませたり、新しいデータをテキストで追加して自分だけの検索HTMLファイルを作成・ダウンロードできます。</p>
+        
+        <div class="file-input-wrapper">
+            <label style="font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 5px;">既存の検索用HTMLファイルを読み込む：</label>
+            <input type="file" id="htmlFileInput" accept=".html" onchange="importHTMLFile(event)">
+        </div>
+
+        <div style="margin-top: 15px;">
+            <label style="font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 5px;">新しいデータを追加・編集（JSONまたはテキスト構造）：</label>
+            <textarea id="dataEditor" placeholder="ここにデータを入力、またはインポートされたデータが表示されます"></textarea>
+            <div class="btn-group">
+                <button onclick="loadDataFromEditor()">データを反映して検索可能にする</button>
+                <button class="secondary" onclick="downloadStandaloneHTML()">このデータを組み込んだHTMLをダウンロード</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- セクション3: プロンプトと解説 -->
+    <div class="card">
+        <h2>🤖 AI生成用プロンプトと仕組みの解説</h2>
+        <p>このツールや元となったHTMLをAIに作らせるための指示書（プロンプト）です。</p>
+        <div class="prompt-area" id="promptText">以下の要件を満たす、1つのHTMLファイル（HTML/CSS/JS一体型）を作成してください。
+【要件】
+1. 検索用テキストボックスと検索ボタンを配置する。
+2. ユーザーがテキストや既存HTMLファイルをインポートして、独自のデータを組み込めるようにする。
+3. 検索されたキーワードに一致する項目（行単位）だけをハイライト表示し、含まれるカードのみを表示する（スペース区切りのAND検索対応）。
+4. 画面上のデータから、検索機能付きの独立したHTMLファイルをワンクリックで生成・ダウンロードできるようにする。</div>
+        <button onclick="copyPrompt()">プロンプトをコピーする</button>
+    </div>
+
+    <script>
+        // 初期サンプルデータ（提供されたデータに基づく）
+        let appData = [
+            {
+                cardId: "card1",
+                date: "10月 7 日",
+                title: "最新版の作業成果量メモ",
+                contentHtml: `最新版の作業成果量メモです。パプリカ系の作業をまあまあな数回していたのでそれなりに需要はありそう？<br><br>
+                成果量メモ:合計成果量/作業回数=1回あたりの成果量<br><br>
+                <div class="category-block" data-category="原料">
+                    <div class="category-title">ーー原料ーーーーーーーーー</div>
+                    <div class="item-row">紙束:木工7#8363/400=20.91(工夫して紙をすく)</div>
+                    <div class="item-row">サンフラワーオイル:農家6#3062/200=15.31</div>
+                    <div class="item-row">土:鉱夫7良立地地面#10460/400=26.15(土を取ってくる)</div>
+                    <div class="item-row">石:鉱夫6良立地地面#4743/400=11.86(石を取ってくる)</div>
+                    <div class="item-row">ポーション:錬金術師6#2445/150=16.3</div>
+                </div>
+                <div class="category-block" data-category="食物">
+                    <div class="category-title">ーー食物ーーーーーーーー</div>
+                    <div class="item-row">小麦:農家7良立地地面#5235/161=32.5</div>
+                    <div class="item-row">キャベツ:農家7良立地地面#7384/200=37.0</div>
+                    <div class="item-row">ツナポコ:調理師8#18714/200=93.57</div>
+                </div>`
+            },
+            {
+                cardId: "card2",
+                date: "10月 17 日",
+                title: "トロールの巣を襲撃するデータ",
+                contentHtml: `☆トロールの巣を襲撃する<br><br>
+                <div class="category-block" data-category="襲撃データ">
+                    <div class="category-title">ーー襲撃データーーーーーーー</div>
+                    <div class="item-row">ルタバガの奇蹟:32/900=0.036</div>
+                    <div class="item-row">ルタバガの若芽:41/900=0.046</div>
+                    <div class="item-row">コイン:2124/900=2.36</div>
+                </div>`
+            }
+        ];
+
+        // 起動時にDOMにカードを描画
+        window.addEventListener('DOMContentLoaded', () => {
+            renderCards();
+            document.getElementById('dataEditor').value = JSON.stringify(appData, null, 2);
+            
+            document.getElementById('searchInput').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') searchPosts();
+            });
+        });
+
+        // カードを画面に描画する関数
+        function renderCards() {
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = '';
+
+            appData.forEach(card => {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'post-card';
+                cardDiv.setAttribute('data-card-id', card.cardId);
+                cardDiv.innerHTML = `
+                    <div class="post-header">
+                        <span>投稿日: ${card.date}</span>
+                        <span>${card.title}</span>
+                    </div>
+                    <div class="post-content">
+                        ${card.contentHtml}
+                    </div>
+                `;
+                container.appendChild(cardDiv);
+            });
+        }
+
+        // 検索処理
+        function searchPosts() {
+            const input = document.getElementById('searchInput').value.trim().toLowerCase();
+            const cards = document.querySelectorAll('.post-card');
+            const noResult = document.getElementById('noResult');
+            let totalMatchCount = 0;
+
+            if (input === "") {
+                cards.forEach(card => {
+                    card.classList.remove('active');
+                    card.querySelectorAll('.item-row').forEach(row => row.classList.remove('matched'));
+                });
+                noResult.style.display = 'none';
+                return;
+            }
+
+            const keywords = input.split(/[\s　]+/);
+
+            cards.forEach(card => {
+                let cardHasMatch = false;
+                const rows = card.querySelectorAll('.item-row');
+
+                rows.forEach(row => {
+                    const rowText = row.textContent.toLowerCase();
+                    const isMatch = keywords.every(kw => rowText.includes(kw));
+
+                    if (isMatch) {
+                        row.classList.add('matched');
+                        cardHasMatch = true;
+                        totalMatchCount++;
+                    } else {
+                        row.classList.remove('matched');
+                    }
+                });
+
+                if (cardHasMatch) {
+                    card.classList.add('active');
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+
+            noResult.style.display = (totalMatchCount > 0) ? 'none' : 'block';
+        }
+
+        // エディタのJSONデータを反映
+        function loadDataFromEditor() {
+            try {
+                const val = document.getElementById('dataEditor').value;
+                appData = JSON.parse(val);
+                renderCards();
+                alert('データを正常に反映しました！上の検索ボックスから検索できます。');
+            } catch (e) {
+                alert('JSONの形式が正しくありません。記述を確認してください。\nエラー: ' + e.message);
+            }
+        }
+
+        // 既存のHTMLファイルをアップロードして読み込む
+        function importHTMLFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const htmlContent = e.target.result;
+                
+                // 簡易パーサー：HTMLファイル内の .post-card 要素を抽出して appData に変換を試みる
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlContent, 'text/html');
+                const cards = doc.querySelectorAll('.post-card');
+
+                if (cards.length > 0) {
+                    let parsedData = [];
+                    cards.forEach((card, index) => {
+                        const headerSpans = card.querySelectorAll('.post-header span');
+                        const date = headerSpans[0] ? headerSpans[0].textContent.replace('投稿日: ', '') : '不明';
+                        const title = headerSpans[1] ? headerSpans[1].textContent : '実績データ';
+                        const contentHtml = card.querySelector('.post-content').innerHTML;
+
+                        parsedData.push({
+                            cardId: 'card' + (index + 1),
+                            date: date,
+                            title: title,
+                            contentHtml: contentHtml
+                        });
+                    });
+
+                    appData = parsedData;
+                    renderCards();
+                    document.getElementById('dataEditor').value = JSON.stringify(appData, null, 2);
+                    alert(`HTMLファイルから ${cards.length} 件のカードデータを正常に読み込みました！`);
+                } else {
+                    alert('有効な実績カード（.post-card）が見つかりませんでした。別のHTMLファイルを試してください。');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 現在のデータを含む完全な独立HTMLを生成してダウンロード
+        function downloadStandaloneHTML() {
+            // 現在のappDataからHTMLのカード部分を構築
+            let cardsHtmlString = '';
+            appData.forEach(card => {
+                cardsHtmlString += `
+        <div class="post-card" data-card-id="${card.cardId}">
+            <div class="post-header">
+                <span>投稿日: ${card.date}</span>
+                <span>${card.title}</span>
+            </div>
+            <div class="post-content">
+                ${card.contentHtml}
+            </div>
+        </div>\n`;
+            });
+
+            // テンプレートHTMLの組み立て
+            const fullHTML = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作業成果量メモ＆データ検索</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: #f4f6f8; color: #333; max-width: 750px; margin: 0 auto; padding: 20px; }
+        h1 { font-size: 1.25rem; color: #444; text-align: center; margin-bottom: 20px; }
+        .search-box { display: flex; gap: 10px; margin-bottom: 10px; }
+        input[type="text"] { flex: 1; padding: 12px 14px; font-size: 1rem; border: 1px solid #ccc; border-radius: 8px; outline: none; background: white; }
+        input[type="text"]:focus { border-color: #0066cc; }
+        button { padding: 12px 20px; font-size: 1rem; background-color: #0066cc; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        button:hover { background-color: #0052a3; }
+        .hint { font-size: 0.85rem; color: #666; text-align: center; margin-bottom: 20px; }
+        .post-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: none; }
+        .post-card.active { display: block; }
+        .post-header { font-size: 0.85rem; color: #777; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px; display: flex; justify-content: space-between; }
+        .category-title { font-weight: bold; color: #0066cc; margin-bottom: 4px; border-left: 3px solid #0066cc; padding-left: 6px; font-size: 0.9rem; }
+        .item-row { padding: 2px 0 2px 12px; white-space: pre-wrap; display: none; }
+        .item-row.matched { display: block; background-color: #fffde7; border-radius: 4px; }
+        .no-result { text-align: center; color: #888; margin-top: 40px; display: none; }
+    </style>
+</head>
+<body>
+    <h1>作業成果量メモ＆データ検索</h1>
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="アイテム名を入力">
+        <button onclick="searchPosts()">検索</button>
+    </div>
+    <div class="hint">ヒント：特定のアイテム名で細かい項目別にヒットします</div>
+    <div id="resultsContainer">
+${cardsHtmlString}
+    </div>
+    <div id="noResult" class="no-result">一致する項目が見つかりませんでした。</div>
+    <script>
+        document.getElementById('searchInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') searchPosts(); });
+        function searchPosts() {
+            const input = document.getElementById('searchInput').value.trim().toLowerCase();
+            const cards = document.querySelectorAll('.post-card');
+            const noResult = document.getElementById('noResult');
+            let totalMatchCount = 0;
+            if (input === "") {
+                cards.forEach(card => { card.classList.remove('active'); card.querySelectorAll('.item-row').forEach(row => row.classList.remove('matched')); });
+                noResult.style.display = 'none';
+                return;
+            }
+            const keywords = input.split(/[\\s　]+/);
+            cards.forEach(card => {
+                let cardHasMatch = false;
+                card.querySelectorAll('.item-row').forEach(row => {
+                    const rowText = row.textContent.toLowerCase();
+                    const isMatch = keywords.every(kw => rowText.includes(kw));
+                    if (isMatch) { row.classList.add('matched'); cardHasMatch = true; totalMatchCount++; }
+                    else { row.classList.remove('matched'); }
+                });
+                if (cardHasMatch) { card.classList.add('active'); } else { card.classList.remove('active'); }
+            });
+            noResult.style.display = (totalMatchCount > 0) ? 'none' : 'block';
+        }
+    <\/script>
+</body>
+</html>`;
+
+            const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'achievement_search.html';
+            a.click();
+            URL.revokeObjectURL(url);
+            alert('検索機能付きの実績HTMLファイルをダウンロードしました！');
+        }
+
+        function copyPrompt() {
+            const promptText = document.getElementById('promptText').innerText;
+            navigator.clipboard.writeText(promptText).then(() => {
+                alert('プロンプトをクリップボードにコピーしました！');
+            });
+        }
+    </script>
+</body>
+</html>
