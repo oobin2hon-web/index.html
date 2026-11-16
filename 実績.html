@@ -32,6 +32,7 @@
             border-radius: 8px;
             outline: none;
             transition: border-color 0.2s;
+            background: white;
         }
         input[type="text"]:focus {
             border-color: #0066cc;
@@ -69,9 +70,19 @@
             text-align: right;
         }
         .post-content {
-            white-space: pre-wrap;
             font-size: 0.95rem;
             line-height: 1.5;
+        }
+        /* 項目別の絞り込み用スタイル */
+        .item-block {
+            margin-bottom: 14px;
+            padding: 8px;
+            border-radius: 6px;
+            display: none; /* デフォルトは非表示 */
+        }
+        .item-block.matched {
+            display: block;
+            background-color: #fffde7; /* マッチした項目を薄い黄色でハイライト */
         }
         .no-result {
             text-align: center;
@@ -95,48 +106,60 @@
         <input type="text" id="searchInput" placeholder="キーワードを入力 (例: ミスリル, ブラッディウム, 手鏡)">
         <button onclick="searchPosts()">検索</button>
     </div>
-    <div class="hint">ヒント：「ミスリル」「ブラッディウム」「手鏡」「鋳物師」などで検索できます</div>
+    <div class="hint">ヒント：「ミスリル」「ブラッディウム」「手鏡」「鋳物師」などで項目別に検索できます</div>
 
     <div id="resultsContainer">
         <!-- データ1 -->
-        <div class="post-card" data-keywords="ミスリルインゴット 鋳物師 ブラッディウムインゴット 作業回数 獲得数 原価割れ">
+        <div class="post-card" data-card-id="card1">
             <div class="post-header">
                 <span>3日前 / 2日前</span>
             </div>
-            <div class="post-content">1. ミスリルインゴット
-ミスリルインゴットを作る
-職種: 鋳物師LV (LV 8)
-獲得数: 542個（作業回数: 29回）
-1回あたり獲得平均: 18.68個/回
+            <div class="post-content">
+                <div class="item-block">
+                    1. ミスリルインゴット<br>
+                    ミスリルインゴットを作る<br>
+                    職種: 鋳物師LV (LV 8)<br>
+                    獲得数: 542個（作業回数: 29回）<br>
+                    1回あたり獲得平均: 18.68個/回
+                </div>
 
-2. ミスリルインゴット
-ミスリルインゴットを作る(2)
-職種: 鋳物師LV (LV 8)
-獲得数: 163個（作業回数: 6回）
-1回あたり獲得平均: 27.16個/回
-※ほぼ原価割れ、アイテムの仕入れ次第
-成果量は1.35倍〜1.4程度
+                <div class="item-block">
+                    2. ミスリルインゴット<br>
+                    ミスリルインゴットを作る(2)<br>
+                    職種: 鋳物師LV (LV 8)<br>
+                    獲得数: 163個（作業回数: 6回）<br>
+                    1回あたり獲得平均: 27.16個/回<br>
+                    ※ほぼ原価割れ、アイテムの仕入れ次第<br>
+                    成果量は1.35倍〜1.4程度
+                </div>
 
-————————
+                <div style="text-align: center; color: #ccc; margin: 8px 0;">————————</div>
 
-3. ブラッディウムインゴット
-ブラッディウムインゴットを作る
-職種: 鋳物師LV (LV 8)
-獲得数: 490個（作業回数: 29回）
-1回あたり獲得平均: 16.89個/</div>
+                <div class="item-block">
+                    3. ブラッディウムインゴット<br>
+                    ブラッディウムインゴットを作る<br>
+                    職種: 鋳物師LV (LV 8)<br>
+                    獲得数: 490個（作業回数: 29回）<br>
+                    1回あたり獲得平均: 16.89個/
+                </div>
+            </div>
         </div>
 
         <!-- データ2 -->
-        <div class="post-card" data-keywords="手鏡 石工師 鋳物師 作業回数 獲得数">
+        <div class="post-card" data-card-id="card2">
             <div class="post-header">
                 <span>1日前</span>
             </div>
-            <div class="post-content">#手鏡
-手鏡を作る
-職種: 石工師LV (LV 8)
-職種: 鋳物師LV (LV 8)
-獲得数: 452個（作業回数: 147回）
-1回あたり獲得平均: 3.06個/回</div>
+            <div class="post-content">
+                <div class="item-block">
+                    #手鏡<br>
+                    手鏡を作る<br>
+                    職種: 石工師LV (LV 8)<br>
+                    職種: 鋳物師LV (LV 8)<br>
+                    獲得数: 452個（作業回数: 147回）<br>
+                    1回あたり獲得平均: 3.06個/回
+                </div>
+            </div>
         </div>
     </div>
 
@@ -151,31 +174,49 @@
         });
 
         function searchPosts() {
-            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const input = document.getElementById('searchInput').value.trim().toLowerCase();
             const cards = document.querySelectorAll('.post-card');
             const noResult = document.getElementById('noResult');
+            let totalMatchCount = 0;
             
-            if (query === "") {
-                cards.forEach(card => card.classList.remove('active'));
+            if (input === "") {
+                cards.forEach(card => {
+                    card.classList.remove('active');
+                    card.querySelectorAll('.item-block').forEach(block => block.classList.remove('matched'));
+                });
                 noResult.style.display = 'none';
                 return;
             }
 
-            let matchCount = 0;
+            // スペース区切りで複数キーワード（AND検索）に対応
+            const keywords = input.split(/[\s　]+/);
 
             cards.forEach(card => {
-                const keywords = card.getAttribute('data-keywords').toLowerCase();
-                const content = card.innerText.toLowerCase();
+                let cardHasMatch = false;
+                const blocks = card.querySelectorAll('.item-block');
 
-                if (keywords.includes(query) || content.includes(query)) {
+                blocks.forEach(block => {
+                    const blockText = block.textContent.toLowerCase();
+                    // ブロック内のテキストにすべてのキーワードが含まれているかチェック
+                    const isMatch = keywords.every(kw => blockText.includes(kw));
+
+                    if (isMatch) {
+                        block.classList.add('matched');
+                        cardHasMatch = true;
+                        totalMatchCount++;
+                    } else {
+                        block.classList.remove('matched');
+                    }
+                });
+
+                if (cardHasMatch) {
                     card.classList.add('active');
-                    matchCount++;
                 } else {
                     card.classList.remove('active');
                 }
             });
 
-            if (matchCount === 0) {
+            if (totalMatchCount === 0) {
                 noResult.style.display = 'block';
             } else {
                 noResult.style.display = 'none';
