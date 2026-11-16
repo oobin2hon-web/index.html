@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生産データ検索</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 1.25rem;
+            color: #555;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus {
+            border-color: #0066cc;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0052a3;
+        }
+        .post-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: none; /* 初期状態は非表示 */
+        }
+        .post-card.active {
+            display: block;
+        }
+        .post-header {
+            font-size: 0.85rem;
+            color: #777;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 6px;
+            text-align: right;
+        }
+        .post-content {
+            white-space: pre-wrap;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .no-result {
+            text-align: center;
+            color: #888;
+            margin-top: 40px;
+            display: none;
+        }
+        .hint {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>生産データ検索</h1>
+    
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="キーワードを入力 (例: ミスリル, ブラッディウム, 手鏡)">
+        <button onclick="searchPosts()">検索</button>
+    </div>
+    <div class="hint">ヒント：「ミスリル」「ブラッディウム」「手鏡」「鋳物師」などで検索できます</div>
+
+    <div id="resultsContainer">
+        <!-- データ1 -->
+        <div class="post-card" data-keywords="ミスリルインゴット 鋳物師 ブラッディウムインゴット 作業回数 獲得数 原価割れ">
+            <div class="post-header">
+                <span>3日前 / 2日前</span>
+            </div>
+            <div class="post-content">1. ミスリルインゴット
+ミスリルインゴットを作る
+職種: 鋳物師LV (LV 8)
+獲得数: 542個（作業回数: 29回）
+1回あたり獲得平均: 18.68個/回
+
+2. ミスリルインゴット
+ミスリルインゴットを作る(2)
+職種: 鋳物師LV (LV 8)
+獲得数: 163個（作業回数: 6回）
+1回あたり獲得平均: 27.16個/回
+※ほぼ原価割れ、アイテムの仕入れ次第
+成果量は1.35倍〜1.4程度
+
+————————
+
+3. ブラッディウムインゴット
+ブラッディウムインゴットを作る
+職種: 鋳物師LV (LV 8)
+獲得数: 490個（作業回数: 29回）
+1回あたり獲得平均: 16.89個/</div>
+        </div>
+
+        <!-- データ2 -->
+        <div class="post-card" data-keywords="手鏡 石工師 鋳物師 作業回数 獲得数">
+            <div class="post-header">
+                <span>1日前</span>
+            </div>
+            <div class="post-content">#手鏡
+手鏡を作る
+職種: 石工師LV (LV 8)
+職種: 鋳物師LV (LV 8)
+獲得数: 452個（作業回数: 147回）
+1回あたり獲得平均: 3.06個/回</div>
+        </div>
+    </div>
+
+    <div id="noResult" class="no-result">一致するデータが見つかりませんでした。</div>
+
+    <script>
+        // Enterキーでも検索できるようにする
+        document.getElementById('searchInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                searchPosts();
+            }
+        });
+
+        function searchPosts() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const cards = document.querySelectorAll('.post-card');
+            const noResult = document.getElementById('noResult');
+            
+            if (query === "") {
+                cards.forEach(card => card.classList.remove('active'));
+                noResult.style.display = 'none';
+                return;
+            }
+
+            let matchCount = 0;
+
+            cards.forEach(card => {
+                const keywords = card.getAttribute('data-keywords').toLowerCase();
+                const content = card.innerText.toLowerCase();
+
+                if (keywords.includes(query) || content.includes(query)) {
+                    card.classList.add('active');
+                    matchCount++;
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+
+            if (matchCount === 0) {
+                noResult.style.display = 'block';
+            } else {
+                noResult.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
