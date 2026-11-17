@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作業成果量メモ＆データ検索</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: #f4f6f8; color: #333; max-width: 750px; margin: 0 auto; padding: 20px; }
+        h1 { font-size: 1.25rem; color: #444; text-align: center; margin-bottom: 20px; }
+        .search-box { display: flex; gap: 10px; margin-bottom: 10px; }
+        input[type="text"] { flex: 1; padding: 12px 14px; font-size: 1rem; border: 1px solid #ccc; border-radius: 8px; outline: none; background: white; }
+        input[type="text"]:focus { border-color: #0066cc; }
+        button { padding: 12px 20px; font-size: 1rem; background-color: #0066cc; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        button:hover { background-color: #0052a3; }
+        .hint { font-size: 0.85rem; color: #666; text-align: center; margin-bottom: 20px; }
+        .post-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: none; }
+        .post-card.active { display: block; }
+        .post-header { font-size: 0.85rem; color: #777; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px; display: flex; justify-content: space-between; }
+        .category-title { font-weight: bold; color: #0066cc; margin-bottom: 4px; border-left: 3px solid #0066cc; padding-left: 6px; font-size: 0.9rem; }
+        .item-row { padding: 2px 0 2px 12px; white-space: pre-wrap; display: none; }
+        .item-row.matched { display: block; background-color: #fffde7; border-radius: 4px; }
+        .no-result { text-align: center; color: #888; margin-top: 40px; display: none; }
+    </style>
+</head>
+<body>
+    <h1>作業成果量メモ＆データ検索</h1>
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="アイテム名を入力">
+        <button onclick="searchPosts()">検索</button>
+    </div>
+    <div class="hint">ヒント：特定のアイテム名で細かい項目別にヒットします</div>
+    <div id="resultsContainer">
+
+        <div class="post-card" data-card-id="card1">
+            <div class="post-header">
+                <span>投稿日: 3日前 / 2日前</span>
+                <span>実績データ</span>
+            </div>
+            <div class="post-content">
+                
+                <div class="item-block">
+                    1. ミスリルインゴット<br>
+                    ミスリルインゴットを作る<br>
+                    職種: 鋳物師LV (LV 8)<br>
+                    獲得数: 542個（作業回数: 29回）<br>
+                    1回あたり獲得平均: 18.68個/回
+                </div>
+
+                <div class="item-block">
+                    2. ミスリルインゴット<br>
+                    ミスリルインゴットを作る(2)<br>
+                    職種: 鋳物師LV (LV 8)<br>
+                    獲得数: 163個（作業回数: 6回）<br>
+                    1回あたり獲得平均: 27.16個/回<br>
+                    ※ほぼ原価割れ、アイテムの仕入れ次第<br>
+                    成果量は1.35倍〜1.4程度
+                </div>
+
+                <div style="text-align: center; color: #ccc; margin: 8px 0;">————————</div>
+
+                <div class="item-block">
+                    3. ブラッディウムインゴット<br>
+                    ブラッディウムインゴットを作る<br>
+                    職種: 鋳物師LV (LV 8)<br>
+                    獲得数: 490個（作業回数: 29回）<br>
+                    1回あたり獲得平均: 16.89個/回
+                </div>
+            
+            </div>
+        </div>
+
+        <div class="post-card" data-card-id="card2">
+            <div class="post-header">
+                <span>投稿日: 1日前</span>
+                <span>実績データ</span>
+            </div>
+            <div class="post-content">
+                
+                <div class="item-block">
+                    #手鏡<br>
+                    手鏡を作る<br>
+                    職種: 石工師LV (LV 8)<br>
+                    職種: 鋳物師LV (LV 8)<br>
+                    獲得数: 452個（作業回数: 147回）<br>
+                    1回あたり獲得平均: 3.06個/回
+                </div>
+            
+            </div>
+        </div>
+
+        <div class="post-card" data-card-id="card3">
+            <div class="post-header">
+                <span>投稿日: 3日前 (oobin2hon)</span>
+                <span>実績データ</span>
+            </div>
+            <div class="post-content">
+                
+                <div class="item-block">
+                    1. 氷<br>
+                    氷を錬成する<br>
+                    職種: 錬金術師LV (LV 8)<br>
+                    獲得数: 2344個（作業回数: 138回）<br>
+                    1回あたり獲得平均: 16.98個/回
+                </div>
+
+                <div style="text-align: center; color: #ccc; margin: 8px 0;">————————</div>
+
+                <div class="item-block">
+                    1. 氷<br>
+                    氷を錬成する<br>
+                    職種: 錬金術師LV (LV 7)<br>
+                    獲得数: 5428個（作業回数: 340回）<br>
+                    1回あたり獲得平均: 15.96個/回
+                </div>
+
+                <div style="text-align: center; color: #ccc; margin: 8px 0;">————————</div>
+
+                <div class="item-block">
+                    1. 氷<br>
+                    氷を錬成する<br>
+                    職種: 錬金術師LV (LV 6)<br>
+                    獲得数: 3008個（作業回数: 200回）<br>
+                    1回あたり獲得平均: 15.04個/回
+                </div>
+            
+            </div>
+        </div>
+
+        <div class="post-card" data-card-id="card4">
+            <div class="post-header">
+                <span>投稿日: 3日前 (oobin2hon)</span>
+                <span>実績データ</span>
+            </div>
+            <div class="post-content">
+                
+                <div class="item-block">
+                    2. ビン<br>
+                    ビンを作る<br>
+                    職種: 細工師LV (LV 8)<br>
+                    獲得数: 4787個（作業回数: 142回）<br>
+                    1回あたり獲得平均: 33.71個/回
+                </div>
+            
+            </div>
+        </div>
+
+        <div class="post-card" data-card-id="card5">
+            <div class="post-header">
+                <span>投稿日: 3日前 (oobin2hon)</span>
+                <span>実績データ</span>
+            </div>
+            <div class="post-content">
+                
+                <div class="item-block">
+                    3. 鏡もちぃ梅<br>
+                    鏡もちぃ梅を作る<br>
+                    職種: 商店LV (LV 13)<br>
+                    獲得数: 688個（作業回数: 77回）<br>
+                    1回あたり獲得平均: 8.93個/回
+                </div>
+            
+            </div>
+        </div>
+
+    </div>
+    <div id="noResult" class="no-result">一致する項目が見つかりませんでした。</div>
+    <script>
+        document.getElementById('searchInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') searchPosts(); });
+        function searchPosts() {
+            const input = document.getElementById('searchInput').value.trim().toLowerCase();
+            const cards = document.querySelectorAll('.post-card');
+            const noResult = document.getElementById('noResult');
+            let totalMatchCount = 0;
+            if (input === "") {
+                cards.forEach(card => { card.classList.remove('active'); card.querySelectorAll('.item-row').forEach(row => row.classList.remove('matched')); });
+                noResult.style.display = 'none';
+                return;
+            }
+            const keywords = input.split(/[\s　]+/);
+            cards.forEach(card => {
+                let cardHasMatch = false;
+                card.querySelectorAll('.item-row').forEach(row => {
+                    const rowText = row.textContent.toLowerCase();
+                    const isMatch = keywords.every(kw => rowText.includes(kw));
+                    if (isMatch) { row.classList.add('matched'); cardHasMatch = true; totalMatchCount++; }
+                    else { row.classList.remove('matched'); }
+                });
+                if (cardHasMatch) { card.classList.add('active'); } else { card.classList.remove('active'); }
+            });
+            noResult.style.display = (totalMatchCount > 0) ? 'none' : 'block';
+        }
+    </script>
+</body>
+</html>
